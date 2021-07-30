@@ -27,39 +27,4 @@
         id,file_name,url,storage_type,bucket_name,module,file_md5,file_size,suffix,is_chunk,chunk_count,upload_status,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <select id="selectFileByFileMd5AndModule" resultMap="BaseResultMap">
-        select <include refid="AllColumn"/>
-        from file
-        where file_md5 = #{fileMd5}
-          and module = #{module}
-          and is_chunk = 1
-        order by id desc limit 1
-    </select>
-
-    <update id="updateFileByFileMd5AndModule" parameterType="com.jinhx.blog.entity.file.File">
-        update file
-        <set>
-            <if test="uploadStatus != null">
-                upload_status = #{uploadStatus},
-            </if>
-            <if test="url != null">
-                url = #{url},
-            </if>
-            updater_id = #{updateId},
-            update_time = #{updateTime}
-        </set>
-        where file_md5 = #{fileMd5}
-          and module = #{module}
-          and is_chunk = 1
-    </update>
-
-    <select id="selectFileByIds" resultMap="BaseResultMap">
-        select <include refid="AllColumn"/> from file where
-        id in
-        <foreach item="item" index="index" collection="ids"
-                 open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </select>
-
 </mapper>

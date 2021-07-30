@@ -1,23 +1,26 @@
 package com.jinhx.blog.service.file.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.DateUtils;
 import com.jinhx.blog.common.util.MinioUtils;
-import com.jinhx.blog.entity.file.vo.FileVO;
-import com.jinhx.blog.service.operation.FriendLinkService;
-import com.jinhx.blog.service.video.VideoService;
-import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
-import com.jinhx.blog.entity.file.FileChunk;
 import com.jinhx.blog.entity.file.File;
+import com.jinhx.blog.entity.file.FileChunk;
+import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.mapper.file.FileMapper;
 import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.file.FileChunkService;
 import com.jinhx.blog.service.file.FileService;
+import com.jinhx.blog.service.operation.FriendLinkService;
+import com.jinhx.blog.service.video.VideoService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.text.DecimalFormat;
@@ -35,21 +37,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * <p>
- * 文件表 服务实现类
- * </p>
+ * FileServiceImpl
  *
- * @author luoyu
- * @since 2018-11-30
+ * @author jinhx
+ * @since 2018-11-07
  */
 @Service
 public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
 
     @Autowired
     private MinioUtils minioUtils;
-
-    @Resource
-    private FileMapper fileMapper;
 
     @Autowired
     private FileChunkService fileChunkService;
@@ -68,8 +65,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
     /**
      * 上传
-     * @param file
-     * @param fileModule
+     *
+     * @param file file
+     * @param fileModule fileModule
+     * @return FileVO
      */
     @Override
     public FileVO upload(MultipartFile file, Integer fileModule) {
@@ -117,11 +116,12 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
     }
 
     /**
-     * 分片上传
-     * @param file
-     * @param bucketName
-     * @param fileMd5
-     * @param chunkNumber
+     * 分片上传文件
+     *
+     * @param file file
+     * @param bucketName bucketName
+     * @param fileMd5 fileMd5
+     * @param chunkNumber chunkNumber
      */
     @Override
     public void chunkUpload(MultipartFile file, String bucketName, String fileMd5, Integer chunkNumber) {
@@ -144,9 +144,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
     }
 
     /**
-     * 下载
-     * @param response
-     * @param fileName
+     * 下载文件
+     *
+     * @param response response
+     * @param fileName fileName
      */
     @Override
     public void download(HttpServletResponse response, String fileName) {
@@ -166,12 +167,14 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
     /**
      * 分页查询文件
+     *
      * @param page page
      * @param limit limit
      * @param module module
      * @param fileName fileName
      * @param fileMd5 fileMd5
      * @param url url
+     * @return PageUtils
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url) {
@@ -191,13 +194,18 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
     }
 
     /**
-     * 分片上传文件
-     * @param fileVO
+     * 分片上传文件，获取各个分片上传地址
+     *
+     * @param fileVO fileVO
+     * @return List<FileVO>
      */
     @Override
     public List<FileVO> chunk(FileVO fileVO) {
         String bucketName = null;
-        File fileResource = fileMapper.selectFileByFileMd5AndModule(fileVO.getFileMd5(), fileVO.getModule());
+        File fileResource = baseMapper.selectOne(new LambdaQueryWrapper<File>()
+                .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                .eq(File::getIsChunk, File.IS_CHUNK_1));
         // 校验该文件是否上传过
         if(fileResource != null){
             // 秒传
@@ -269,11 +277,16 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
     /**
      * 分片上传，单个分片成功
-     * @param fileVO
+     *
+     * @param fileVO fileVO
+     * @return Boolean
      */
     @Override
     public Boolean chunkUploadSuccess(FileVO fileVO) {
-        File file = fileMapper.selectFileByFileMd5AndModule(fileVO.getFileMd5(), fileVO.getModule());
+        File file = baseMapper.selectOne(new LambdaQueryWrapper<File>()
+                .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                .eq(File::getIsChunk, File.IS_CHUNK_1));
         if (file == null){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件未上传过");
         }
@@ -282,17 +295,21 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         fileChunk.setFileMd5(fileVO.getFileMd5());
         fileChunk.setUploadStatus(FileChunk.UPLOAD_STATUS_1);
         fileChunk.setChunkNumber(fileVO.getChunkNumber());
-        fileChunk.setUpdateInfo();
         return fileChunkService.updateFileChunkByFileMd5AndChunkNumber(fileChunk);
     }
 
     /**
      * 合并文件并返回文件信息
-     * @param fileVO
+     *
+     * @param fileVO fileVO
+     * @return String
      */
     @Override
     public String composeFile(FileVO fileVO) {
-        if (fileMapper.selectFileByFileMd5AndModule(fileVO.getFileMd5(), fileVO.getModule()) == null){
+        if (baseMapper.selectOne(new LambdaQueryWrapper<File>()
+                .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                .eq(File::getIsChunk, File.IS_CHUNK_1)) == null){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件未上传过");
         }
         if(!fileChunkService.checkIsUploadAllChunkByFileMd5(fileVO.getFileMd5())){
@@ -328,8 +345,12 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
             file.setModule(fileVO.getModule());
             file.setUrl(url);
             file.setUploadStatus(File.UPLOAD_STATUS_1);
-            file.setUpdateInfo();
-            fileMapper.updateFileByFileMd5AndModule(file);
+
+            baseMapper.update(file, new LambdaUpdateWrapper<File>()
+                    .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                    .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                    .eq(File::getIsChunk, File.IS_CHUNK_1));
+
             return url;
         }
         throw new MyException(ResponseEnums.MINIO_COMPOSE_FILE_ERROR);
@@ -337,12 +358,17 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
     /**
      * 获取文件访问地址
-     * @param fileMd5
-     * @param module
+     *
+     * @param fileMd5 fileMd5
+     * @param module module
+     * @return String
      */
     @Override
     public String getFileUrl(String fileMd5, Integer module) {
-        File file = fileMapper.selectFileByFileMd5AndModule(fileMd5, module);
+        File file = baseMapper.selectOne(new LambdaQueryWrapper<File>()
+                .eq(ObjectUtil.isNotNull(fileMd5), File::getFileMd5, fileMd5)
+                .eq(ObjectUtil.isNotNull(module), File::getModule, module)
+                .eq(File::getIsChunk, File.IS_CHUNK_1));
         if (file == null){
             return null;
         }
@@ -351,9 +377,11 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
     /**
      * 获取带单位的文件大小
+     *
      * @param size
+     * @return String
      */
-    public String getFileSize(Long size) {
+    private String getFileSize(Long size) {
         double num = 1024;
 
         if (size < num){
@@ -377,12 +405,13 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
     /**
      * 批量删除文件
      *
-     * @param ids
+     * @param ids ids
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteFile(Integer[] ids) {
-        List<File> fileList = fileMapper.selectFileByIds(ids);
+    public void deleteFile(List<Integer> ids) {
+        List<File> fileList = baseMapper.selectList(new LambdaQueryWrapper<File>()
+                .in(!CollectionUtils.isEmpty(ids), File::getId, ids));
 
         List<Integer> failList = new ArrayList<>();
         for (File fileListItem : fileList) {
@@ -408,7 +437,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
             minioUtils.deleteObjectName(fileListItem.getBucketName(),
                     DateTimeFormatter.ofPattern("yyyyMMdd").format(fileListItem.getUpdateTime())
                             + "/" + urls[urls.length - 1]);
-            fileMapper.deleteById(fileListItem.getId());
+            baseMapper.deleteById(fileListItem.getId());
         }
 
         if (!CollectionUtils.isEmpty(failList)){

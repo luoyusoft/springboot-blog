@@ -173,7 +173,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     recommend.setModule(ModuleTypeConstants.VIDEO);
                     recommend.setLinkId(videoVO.getId());
                     recommend.setOrderNum(maxOrderNum + 1);
-                    recommend.setCreateAndUpdateInfo();
                     recommendService.insertRecommend(recommend);
                 }
             }else {
@@ -220,7 +219,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                     recommend.setModule(ModuleTypeConstants.VIDEO);
                     recommend.setLinkId(videoVO.getId());
                     recommend.setOrderNum(maxOrderNum + 1);
-                    recommend.setCreateAndUpdateInfo();
                     recommendService.insertRecommend(recommend);
                 }
             }else {

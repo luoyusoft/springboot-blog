@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.jinhx.blog.common.util.SysAdminUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -68,20 +67,5 @@ public class BaseEntity {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
-
-    public void setUpdateInfo() {
-        setUpdaterId(SysAdminUtils.getUserId());
-        setUpdateTime(LocalDateTime.now());
-    }
-
-    public void setCreateInfo() {
-        setCreaterId(SysAdminUtils.getUserId());
-        setCreateTime(LocalDateTime.now());
-    }
-
-    public void setCreateAndUpdateInfo() {
-        setUpdateInfo();
-        setCreateInfo();
-    }
 
 }

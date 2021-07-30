@@ -4,8 +4,8 @@ import com.jinhx.blog.common.config.CloudStorageProperties;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.DateUtils;
-import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.entity.file.File;
+import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.service.file.CloudStorageService;
 import com.jinhx.blog.service.file.FileService;
 import com.qiniu.common.Zone;
@@ -25,11 +25,10 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * QiniuCloudStorageService
+ * QiniuCloudStorageServiceImpl
  *
- * @author luoyu
- * @date 2018/10/22 12:35
- * @description
+ * @author jinhx
+ * @since 2018-10-22
  */
 @Service("cloudStorageService")
 @Slf4j
@@ -42,15 +41,23 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
     private FileService fileService;
 
     private UploadManager uploadManager;
+
     private String token;
+
     private Auth auth;
 
+    /**
+     * 初始化
+     */
     public QiniuCloudStorageServiceImpl(CloudStorageProperties config){
         this.config = config;
         //初始化
         init();
     }
 
+    /**
+     * 初始化
+     */
     private void init(){
         uploadManager = new UploadManager(new Configuration(Zone.autoZone()));
         auth = Auth.create(config.getQiniuAccessKey(), config.getQiniuSecretKey());
@@ -59,7 +66,10 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
 
     /**
      * 文件上传
-     * @return        返回http地址
+     *
+     * @param file file
+     * @return fileModule fileModule
+     * @return 返回http地址
      */
     @Override
     public FileVO upload(MultipartFile file, Integer fileModule) {
@@ -86,6 +96,7 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
 
     /**
      * 文件路径
+     *
      * @param prefix 前缀
      * @param suffix 后缀
      * @return 返回上传路径
@@ -104,9 +115,10 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
 
     /**
      * 文件上传
-     * @param data    文件字节数组
-     * @param path    文件路径，包含文件名
-     * @return        返回http地址
+     *
+     * @param data 文件字节数组
+     * @param path 文件路径，包含文件名
+     * @return 返回http地址
      */
     @Override
     public String upload(byte[] data, String path) {
@@ -126,9 +138,10 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
 
     /**
      * 文件上传
-     * @param inputStream   字节流
-     * @param path          文件路径，包含文件名
-     * @return              返回http地址
+     *
+     * @param inputStream 字节流
+     * @param path 文件路径，包含文件名
+     * @return 返回http地址
      */
     @Override
     public String upload(InputStream inputStream, String path) {
@@ -143,9 +156,10 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
 
     /**
      * 文件上传
-     * @param data     文件字节数组
-     * @param suffix   后缀
-     * @return         返回http地址
+     *
+     * @param data 文件字节数组
+     * @param suffix 后缀
+     * @return 返回http地址
      */
     @Override
     public String uploadSuffix(byte[] data, String suffix) {
@@ -154,9 +168,10 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
 
     /**
      * 文件上传
-     * @param inputStream  字节流
-     * @param suffix       后缀
-     * @return             返回http地址
+     *
+     * @param inputStream 字节流
+     * @param suffix 后缀
+     * @return 返回http地址
      */
     @Override
     public String uploadSuffix(InputStream inputStream, String suffix) {

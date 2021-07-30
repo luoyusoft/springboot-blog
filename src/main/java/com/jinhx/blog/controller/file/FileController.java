@@ -9,17 +9,17 @@ import com.jinhx.blog.service.file.CloudStorageService;
 import com.jinhx.blog.service.file.FileService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
- * <p>
- * 文件表 前端控制器
- * </p>
+ * FileController
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-30
  */
 @RestController
@@ -32,7 +32,10 @@ public class FileController {
     private FileService fileService;
 
     /**
-     * 上传文件
+     * 文件上传
+     *
+     * @return fileVO fileVO
+     * @return 返回http地址
      */
     @PostMapping("/manage/file/qiniuyun/upload")
     public Response uploadByQiNiuYun(FileVO fileVO) throws Exception {
@@ -44,7 +47,10 @@ public class FileController {
     }
 
     /**
-     * 上传文件
+     * 上传
+     *
+     * @param fileVO fileVO
+     * @return FileVO
      */
     @PostMapping("/manage/file/minio/upload")
     public Response uploadByMinio(FileVO fileVO) throws Exception {
@@ -57,6 +63,9 @@ public class FileController {
 
     /**
      * 分片上传文件
+     *
+     * @param fileVO fileVO
+     * @return Response
      */
     @PostMapping("/manage/file/minio/chunkUpload")
     public Response chunkUpload(FileVO fileVO) throws Exception {
@@ -71,6 +80,10 @@ public class FileController {
 
     /**
      * 下载文件
+     *
+     * @param response response
+     * @param fileVO fileVO
+     * @return Response
      */
     @PostMapping("/manage/file/minio/download")
     public Response downloadByMinio(HttpServletResponse response, @RequestBody FileVO fileVO) throws Exception {
@@ -79,7 +92,15 @@ public class FileController {
     }
 
     /**
-     * 获取列表
+     * 分页查询文件
+     *
+     * @param page page
+     * @param limit limit
+     * @param module module
+     * @param fileName fileName
+     * @param fileMd5 fileMd5
+     * @param url url
+     * @return PageUtils
      */
     @GetMapping("/manage/file/list")
     @RequiresPermissions("file:list")
@@ -91,6 +112,9 @@ public class FileController {
 
     /**
      * 分片上传文件，获取各个分片上传地址
+     *
+     * @param fileVO fileVO
+     * @return List<FileVO>
      */
     @PostMapping("/manage/file/minio/chunk")
     public Response chunk(@RequestBody FileVO fileVO){
@@ -102,7 +126,10 @@ public class FileController {
     }
 
     /**
-     * 分片上传，单个分片成功更新
+     * 分片上传，单个分片成功
+     *
+     * @param fileVO fileVO
+     * @return Boolean
      */
     @PutMapping("/manage/file/minio/chunkUploadSuccess")
     public Response chunkUploadSuccess(@RequestBody FileVO fileVO){
@@ -114,7 +141,10 @@ public class FileController {
     }
 
     /**
-     * 合并文件，获取文件访问地址
+     * 合并文件并返回文件信息
+     *
+     * @param fileVO fileVO
+     * @return String
      */
     @PostMapping("/manage/file/minio/compose")
     public Response composeFile(@RequestBody FileVO fileVO){
@@ -128,6 +158,10 @@ public class FileController {
 
     /**
      * 获取文件访问地址
+     *
+     * @param fileMd5 fileMd5
+     * @param module module
+     * @return String
      */
     @GetMapping("/manage/file/minio/url")
     public Response getFileUrl(@RequestParam("fileMd5") String fileMd5, @RequestParam("module") Integer module){
@@ -140,15 +174,17 @@ public class FileController {
 
     /**
      * 批量删除文件
+     *
+     * @param ids ids
      */
     @DeleteMapping("/manage/file/minio/file")
     @RequiresPermissions("file:delete")
-    public Response deleteFile(@RequestBody Integer[] ids){
-        if (ids == null || ids.length < 1){
+    public Response deleteFile(@RequestBody List<Integer> ids){
+        if (CollectionUtils.isEmpty(ids)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能为空");
         }
 
-        if (ids.length > 100){
+        if (ids.size() > 100){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
         }
 

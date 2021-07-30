@@ -191,7 +191,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     recommend.setModule(ModuleTypeConstants.ARTICLE);
                     recommend.setLinkId(articleVO.getId());
                     recommend.setOrderNum(maxOrderNum + 1);
-                    recommend.setCreateAndUpdateInfo();
                     recommendService.insertRecommend(recommend);
                 }
             }else {
@@ -262,7 +261,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     recommend.setModule(ModuleTypeConstants.ARTICLE);
                     recommend.setLinkId(articleVO.getId());
                     recommend.setOrderNum(maxOrderNum + 1);
-                    recommend.setCreateAndUpdateInfo();
                     recommendService.insertRecommend(recommend);
                 }
             }else {

@@ -10,78 +10,91 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
- * <p>
- * 文件表 服务类
- * </p>
+ * FileService
  *
- * @author luoyu
- * @since 2018-11-30
+ * @author jinhx
+ * @since 2018-11-07
  */
 public interface FileService extends IService<File> {
 
     /**
      * 上传
-     * @param file
-     * @param fileModule
+     *
+     * @param file file
+     * @param fileModule fileModule
+     * @return FileVO
      */
     FileVO upload(MultipartFile file, Integer fileModule);
 
     /**
-     * 分片上传
-     * @param file
-     * @param bucketName
-     * @param fileMd5
-     * @param chunkNumber
+     * 分片上传文件
+     *
+     * @param file file
+     * @param bucketName bucketName
+     * @param fileMd5 fileMd5
+     * @param chunkNumber chunkNumber
      */
     void chunkUpload(MultipartFile file, String bucketName, String fileMd5, Integer chunkNumber);
 
     /**
-     * 下载
-     * @param response
-     * @param fileName
+     * 下载文件
+     *
+     * @param response response
+     * @param fileName fileName
      */
     void download(HttpServletResponse response, String fileName);
 
     /**
      * 分页查询文件
+     *
      * @param page page
      * @param limit limit
      * @param module module
      * @param fileName fileName
      * @param fileMd5 fileMd5
      * @param url url
+     * @return PageUtils
      */
     PageUtils queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url);
 
     /**
-     * 分片上传文件
-     * @param fileVO
+     * 分片上传文件，获取各个分片上传地址
+     *
+     * @param fileVO fileVO
+     * @return List<FileVO>
      */
     List<FileVO> chunk(FileVO fileVO);
 
     /**
      * 分片上传，单个分片成功
-     * @param fileVO
+     *
+     * @param fileVO fileVO
+     * @return Boolean
      */
     Boolean chunkUploadSuccess(FileVO fileVO);
 
     /**
      * 合并文件并返回文件信息
-     * @param fileVO
+     *
+     * @param fileVO fileVO
+     * @return String
      */
     String composeFile(FileVO fileVO);
 
     /**
      * 获取文件访问地址
-     * @param fileMd5
-     * @param module
+     *
+     * @param fileMd5 fileMd5
+     * @param module module
+     * @return String
      */
     String getFileUrl(String fileMd5, Integer module);
 
     /**
      * 批量删除文件
-     * @param ids
+     *
+     * @param ids ids
      */
-    void deleteFile(Integer[] ids);
+    void deleteFile(List<Integer> ids);
 
 }

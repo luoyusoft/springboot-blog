@@ -20,31 +20,4 @@
         id,file_md5,upload_url,chunk_number,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <select id="checkIsUploadAllChunkByFileMd5" resultType="java.lang.Integer">
-        select count(*)
-        from file_chunk
-        where file_md5 = #{fileMd5}
-          and upload_status = #{uploadStatus}
-    </select>
-
-    <select id="selectFileChunksByFileMd5" resultMap="BaseResultMap">
-        select <include refid="AllColumn"/>
-        from file_chunk
-        where file_md5 = #{fileMd5}
-        order by chunk_number asc
-    </select>
-
-    <update id="updateFileChunkByFileMd5AndChunkNumber" parameterType="com.jinhx.blog.entity.file.FileChunk">
-        update file_chunk
-        <set>
-            <if test="uploadStatus != null">
-                upload_status = #{uploadStatus},
-            </if>
-            updater_id = #{updateId},
-            update_time = #{updateTime}
-        </set>
-        where file_md5 = #{fileMd5}
-          and chunk_number = #{chunkNumber}
-    </update>
-
 </mapper>
