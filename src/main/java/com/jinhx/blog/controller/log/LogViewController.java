@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * TimelineController
+ * LogViewController
  *
- * @author luoyu
- * @date 2019/02/24 20:46
- * @description
+ * @author jinhx
+ * @since 2019-02-24
  */
 @RestController
 public class LogViewController {
@@ -25,6 +24,8 @@ public class LogViewController {
 
     /**
      * 获取首页信息
+     *
+     * @return 首页信息
      */
     @GetMapping("/manage/log/homeinfo")
     @RequiresPermissions("log:list")

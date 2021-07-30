@@ -1,6 +1,7 @@
 package com.jinhx.blog.service.log.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.api.IPApi;
@@ -26,9 +27,8 @@ import java.util.Map;
 /**
  * LogViewServiceImpl
  *
- * @author luoyu
- * @date 2018/10/25 15:36
- * @description
+ * @author jinhx
+ * @since 2019-02-24
  */
 @Slf4j
 @Service
@@ -39,16 +39,24 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
 
     /**
      * 获取首页信息
+     *
      * @return 首页信息
      */
     @Override
     public HomeLogInfoVO getHommeLogInfoVO() {
-        Integer allPV = baseMapper.selectAllPV(null);
-        Integer allUV = baseMapper.selectAllUV(null);
+        Integer allPV = baseMapper.selectCount(new LambdaQueryWrapper<>());
+        Integer allUV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
+                .groupBy(LogView::getIp, LogView::getBrowserName, LogView::getBrowserVersion, LogView::getDeviceManufacturer,
+                        LogView::getDeviceType, LogView::getOsVersion));
+
         // 当天零点
         LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        Integer todayPV = baseMapper.selectAllPV(createTime);
-        Integer todayUV = baseMapper.selectAllUV(createTime);
+        Integer todayPV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
+                .ge(LogView::getCreateTime, createTime));
+        Integer todayUV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
+                .ge(LogView::getCreateTime, createTime)
+                .groupBy(LogView::getIp, LogView::getBrowserName, LogView::getBrowserVersion, LogView::getDeviceManufacturer,
+                        LogView::getDeviceType, LogView::getOsVersion));
 
         HomeLogInfoVO homeLogInfoVO = new HomeLogInfoVO();
         homeLogInfoVO.setAllPV(allPV);
@@ -60,10 +68,11 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
 
     /**
      * 分页查询日志
-     * @param page
-     * @param limit
-     * @param module
-     * @return
+     *
+     * @param page page
+     * @param limit limit
+     * @param module module
+     * @return PageUtils
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, Integer module) {
@@ -72,8 +81,8 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
         params.put("limit", String.valueOf(limit));
 
         IPage<LogView> logViewIPage = baseMapper.selectPage(new Query<LogView>(params).getPage(),
-                new QueryWrapper<LogView>().lambda()
-                .eq(module != null, LogView::getModule,module)
+                new LambdaQueryWrapper<LogView>()
+                .eq(ObjectUtil.isNotNull(module), LogView::getModule, module)
                 .orderByDesc(LogView::getCreateTime)
         );
         return new PageUtils(logViewIPage);
@@ -81,26 +90,48 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
 
     /**
      * 清洗城市信息
-     * @return
      */
     @Override
     public void cleanCityInfo() {
         log.info("开始清洗log_view表");
         XxlJobLogger.log("开始清洗log_view表");
-        Integer maxId = baseMapper.selectMaxId();
-        if (maxId == null || maxId < 1){
+
+        LogView maxLogView = baseMapper.selectOne(new LambdaQueryWrapper<LogView>()
+                .eq(LogView::getCountry, null)
+                .or()
+                .eq(LogView::getRegion, null)
+                .or()
+                .eq(LogView::getCity, null)
+                .orderByDesc(LogView::getId));
+
+        if (maxLogView == null){
             return;
         }
+
+        Integer maxId = maxLogView.getId();
+
         for (int start = 0, end = 500; start < maxId; start += 500, end += 500) {
-            List<LogView> logViews = baseMapper.selectLogViewsByPage(start, end);
+            List<LogView> logViews = baseMapper.selectList(new LambdaQueryWrapper<LogView>()
+                            .ge(LogView::getId, start)
+                            .le(LogView::getId, end)
+                            .and(lqw ->
+                                    lqw.eq(LogView::getCountry, null)
+                                            .or()
+                                            .eq(LogView::getRegion, null)
+                                            .or()
+                                            .eq(LogView::getCity, null)));
+
             logViews.forEach(logViewsItem -> {
                 try {
                     IPInfo ipInfo = ipApi.getIpInfo(logViewsItem.getIp());
-                    logViewsItem.setCountry(ipInfo.getCountry());
-                    logViewsItem.setRegion(ipInfo.getRegionName());
-                    logViewsItem.setCity(ipInfo.getCity());
-                    logViewsItem.setUpdateTime(LocalDateTime.now());
-                    baseMapper.updateLogViewById(logViewsItem);
+                    LogView logView = new LogView();
+                    logView.setId(logViewsItem.getId());
+                    logView.setCountry(ipInfo.getCountry());
+                    logView.setRegion(ipInfo.getRegionName());
+                    logView.setCity(ipInfo.getCity());
+
+                    baseMapper.updateById(logView);
+
                     log.info("清洗成功：{}", logViewsItem);
                     XxlJobLogger.log("清洗成功：{}", logViewsItem.toString());
                     Thread.sleep(1000);

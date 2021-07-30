@@ -1,32 +1,40 @@
 package com.jinhx.blog.service.messagewall.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
-import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
-import com.jinhx.blog.entity.messagewall.vo.MessageWallVO;
 import com.jinhx.blog.entity.messagewall.MessageWall;
 import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
+import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
+import com.jinhx.blog.entity.messagewall.vo.MessageWallVO;
 import com.jinhx.blog.mapper.messagewall.MessageWallMapper;
 import com.jinhx.blog.service.messagewall.MessageWallService;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * MessageWallServiceImpl
  *
- * @author luoyu
- * @date 2018/11/21 12:48
- * @description
+ * @author jinhx
+ * @since 2021-04-11
  */
 @Service
 public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, MessageWall> implements MessageWallService {
@@ -48,6 +56,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
 
     /**
      * 后台获取首页信息
+     *
      * @return 首页信息
      */
     @Override
@@ -55,14 +64,17 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         // 当天零点
         LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         HomeMessageWallInfoVO homeMessageWallInfoVO = new HomeMessageWallInfoVO();
-        homeMessageWallInfoVO.setMaxFloorNum(baseMapper.selectMaxFloorNum());
-        homeMessageWallInfoVO.setAllCount(baseMapper.selectMessageWallCount());
-        homeMessageWallInfoVO.setTodayCount(baseMapper.selectTodayCount(createTime));
+        homeMessageWallInfoVO.setMaxFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
+                .orderByDesc(MessageWall::getFloorNum)).getFloorNum());
+        homeMessageWallInfoVO.setAllCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
+        homeMessageWallInfoVO.setTodayCount(baseMapper.selectCount(new LambdaQueryWrapper<MessageWall>()
+                .ge(MessageWall::getCreateTime, createTime)));
         return homeMessageWallInfoVO;
     }
 
     /**
      * 后台新增留言
+     *
      * @param messageWall 留言
      */
     @Override
@@ -70,7 +82,8 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         // 新楼层
         if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
             messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectMaxFloorNum() + 1);
+            messageWall.setFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
+                    .orderByDesc(MessageWall::getFloorNum)).getFloorNum() + 1);
         } else {
             if (messageWall.getFloorNum() == null){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
@@ -86,6 +99,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
 
     /**
      * 后台分页查询留言列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param name 昵称
@@ -97,17 +111,45 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         Map<String, Object> params = new HashMap<>();
         params.put("page", String.valueOf(page));
         params.put("limit", String.valueOf(limit));
-        params.put("name", name);
-        params.put("floorNum", floorNum);
 
-        Page<MessageWallVO> messageWallVOPage = new Query<MessageWallVO>(params).getPage();
-        List<MessageWallVO> messageWallVOList = baseMapper.selectMessageWallVOs(messageWallVOPage, params);
-        messageWallVOPage.setRecords(messageWallVOList);
-        return new PageUtils(messageWallVOPage);
+        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new Query<MessageWall>(params).getPage(), new LambdaQueryWrapper<MessageWall>()
+                .like(ObjectUtil.isNotEmpty(name), MessageWall::getName, name)
+                .eq(floorNum != null, MessageWall::getFloorNum, floorNum)
+                .orderByDesc(MessageWall::getId));
+
+        if (CollectionUtils.isEmpty(messageWallIPage.getRecords())){
+            return new PageUtils(messageWallIPage);
+        }
+
+        List<MessageWall> messageWalls = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .in(MessageWall::getId, messageWallIPage.getRecords().stream().map(MessageWall::getReplyId).distinct().collect(Collectors.toList())));
+
+        if (CollectionUtils.isEmpty(messageWalls)){
+            messageWallIPage.setRecords(Lists.newArrayList());
+            return new PageUtils(messageWallIPage);
+        }
+
+        // key：id，value：name
+        Map<Integer, String> map = messageWalls.stream().collect(Collectors.toMap(MessageWall::getId, MessageWall::getName));
+
+        List<MessageWallVO> messageWallVOs = Lists.newArrayList();
+        messageWallIPage.getRecords().forEach(item -> {
+            MessageWallVO messageWallVO = new MessageWallVO();
+            BeanUtils.copyProperties(item, messageWallVO);
+            messageWallVO.setReplyName(map.get(item.getReplyId()));
+            messageWallVOs.add(messageWallVO);
+        });
+
+        IPage<MessageWallVO> messageWallVOIPage = new Page<>();
+        BeanUtils.copyProperties(messageWallIPage, messageWallVOIPage);
+        messageWallVOIPage.setRecords(messageWallVOs);
+
+        return new PageUtils(messageWallVOIPage);
     }
 
     /**
      * 后台批量删除
+     *
      * @param ids ids
      */
     @Override
@@ -119,6 +161,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
 
     /**
      * 新增留言
+     *
      * @param messageWall 留言对象
      */
     @Override
@@ -127,7 +170,8 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         // 新楼层
         if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
             messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectMaxFloorNum() + 1);
+            messageWall.setFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
+                    .orderByDesc(MessageWall::getFloorNum)).getFloorNum() + 1);
         }else {
             if (messageWall.getFloorNum() == null){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
@@ -142,6 +186,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
 
     /**
      * 按楼层分页获取留言列表
+     *
      * @param page 页码
      * @param limit 页数
      * @return 留言列表
@@ -149,15 +194,52 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
     @Override
     public MessageWallListVO listMessageWalls(Integer page, Integer limit) {
         MessageWallListVO messageWallListVO = new MessageWallListVO();
-        messageWallListVO.setTotalCount(baseMapper.selectMessageWallCount());
-        Integer maxFloorNum = baseMapper.selectMaxFloorNum() - (page - 1) * limit;
-        Integer minFloorNum = maxFloorNum - limit + 1;
-        messageWallListVO.setHaveMoreFloor(minFloorNum > 1);
-        List<MessageWallVO> messageWallVOS = baseMapper.selectMessageWallVOListByFloor(minFloorNum, maxFloorNum);
-        if (CollectionUtils.isEmpty(messageWallVOS)){
-            messageWallVOS = new ArrayList<>();
+        messageWallListVO.setTotalCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
+        if (messageWallListVO.getTotalCount() == null || messageWallListVO.getTotalCount() < 1){
+            messageWallListVO.setHaveMoreFloor(false);
+            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
+            return messageWallListVO;
         }
-        messageWallListVO.setMessageWallVOList(messageWallVOS);
+
+        Integer maxFloorNum = baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
+                .orderByDesc(MessageWall::getFloorNum)).getFloorNum() - (page - 1) * limit;
+        Integer minFloorNum = maxFloorNum - limit + 1;
+
+        messageWallListVO.setHaveMoreFloor(minFloorNum > 1);
+
+        List<MessageWall> messageWalls = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .ge(MessageWall::getFloorNum, minFloorNum)
+                .le(MessageWall::getFloorNum, maxFloorNum)
+                .orderByDesc(MessageWall::getFloorNum)
+                .orderByAsc(MessageWall::getId));
+
+        if (CollectionUtils.isEmpty(messageWalls)){
+            messageWallListVO.setHaveMoreFloor(false);
+            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
+            return messageWallListVO;
+        }
+
+        List<MessageWall> messageWallNames = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .in(MessageWall::getId, messageWalls.stream().map(MessageWall::getReplyId).distinct().collect(Collectors.toList())));
+
+        if (CollectionUtils.isEmpty(messageWallNames)){
+            messageWallListVO.setHaveMoreFloor(false);
+            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
+            return messageWallListVO;
+        }
+
+        // key：id，value：name
+        Map<Integer, String> map = messageWallNames.stream().collect(Collectors.toMap(MessageWall::getId, MessageWall::getName));
+
+        List<MessageWallVO> messageWallVOs = Lists.newArrayList();
+        messageWalls.forEach(item -> {
+            MessageWallVO messageWallVO = new MessageWallVO();
+            BeanUtils.copyProperties(item, messageWallVO);
+            messageWallVO.setReplyName(map.get(item.getReplyId()));
+            messageWallVOs.add(messageWallVO);
+        });
+
+        messageWallListVO.setMessageWallVOList(messageWallVOs);
         return messageWallListVO;
     }
 

@@ -8,13 +8,16 @@ import com.jinhx.blog.entity.chat.vo.UserVO;
 import java.util.List;
 
 /**
- * @author luoyu
- * @date 2019-06-14
+ * ChatService
+ *
+ * @author jinhx
+ * @since 2019-06-07
  */
 public interface ChatService {
 
     /**
      * 新增用户
+     *
      * @param id id
      * @return 用户信息
      */
@@ -22,6 +25,7 @@ public interface ChatService {
 
     /**
      * 用户登录
+     *
      * @param user 用户对象
      * @return 用户信息
      */
@@ -29,6 +33,7 @@ public interface ChatService {
 
     /**
      * 用户登录
+     *
      * @param user 用户对象
      * @return 用户信息
      */
@@ -36,6 +41,7 @@ public interface ChatService {
 
     /**
      * 获取当前窗口用户信息
+     *
      * @param id id
      * @return 当前窗口用户信息
      */
@@ -52,18 +58,21 @@ public interface ChatService {
 
     /**
      * 获取在线用户列表
+     *
      * @return 在线用户列表
      */
     List<UserVO> listOnlineUsers();
 
     /**
      * 获取公共聊天消息列表
+     *
      * @return 消息列表
      */
     List<Message> listCommonMessages();
 
     /**
      * 获取指定用户的聊天消息列表
+     *
      * @param fromId 推送方ID
      * @param toId   接收方ID
      * @return 消息列表
@@ -72,6 +81,7 @@ public interface ChatService {
 
     /**
      * 删除指定ID在Redis中储存的数据
+     *
      * @param id id
      */
     void delete(String id);

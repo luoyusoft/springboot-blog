@@ -21,8 +21,10 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 
 /**
- * @author luoyu
- * @date 2019-06-14
+ * ChatServiceImpl
+ *
+ * @author jinhx
+ * @since 2019-06-07
  */
 @Slf4j
 @Service
@@ -38,6 +40,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 新增用户
+     *
      * @param id id
      * @return 用户信息
      */
@@ -59,6 +62,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 用户登录
+     *
      * @param user 用户对象
      * @return 用户信息
      */
@@ -114,6 +118,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 用户登录
+     *
      * @param user 用户对象
      * @return 用户信息
      */
@@ -155,6 +160,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 获取当前窗口用户信息
+     *
      * @param id id
      * @return 当前窗口用户信息
      */
@@ -174,6 +180,13 @@ public class ChatServiceImpl implements ChatService {
         return null;
     }
 
+    /**
+     * 推送消息，储存到Redis数据库中
+     *
+     * @param fromId  推送方ID
+     * @param toId    接收方ID
+     * @param message 消息
+     */
     @Override
     public void pushMessage(String fromId, String toId, String message) {
         Message entity = new Message();
@@ -194,6 +207,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 推送消息
+     *
      * @param message 消息对象
      * @param key    key
      */
@@ -215,6 +229,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 获取在线用户列表
+     *
      * @return 在线用户列表
      */
     @Override
@@ -235,6 +250,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 获取公共聊天消息列表
+     *
      * @return 消息列表
      */
     @Override
@@ -254,6 +270,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 获取指定用户的聊天消息列表
+     *
      * @param fromId 推送方ID
      * @param toId   接收方ID
      * @return 消息列表
@@ -286,6 +303,7 @@ public class ChatServiceImpl implements ChatService {
 
     /**
      * 删除指定ID在Redis中储存的数据
+     *
      * @param id id
      */
     @Override

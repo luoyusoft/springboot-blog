@@ -1,8 +1,8 @@
 package com.jinhx.blog.controller.chat;
 
-import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.DateUtils;
 import com.jinhx.blog.common.util.EncodeUtils;
 import com.jinhx.blog.common.util.IPUtils;
@@ -23,8 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * @author luoyu
- * @date 2019-06-11
+ * ChatController
+ *
+ * @author jinhx
+ * @since 2019-06-07
  */
 @Slf4j
 @RestController

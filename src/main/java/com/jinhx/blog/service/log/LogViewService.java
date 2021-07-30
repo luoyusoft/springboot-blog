@@ -6,32 +6,32 @@ import com.jinhx.blog.entity.log.LogView;
 import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 
 /**
- * LogViewService
+ * LogViewServiceImpl
  *
- * @author luoyu
- * @date 2018/10/25 15:36
- * @description
+ * @author jinhx
+ * @since 2019-02-24
  */
 public interface LogViewService extends IService<LogView> {
 
     /**
      * 获取首页信息
+     *
      * @return 首页信息
      */
     HomeLogInfoVO getHommeLogInfoVO();
 
     /**
      * 分页查询日志
-     * @param page
-     * @param limit
-     * @param module
-     * @return
+     *
+     * @param page page
+     * @param limit limit
+     * @param module module
+     * @return PageUtils
      */
     PageUtils queryPage(Integer page, Integer limit, Integer module);
 
     /**
      * 清洗城市信息
-     * @return
      */
     void cleanCityInfo();
 

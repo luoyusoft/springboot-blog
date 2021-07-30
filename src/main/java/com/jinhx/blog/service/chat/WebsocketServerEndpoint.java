@@ -20,8 +20,10 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * @author luoyu
- * @date 2019-06-10
+ * WebsocketServerEndpoint
+ *
+ * @author jinhx
+ * @since 2019-06-07
  */
 @Slf4j
 @Component
@@ -50,8 +52,8 @@ public class WebsocketServerEndpoint {
     /**
      * 链接成功调用的方法
      *
-     * @param session
-     * @param id
+     * @param session session
+     * @param id id
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) {
@@ -86,10 +88,10 @@ public class WebsocketServerEndpoint {
     public void onClose() {
         log.info("Websocket链接成功关闭");
 
-        //移除当前Websocket对象
+        // 移除当前Websocket对象
         websocketServerEndpoints.remove(this);
 
-        //在内线人数-1
+        // 在线人数-1
         subOnLineCount();
 
         log.info("Websocket链接关闭，当前在线人数：" + getOnlineCount());
@@ -98,7 +100,7 @@ public class WebsocketServerEndpoint {
     /**
      * 收到客户端消息后调用的方法
      *
-     * @param message
+     * @param message message
      */
     @OnMessage
     public void onMessage(String message) throws IOException {
@@ -110,6 +112,11 @@ public class WebsocketServerEndpoint {
         sendMore(getData(null, message));
     }
 
+    /**
+     * 链接出错时调用
+     *
+     * @param e e
+     */
     @OnError
     public void onError(Throwable e) {
         e.printStackTrace();
@@ -117,6 +124,7 @@ public class WebsocketServerEndpoint {
 
     /**
      * 推送消息
+     *
      * @param message 详细对象
      */
     private void sendMessage(String message) throws Exception {
@@ -125,6 +133,7 @@ public class WebsocketServerEndpoint {
 
     /**
      * 封装返回消息
+     *
      * @param toId    指定窗口ID
      * @param message 消息内容
      * @return 返回消息
@@ -141,7 +150,7 @@ public class WebsocketServerEndpoint {
     /**
      * 群发消息
      *
-     * @param data
+     * @param data data
      */
     private void sendMore(String data) {
         for (WebsocketServerEndpoint websocketServerEndpoint : websocketServerEndpoints) {
@@ -155,6 +164,7 @@ public class WebsocketServerEndpoint {
 
     /**
      * 向指定窗口推送消息
+     *
      * @param toId    接收方ID
      * @param message 消息对象
      */
@@ -185,7 +195,8 @@ public class WebsocketServerEndpoint {
 
     /**
      * 是否在线
-     * @param id    id
+     *
+     * @param id id
      * @return 是否在线
      */
     public Boolean isOnline(String id) {
@@ -200,14 +211,25 @@ public class WebsocketServerEndpoint {
         return false;
     }
 
+    /**
+     * 在线人数-1
+     */
     private void subOnLineCount() {
         WebsocketServerEndpoint.online--;
     }
 
+    /**
+     * 获取在线人数
+     *
+     * @return 在线人数
+     */
     private synchronized long getOnlineCount() {
         return online;
     }
 
+    /**
+     * 在线人数+1
+     */
     private void addOnlineCount() {
         WebsocketServerEndpoint.online++;
     }

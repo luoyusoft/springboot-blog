@@ -27,6 +27,12 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.util.List;
 
+/**
+ * GitalkServiceImpl
+ *
+ * @author jinhx
+ * @since 2020-11-07
+ */
 @Slf4j
 @Service
 public class GitalkServiceImpl implements GitalkService {
@@ -44,7 +50,9 @@ public class GitalkServiceImpl implements GitalkService {
     private VideoMapper videoMapper;
 
     /**
-     * @return
+     * 初始化gitalk文章数据
+     *
+     * @return 初始化结果
      */
     @Override
     public boolean initArticleList(){
@@ -64,7 +72,9 @@ public class GitalkServiceImpl implements GitalkService {
     }
 
     /**
-     * @return
+     * 初始化gitalk视频数据
+     *
+     * @return 初始化结果
      */
     @Override
     public boolean initVideoList(){
@@ -83,6 +93,9 @@ public class GitalkServiceImpl implements GitalkService {
         return true;
     }
 
+    /**
+     * RabbitMQ消费者
+     */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConstants.BLOG_GITALK_INIT_QUEUE, durable = "true"),
             exchange = @Exchange(
