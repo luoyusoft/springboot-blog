@@ -9,9 +9,8 @@ import java.util.List;
 /**
  * TimelineMapper
  *
- * @author luoyu
- * @date 2019/02/24 20:53
- * @description
+ * @author jinhx
+ * @since 2019-02-24
  */
 public interface TimelineMapper {
 

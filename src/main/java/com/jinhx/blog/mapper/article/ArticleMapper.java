@@ -11,11 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>
- * 文章 Mapper 接口
- * </p>
+ * ArticleMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-07
  */
 public interface ArticleMapper extends BaseMapper<Article> {

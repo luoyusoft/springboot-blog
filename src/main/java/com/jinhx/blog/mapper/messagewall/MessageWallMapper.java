@@ -11,12 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>
- * 留言墙 Mapper 接口
- * </p>
+ * MessageWallMapper
  *
- * @author luoyu
- * @since 2018-11-07
+ * @author jinhx
+ * @since 2021-04-15
  */
 public interface MessageWallMapper extends BaseMapper<MessageWall> {
 

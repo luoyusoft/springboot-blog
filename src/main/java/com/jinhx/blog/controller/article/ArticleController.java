@@ -15,9 +15,9 @@ import javax.annotation.Resource;
 
 /**
  * ArticleController
+ *
  * @author jinhx
- * @date 2018/11/20 20:25
- * @description
+ * @since 2018-11-20
  */
 @RestController
 public class ArticleController {

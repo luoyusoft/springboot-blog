@@ -8,11 +8,9 @@ import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 
 /**
- * <p>
- * 推荐 Mapper 接口
- * </p>
+ * RecommendMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-22
  */
 public interface RecommendMapper extends BaseMapper<Recommend> {

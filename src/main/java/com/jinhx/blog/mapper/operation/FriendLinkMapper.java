@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinhx.blog.entity.operation.FriendLink;
 
 /**
- * <p>
- * 友链 Mapper 接口
- * </p>
+ * FriendLinkMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-14
  */
 public interface FriendLinkMapper extends BaseMapper<FriendLink> {

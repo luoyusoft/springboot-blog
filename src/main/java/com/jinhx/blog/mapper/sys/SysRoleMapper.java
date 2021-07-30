@@ -6,11 +6,9 @@ import com.jinhx.blog.entity.sys.SysRole;
 import java.util.List;
 
 /**
- * <p>
- *  Mapper 接口
- * </p>
+ * SysRoleMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-08
  */
 public interface SysRoleMapper extends BaseMapper<SysRole> {

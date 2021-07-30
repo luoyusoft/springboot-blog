@@ -10,12 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>
- * 文章 Mapper 接口
- * </p>
+ * VideoMapper
  *
- * @author luoyu
- * @since 2018-11-07
+ * @author jinhx
+ * @since 2020-02-24
  */
 public interface VideoMapper extends BaseMapper<Video> {
 

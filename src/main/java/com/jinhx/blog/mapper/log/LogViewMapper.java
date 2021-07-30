@@ -8,11 +8,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * <p>
- * 阅读日志 Mapper 接口
- * </p>
+ * LogViewMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-15
  */
 public interface LogViewMapper extends BaseMapper<LogView> {

@@ -8,11 +8,9 @@ import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 
 /**
- * <p>
- * 置顶 Mapper 接口
- * </p>
+ * TopMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-22
  */
 public interface TopMapper extends BaseMapper<Top> {

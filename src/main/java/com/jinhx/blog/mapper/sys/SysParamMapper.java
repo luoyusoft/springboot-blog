@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jinhx.blog.entity.sys.SysParam;
 
 /**
- * <p>
- * 系统参数 Mapper 接口
- * </p>
+ * SysParamMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-12-28
  */
 public interface SysParamMapper extends BaseMapper<SysParam> {

@@ -7,12 +7,10 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * <p>
- * 云存储分片表 Mapper 接口
- * </p>
+ * FileChunkMapper
  *
- * @author luoyu
- * @since 2018-11-30
+ * @author jinhx
+ * @since 2018-11-07
  */
 public interface FileChunkMapper extends BaseMapper<FileChunk> {
 

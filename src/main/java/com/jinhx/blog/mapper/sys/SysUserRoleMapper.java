@@ -9,9 +9,8 @@ import java.util.List;
 /**
  * SysUserRoleMapper
  *
- * @author luoyu
- * @date 2018/10/26 00:02
- * @description
+ * @author jinhx
+ * @since 2018-10-08
  */
 public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
 

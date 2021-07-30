@@ -8,11 +8,9 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * <p>
- * 标签 Mapper 接口
- * </p>
+ * TagMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-07
  */
 public interface TagMapper extends BaseMapper<Tag> {

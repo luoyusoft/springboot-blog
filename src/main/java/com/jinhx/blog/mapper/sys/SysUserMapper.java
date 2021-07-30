@@ -6,11 +6,9 @@ import com.jinhx.blog.entity.sys.SysUser;
 import java.util.List;
 
 /**
- * <p>
- *  Mapper 接口
- * </p>
+ * SysUserMapper
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-08
  */
 public interface SysUserMapper extends BaseMapper<SysUser> {
