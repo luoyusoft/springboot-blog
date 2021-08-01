@@ -1,7 +1,8 @@
 package com.jinhx.blog.controller.operation;
 
-import com.jinhx.blog.common.exception.MyException;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
@@ -17,11 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
- * 置顶 前端控制器
- * </p>
+ * TopController
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-22
  */
 @RestController
@@ -31,7 +30,11 @@ public class TopController {
     private TopService topService;
 
     /**
-     * 列表
+     * 分页查询
+     *
+     * @param page page
+     * @param limit limit
+     * @return PageUtils
      */
     @GetMapping("/manage/operation/top/list")
     @RequiresPermissions("operation:top:list")
@@ -41,12 +44,16 @@ public class TopController {
     }
 
     /**
-     * 查找
+     * 获取置顶列表
+     *
+     * @param module module
+     * @param title title
+     * @return List<TopVO>
      */
     @GetMapping("/manage/operation/top/select")
     @RequiresPermissions("operation:top:list")
     public Response select(@RequestParam("module") Integer module, @RequestParam("title") String title) {
-        if(module == null){
+        if(ObjectUtils.isNull(module)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "module不能为空");
         }
         List<TopVO> TopList = topService.select(module, title);
@@ -55,6 +62,9 @@ public class TopController {
 
     /**
      * 信息
+     *
+     * @param id id
+     * @return 信息
      */
     @GetMapping("/manage/operation/top/info/{id}")
     @RequiresPermissions("operation:top:info")
@@ -64,7 +74,9 @@ public class TopController {
     }
 
     /**
-     * 保存
+     * 新增
+     *
+     * @param top top
      */
     @PostMapping("/manage/operation/top/save")
     @RequiresPermissions("operation:top:save")
@@ -79,7 +91,9 @@ public class TopController {
     }
 
     /**
-     * 修改
+     * 更新
+     *
+     * @param top top
      */
     @PutMapping("/manage/operation/top/update")
     @RequiresPermissions("operation:top:update")
@@ -94,12 +108,14 @@ public class TopController {
     }
 
     /**
-     * 置顶置顶
+     * 置顶
+     *
+     * @param id id
      */
     @PutMapping("/manage/operation/top/top/{id}")
     @RequiresPermissions("operation:top:update")
     public Response updateTop(@PathVariable("id") Integer id){
-        if(id == null){
+        if(ObjectUtils.isNull(id)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
         }
         topService.updateTopTop(id);
@@ -109,6 +125,8 @@ public class TopController {
 
     /**
      * 删除
+     *
+     * @param ids ids
      */
     @DeleteMapping("/manage/operation/top/delete")
     @RequiresPermissions("operation:top:delete")

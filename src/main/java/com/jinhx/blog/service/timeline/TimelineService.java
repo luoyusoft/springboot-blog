@@ -7,14 +7,14 @@ import java.util.List;
 /**
  * TimelineService
  *
- * @author luoyu
- * @date 2019/02/24
- * @description 时间线
+ * @author jinhx
+ * @since 2019-04-11
  */
 public interface TimelineService {
 
     /**
      * 获取时间线列表
+     *
      * @return 时间线列表
      */
     List<Timeline> listTimelines();

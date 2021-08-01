@@ -4,16 +4,16 @@ import com.jinhx.blog.entity.file.File;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * <p>
- * 文件表
- * </p>
+ * FileVO
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-30
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 @ApiModel(value="FileVO对象", description="文件表")
 public class FileVO extends File {

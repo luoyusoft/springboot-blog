@@ -3,15 +3,17 @@ package com.jinhx.blog.entity.video.dto;
 import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.video.Video;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 /**
  * VideoDTO
+ *
  * @author jinhx
- * @date 2019/01/09 16:51
- * @description VideoDTO
+ * @since 2019-02-22
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class VideoDTO extends Video {
 

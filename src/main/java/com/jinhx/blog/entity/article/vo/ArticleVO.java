@@ -1,18 +1,19 @@
 package com.jinhx.blog.entity.article.vo;
 
-import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.operation.Tag;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 /**
  * ArticleVO
  *
- * @author luoyu
- * @date 2019/01/08 19:04
- * @description
+ * @author jinhx
+ * @since 2018-11-07
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class ArticleVO extends Article {
 

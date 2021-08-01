@@ -5,9 +5,8 @@ import lombok.Data;
 /**
  * HomeRecommendInfoVO
  *
- * @author luoyu
- * @date 2019/01/08 19:04
- * @description
+ * @author jinhx
+ * @since 2019-01-17
  */
 @Data
 public class HomeRecommendInfoVO {

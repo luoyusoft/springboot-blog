@@ -1,15 +1,15 @@
 package com.jinhx.blog.controller.operation;
 
 import com.jinhx.blog.common.constants.RedisKeyConstants;
-import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.service.operation.FriendLinkService;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.operation.FriendLink;
 import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
+import com.jinhx.blog.service.operation.FriendLinkService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,11 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
- * 友链 前端控制器
- * </p>
+ * FriendLinkController
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-14
  */
 @RestController
@@ -36,6 +34,8 @@ public class FriendLinkController {
 
     /**
      * 获取首页信息
+     *
+     * @return 首页信息
      */
     @GetMapping("/manage/operation/friendlink/homeinfo")
     public Response getHommeFriendLinkInfoVO() {
@@ -44,7 +44,12 @@ public class FriendLinkController {
     }
 
     /**
-     * 列表
+     * 分页查询
+     *
+     * @param page page
+     * @param limit limit
+     * @param title title
+     * @return PageUtils
      */
     @GetMapping("/manage/operation/friendlink/list")
     @RequiresPermissions("operation:friendlink:list")
@@ -55,6 +60,9 @@ public class FriendLinkController {
 
     /**
      * 信息
+     *
+     * @param id id
+     * @return 信息
      */
     @GetMapping("/manage/operation/friendlink/info/{id}")
     @RequiresPermissions("operation:friendlink:info")
@@ -65,6 +73,8 @@ public class FriendLinkController {
 
     /**
      * 保存
+     *
+     * @param friendLink friendLink
      */
     @PostMapping("/manage/operation/friendlink/save")
     @RequiresPermissions("operation:friendlink:save")
@@ -78,6 +88,8 @@ public class FriendLinkController {
 
     /**
      * 修改
+     *
+     * @param friendLink friendLink
      */
     @PutMapping("/manage/operation/friendlink/update")
     @RequiresPermissions("operation:friendlink:update")
@@ -89,6 +101,8 @@ public class FriendLinkController {
 
     /**
      * 删除
+     *
+     * @param ids ids
      */
     @DeleteMapping("/manage/operation/friendlink/delete")
     @RequiresPermissions("operation:friendlink:delete")
@@ -110,6 +124,7 @@ public class FriendLinkController {
 
     /**
      * 获取友链列表
+     *
      * @return 友链列表
      */
     @RequestMapping("/operation/listfriendlinks")

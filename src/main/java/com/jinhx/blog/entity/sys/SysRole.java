@@ -2,8 +2,8 @@ package com.jinhx.blog.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.entity.base.BaseEntity;
 import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,11 +14,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>
- * 角色
- * </p>
+ * SysRole
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-19
  */
 @Data

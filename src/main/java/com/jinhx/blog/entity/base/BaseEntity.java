@@ -19,7 +19,10 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.time.LocalDateTime;
 
 /**
- * 基础实体类
+ * BaseEntity
+ *
+ * @author jinhx
+ * @since 2018-11-07
  */
 @Data
 public class BaseEntity {

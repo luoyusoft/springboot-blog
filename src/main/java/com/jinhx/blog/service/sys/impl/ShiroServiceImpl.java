@@ -3,7 +3,6 @@ package com.jinhx.blog.service.sys.impl;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.SysUserToken;
-import com.jinhx.blog.mapper.sys.SysMenuMapper;
 import com.jinhx.blog.service.sys.ShiroService;
 import com.jinhx.blog.service.sys.SysUserService;
 import com.jinhx.blog.service.sys.SysUserTokenService;
@@ -30,16 +29,13 @@ public class ShiroServiceImpl implements ShiroService {
     private SysUserService sysUserService;
 
     @Autowired
-    private SysMenuMapper sysMenuMapper;
-
-    @Autowired
     private SysUserTokenService sysUserTokenService;
 
     /**
      * 获取用户的所有权限
      *
-     * @param userId
-     * @return
+     * @param userId userId
+     * @return Set<String>
      */
     @Override
     public Set<String> getUserPermissions(Integer userId) {

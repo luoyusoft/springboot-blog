@@ -6,10 +6,10 @@ import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.util.ElasticSearchUtils;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
-import com.jinhx.blog.mapper.video.VideoMapper;
-import com.jinhx.blog.service.operation.TagService;
 import com.jinhx.blog.entity.video.dto.VideoDTO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
+import com.jinhx.blog.mapper.video.VideoMapper;
+import com.jinhx.blog.service.operation.TagService;
 import com.jinhx.blog.service.search.VideoEsServer;
 import com.jinhx.blog.service.sys.SysUserService;
 import com.rabbitmq.client.Channel;
@@ -30,6 +30,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * VideoEsServerImpl
+ *
+ * @author jinhx
+ * @since 2019-04-11
+ */
 @Slf4j
 @Service
 public class VideoEsServerImpl implements VideoEsServer {
@@ -49,6 +55,11 @@ public class VideoEsServerImpl implements VideoEsServer {
     @Autowired
     private SysUserService sysUserService;
 
+    /**
+     * 初始化es视频数据
+     *
+     * @return 初始化结果
+     */
     @Override
     public boolean initVideoList() throws Exception {
         if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX)){
@@ -72,7 +83,9 @@ public class VideoEsServerImpl implements VideoEsServer {
 
     /**
      * 新增视频，rabbitmq监听器，添加到es中
-     * @return
+     *
+     * @param message message
+     * @param channel channel
      */
     @RabbitListener(queues = RabbitMQConstants.BLOG_ES_VIDEO_ADD_QUEUE)
     public void addListener(Message message, Channel channel){
@@ -96,7 +109,9 @@ public class VideoEsServerImpl implements VideoEsServer {
 
     /**
      * 更新视频，rabbitmq监听器，更新到es
-     * @return
+     *
+     * @param message message
+     * @param channel channel
      */
     @RabbitListener(queues = RabbitMQConstants.BLOG_ES_VIDEO_UPDATE_QUEUE)
     public void updateListener(Message message, Channel channel){
@@ -120,7 +135,9 @@ public class VideoEsServerImpl implements VideoEsServer {
 
     /**
      * 删除视频，rabbitmq监听器，从es中删除
-     * @return
+     *
+     * @param message message
+     * @param channel channel
      */
     @RabbitListener(queues = RabbitMQConstants.BLOG_ES_VIDEO_DELETE_QUEUE)
     public void deleteListener(Message message, Channel channel){
@@ -151,6 +168,7 @@ public class VideoEsServerImpl implements VideoEsServer {
 
     /**
      * 搜索视频
+     *
      * @param keyword 关键字
      * @return 搜索结果
      */

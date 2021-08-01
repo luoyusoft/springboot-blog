@@ -5,11 +5,10 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * TimelineMonh
+ * TimelineMonth
  *
- * @author luoyu
- * @date 2019/02/24 20:33
- * @description
+ * @author jinhx
+ * @since 2019-02-22
  */
 @Data
 public class TimelineMonth {

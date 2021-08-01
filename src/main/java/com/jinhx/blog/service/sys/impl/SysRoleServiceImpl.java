@@ -1,6 +1,6 @@
 package com.jinhx.blog.service.sys.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * SysRoleServiceImpl
@@ -40,6 +38,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     /**
      * 获取角色列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param roleName 角色名
@@ -47,20 +46,17 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, String roleName) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-
-        IPage<SysRole> rolePage = baseMapper.selectPage(new Query<SysRole>(params).getPage(),
-                new QueryWrapper<SysRole>().lambda()
+        IPage<SysRole> roleIPage = baseMapper.selectPage(new Query<SysRole>(page, limit).getPage(),
+                new LambdaQueryWrapper<SysRole>()
                 .like(StringUtils.isNotBlank(roleName), SysRole::getRoleName,roleName)
         );
 
-        return new PageUtils(rolePage);
+        return new PageUtils(roleIPage);
     }
 
     /**
      * 根据角色id列表批量删除角色
+     *
      * @param roleIds 角色id列表
      */
     @Override
@@ -81,6 +77,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     /**
      * 查询角色列表
+     *
      * @param createrId 创建者id
      * @return 角色列表
      */
@@ -91,6 +88,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     /**
      * 新增角色信息
+     *
      * @param sysRole 角色信息
      * @return 新增结果
      */
@@ -106,6 +104,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     /**
      * 更新角色信息
+     *
      * @param sysRole 角色信息
      * @return 更新结果
      */

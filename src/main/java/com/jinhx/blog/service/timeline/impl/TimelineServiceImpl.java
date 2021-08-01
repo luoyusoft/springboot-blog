@@ -19,9 +19,8 @@ import java.util.List;
 /**
  * TimelineServiceImpl
  *
- * @author luoyu
- * @date 2019/02/24 20:47
- * @description 时间线
+ * @author jinhx
+ * @since 2019-04-11
  */
 @CacheConfig(cacheNames ={RedisKeyConstants.TIMELINES})
 @Service
@@ -32,6 +31,7 @@ public class TimelineServiceImpl implements TimelineService {
 
     /**
      * 获取时间线列表
+     *
      * @return 时间线列表
      */
     @Cacheable
@@ -44,8 +44,8 @@ public class TimelineServiceImpl implements TimelineService {
 
     /**
      * 数据转换
+     *
      * @param timelineList 时间线列表
-     * @return 时间线列表
      */
     private void genTimelineMonth(List<Timeline> timelineList) {
         for(Timeline timeline : timelineList) {

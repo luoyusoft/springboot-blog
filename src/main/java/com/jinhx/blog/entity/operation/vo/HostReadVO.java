@@ -11,12 +11,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
- * 推荐
- * </p>
+ * HostReadVO
  *
- * @author luoyu
- * @since 2019-02-22
+ * @author jinhx
+ * @since 2019-02-17
  */
 @Data
 public class HostReadVO implements Serializable {

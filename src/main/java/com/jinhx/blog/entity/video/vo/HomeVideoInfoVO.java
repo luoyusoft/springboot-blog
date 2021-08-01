@@ -5,9 +5,8 @@ import lombok.Data;
 /**
  * HomeVideoInfoVO
  *
- * @author luoyu
- * @date 2019/01/08 19:04
- * @description
+ * @author jinhx
+ * @since 2019-02-22
  */
 @Data
 public class HomeVideoInfoVO {

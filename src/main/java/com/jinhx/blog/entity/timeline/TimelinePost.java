@@ -10,10 +10,10 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * TimelineData
+ * TimelinePost
+ *
  * @author jinhx
- * @date 2019/02/24 20:39
- * @description
+ * @since 2019-02-22
  */
 @Data
 public class TimelinePost {

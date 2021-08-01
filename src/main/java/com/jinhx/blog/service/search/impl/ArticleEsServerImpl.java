@@ -1,15 +1,17 @@
 package com.jinhx.blog.service.search.impl;
 
+import com.jinhx.blog.adaptor.article.ArticleAdaptor;
+import com.jinhx.blog.adaptor.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.util.ElasticSearchUtils;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
-import com.jinhx.blog.service.operation.TagService;
-import com.jinhx.blog.entity.article.dto.ArticleDTO;
+import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
-import com.jinhx.blog.mapper.article.ArticleMapper;
+import com.jinhx.blog.service.article.ArticleService;
+import com.jinhx.blog.service.operation.TagService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.sys.SysUserService;
 import com.rabbitmq.client.Channel;
@@ -17,7 +19,6 @@ import com.xxl.job.core.log.XxlJobLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,8 +26,17 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * ArticleEsServerImpl
+ *
+ * @author jinhx
+ * @since 2019-04-11
+ */
 @Slf4j
 @Service
 public class ArticleEsServerImpl implements ArticleEsServer {
@@ -38,7 +48,7 @@ public class ArticleEsServerImpl implements ArticleEsServer {
     private RabbitMQUtils rabbitmqUtils;
 
     @Autowired
-    private ArticleMapper articleMapper;
+    private ArticleService articleService;
 
     @Autowired
     private TagService tagService;
@@ -46,18 +56,27 @@ public class ArticleEsServerImpl implements ArticleEsServer {
     @Autowired
     private SysUserService sysUserService;
 
+    @Autowired
+    private ArticleAdaptor articleAdaptor;
+
+    /**
+     * 初始化es文章数据
+     *
+     * @return 初始化结果
+     */
     @Override
     public boolean initArticleList() throws Exception {
         if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
             if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
-                List<ArticleDTO> articleDTOList = articleMapper.selectArticleDTOList();
-                XxlJobLogger.log("初始化es文章数据，查到个数：{}", articleDTOList.size());
-                log.info("初始化es文章数据，查到个数：{}", articleDTOList.size());
-                if(!CollectionUtils.isEmpty(articleDTOList)){
-                    articleDTOList.forEach(x -> {
-                        ArticleVO articleVO = new ArticleVO();
-                        BeanUtils.copyProperties(x, articleVO);
-                        articleVO.setAuthor(sysUserService.getNicknameByUserId(articleVO.getCreaterId()));
+                List<Article> articles = articleService.listArticlesByPublish();
+                XxlJobLogger.log("初始化es文章数据，查到个数：{}", articles.size());
+                log.info("初始化es文章数据，查到个数：{}", articles.size());
+                if(!CollectionUtils.isEmpty(articles)){
+                    articles.forEach(x -> {
+                        ArticleVO articleVO = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                                .setAuthor()
+                                .build(x));
+
                         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY, JsonUtils.objectToJson(articleVO));
                     });
                     return true;
@@ -69,7 +88,9 @@ public class ArticleEsServerImpl implements ArticleEsServer {
 
     /**
      * 新增文章，rabbitmq监听器，添加到es中
-     * @return
+     *
+     * @param message message
+     * @param channel channel
      */
     @RabbitListener(queues = RabbitMQConstants.BLOG_ES_ARTICLE_ADD_QUEUE)
     public void addListener(Message message, Channel channel){
@@ -91,7 +112,9 @@ public class ArticleEsServerImpl implements ArticleEsServer {
 
     /**
      * 更新文章，rabbitmq监听器，更新到es
-     * @return
+     *
+     * @param message message
+     * @param channel channel
      */
     @RabbitListener(queues = RabbitMQConstants.BLOG_ES_ARTICLE_UPDATE_QUEUE)
     public void updateListener(Message message, Channel channel){
@@ -113,7 +136,9 @@ public class ArticleEsServerImpl implements ArticleEsServer {
 
     /**
      * 删除文章，rabbitmq监听器，从es中删除
-     * @return
+     *
+     * @param message message
+     * @param channel channel
      */
     @RabbitListener(queues = RabbitMQConstants.BLOG_ES_ARTICLE_DELETE_QUEUE)
     public void deleteListener(Message message, Channel channel){
@@ -144,6 +169,7 @@ public class ArticleEsServerImpl implements ArticleEsServer {
 
     /**
      * 搜索文章
+     *
      * @param keyword 关键字
      * @return 搜索结果
      */

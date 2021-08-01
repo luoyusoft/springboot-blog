@@ -1,8 +1,8 @@
 package com.jinhx.blog.entity.operation;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.entity.base.BaseEntity;
 import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,11 +12,9 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * <p>
- * 文章标签多对多维护表
- * </p>
+ * TagLink
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-01-07
  */
 @Data
@@ -38,14 +36,5 @@ public class TagLink extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "标签所属模块：0文章，1阅读")
     @NotNull(message="所属模块不能为空", groups = {AddGroup.class})
     private Integer module;
-
-    public TagLink() {
-    }
-
-    public TagLink(Integer linkId, Integer tagId, Integer module) {
-        this.linkId =  linkId;
-        this.tagId = tagId;
-        this.module = module;
-    }
 
 }

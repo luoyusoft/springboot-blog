@@ -2,14 +2,13 @@ package com.jinhx.blog.service.search.impl;
 
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
+import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.operation.vo.TopVO;
+import com.jinhx.blog.entity.search.vo.SearchListVO;
 import com.jinhx.blog.service.operation.TopService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.search.SearchServer;
 import com.jinhx.blog.service.search.VideoEsServer;
-import com.jinhx.blog.entity.article.vo.ArticleVO;
-import com.jinhx.blog.entity.operation.vo.TopVO;
-import com.jinhx.blog.entity.search.vo.SearchListVO;
-import com.jinhx.blog.entity.video.vo.VideoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * SearchServerImpl
+ *
+ * @author jinhx
+ * @since 2019-04-11
+ */
 @Slf4j
 @Service
 public class SearchServerImpl implements SearchServer {
@@ -33,6 +38,7 @@ public class SearchServerImpl implements SearchServer {
 
     /**
      * 搜索，包括文章，视频
+     *
      * @param keyword 关键字
      * @return 搜索结果，包括文章，视频
      */

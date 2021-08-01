@@ -4,15 +4,17 @@ import lombok.Data;
 
 /**
  * PasswordVO
+ *
  * @author jinhx
- * @date 2018/10/26 17:40
- * @description
+ * @since 2018-10-26
  */
 @Data
 public class PasswordVO {
 
     private String password;
+
     private Integer id;
+
     private String newPassword;
 
 }

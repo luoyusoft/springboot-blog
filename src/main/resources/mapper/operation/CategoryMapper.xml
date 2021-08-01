@@ -20,16 +20,4 @@
         id, name, module, rank, parent_id,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <select id="queryAll" resultMap="BaseResultMap">
-        select t.*,s.name as parentName from category t left join category s on t.parent_id = s.id
-        <where>
-            <if test="name != null and name != ''">
-                and t.name like concat('%',#{name},'%')
-            </if>
-            <if test="module != null">
-                and t.module = #{module}
-            </if>
-        </where>
-    </select>
-
 </mapper>

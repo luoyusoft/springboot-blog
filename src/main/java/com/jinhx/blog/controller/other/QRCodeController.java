@@ -9,18 +9,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 /**
- * <p>
- * 二维码 前端控制器
- * </p>
+ * QRCodeController
  *
- * @author luoyu
- * @since 2018-11-30
+ * @author jinhx
+ * @since 2018-11-21
  */
 @RestController
 public class QRCodeController {
 
     /**
      * 生成普通二维码
+     *
+     * @param response response
+     * @param url url
      */
     @GetMapping(value = "/manage/other/qrcode/common")
     public void getCommonQRCode(HttpServletResponse response, String url) throws Exception {
@@ -39,6 +40,9 @@ public class QRCodeController {
 
     /**
      * 生成带有logo二维码
+     *
+     * @param response response
+     * @param url url
      */
     @GetMapping(value = "/manage/other/qrcode/logo")
     public void getLogoQRCode(HttpServletResponse response, String url) throws Exception {

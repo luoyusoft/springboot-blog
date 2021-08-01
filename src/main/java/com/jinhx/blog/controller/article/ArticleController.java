@@ -27,6 +27,8 @@ public class ArticleController {
 
     /**
      * 获取首页信息
+     *
+     * @return 首页信息
      */
     @GetMapping("/manage/article/homeinfo")
     @RequiresPermissions("article:list")
@@ -35,7 +37,12 @@ public class ArticleController {
     }
 
     /**
-     * 列表
+     * 分页查询文章列表
+     *
+     * @param page 页码
+     * @param limit 页数
+     * @param title 标题
+     * @return 文章列表
      */
     @GetMapping("/manage/article/list")
     @RequiresPermissions("article:list")
@@ -44,16 +51,19 @@ public class ArticleController {
     }
 
     /**
-     * 信息
+     * 保存文章
+     *
+     * @param articleVO 文章信息
      */
     @GetMapping("/manage/article/info/{articleId}")
     @RequiresPermissions("article:list")
     public Response info(@PathVariable("articleId") Integer articleId) {
-        return Response.success(articleService.getArticle(articleId));
+        return Response.success(articleService.getArticleVO(articleId, null));
     }
 
     /**
      * 保存文章
+     *
      * @param articleVO 文章信息
      */
     @PostMapping("/manage/article/save")
@@ -67,6 +77,7 @@ public class ArticleController {
 
     /**
      * 更新文章
+     *
      * @param articleVO 文章信息
      */
     @PutMapping("/manage/article/update")
@@ -78,6 +89,7 @@ public class ArticleController {
 
     /**
      * 更新文章状态
+     *
      * @param articleVO 文章信息
      */
     @PutMapping("/manage/article/update/status")
@@ -89,6 +101,7 @@ public class ArticleController {
 
     /**
      * 批量删除
+     *
      * @param ids 文章id列表
      */
     @DeleteMapping("/manage/article/delete")
@@ -110,6 +123,7 @@ public class ArticleController {
 
     /**
      * 分页获取文章列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @param categoryId 分类
@@ -128,6 +142,7 @@ public class ArticleController {
 
     /**
      * 分页获取首页文章列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @return 首页文章列表
@@ -139,19 +154,21 @@ public class ArticleController {
     }
 
     /**
-     * 获取ArticleDTO对象
+     * 获取ArticleVO对象
+     *
      * @param id id
      * @param password password
-     * @return ArticleDTO
+     * @return ArticleVO
      */
     @GetMapping("/article/{id}")
     @LogView(module = 0)
     public Response getArticle(@PathVariable Integer id, @RequestParam(value = "password", required = false, defaultValue = "") String password){
-        return Response.success(articleService.getArticleDTO(id, password));
+        return Response.success(articleService.getArticleVOByPassword(id, password));
     }
 
     /**
      * 文章点赞
+     *
      * @param id id
      * @return 点赞结果
      */
@@ -166,6 +183,7 @@ public class ArticleController {
 
     /**
      * 获取热读榜
+     *
      * @return 热读文章列表
      */
     @GetMapping("/article/listhotreadarticles")
@@ -176,7 +194,8 @@ public class ArticleController {
 
     /**
      * 根据文章id获取公开状态
-     * @param id 文章id
+     *
+     * @param articleId 文章id
      * @return 公开状态
      */
     @GetMapping("/article/open")

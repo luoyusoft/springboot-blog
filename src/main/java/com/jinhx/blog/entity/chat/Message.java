@@ -7,10 +7,10 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 会话消息实体
+ * Message
  *
- * @author luoyu
- * @date 2019-06-14
+ * @author jinhx
+ * @since 2019-06-14
  */
 @Data
 @ApiModel(description = "websocket消息")

@@ -3,15 +3,17 @@ package com.jinhx.blog.entity.video.vo;
 import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.video.Video;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 /**
  * VideoVO
+ *
  * @author jinhx
- * @date 2019/01/08 19:04
- * @description
+ * @since 2019-02-22
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class VideoVO extends Video {
 

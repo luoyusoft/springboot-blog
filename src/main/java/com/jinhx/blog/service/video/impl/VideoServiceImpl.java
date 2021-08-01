@@ -1,5 +1,7 @@
 package com.jinhx.blog.service.video.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,6 +24,7 @@ import com.jinhx.blog.mapper.video.VideoMapper;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.CategoryService;
 import com.jinhx.blog.service.operation.RecommendService;
+import com.jinhx.blog.service.operation.TagLinkService;
 import com.jinhx.blog.service.operation.TagService;
 import com.jinhx.blog.service.sys.SysUserService;
 import com.jinhx.blog.service.video.VideoService;
@@ -51,6 +54,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private TagService tagService;
 
     @Autowired
+    private TagLinkService tagLinkService;
+
+    @Autowired
     private CategoryService categoryService;
 
     @Autowired
@@ -73,6 +79,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     /**
      * 获取首页信息
+     *
      * @return 首页信息
      */
     @Override
@@ -100,7 +107,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         params.put("limit", String.valueOf(limit));
         params.put("title", title);
 
-        Page<VideoDTO> videoDTOPage = new Query<VideoDTO>(params).getPage();
+        Page<VideoDTO> videoDTOPage = new Query<VideoDTO>(page, limit).getPage();
         List<VideoDTO> videoDTOList = baseMapper.listVideoDTO(videoDTOPage, params);
         // 查询所有分类
         List<Category> categoryList = categoryService.list(new QueryWrapper<Category>().lambda().eq(Category::getModule, ModuleTypeConstants.VIDEO));
@@ -160,7 +167,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Transactional(rollbackFor = Exception.class)
     public void updateVideo(VideoVO videoVO) {
         // 删除多对多所属标签
-        tagService.deleteTagLink(videoVO.getId(), ModuleTypeConstants.VIDEO);
+        tagLinkService.deleteTagLink(videoVO.getId(), ModuleTypeConstants.VIDEO);
         // 更新所属标签
         tagService.saveTagAndNew(videoVO.getTagList(),videoVO.getId(), ModuleTypeConstants.VIDEO);
         // 更新博文
@@ -234,13 +241,14 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     /**
      * 获取视频对象
      *
-     * @param videoId
-     * @return
+     * @param videoId videoId
+     * @param publish publish
+     * @return VideoVO
      */
     @Override
-    public VideoVO getVideo(Integer videoId) {
+    public VideoVO getVideoVO(Integer videoId, Boolean publish) {
         VideoVO videoVO = new VideoVO();
-        Video video = baseMapper.selectById(videoId);
+        Video video = getVideo(videoId, publish);
         BeanUtils.copyProperties(video, videoVO);
         // 查询所属标签
         videoVO.setTagList(tagService.listByLinkId(videoId, ModuleTypeConstants.VIDEO));
@@ -254,6 +262,20 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         videoVO.setAuthor(sysUserService.getNicknameByUserId(videoVO.getCreaterId()));
 
         return videoVO;
+    }
+
+    /**
+     * 获取视频对象
+     *
+     * @param videoId videoId
+     * @param publish publish
+     * @return Video
+     */
+    @Override
+    public Video getVideo(Integer videoId, Boolean publish) {
+        return baseMapper.selectOne(new LambdaQueryWrapper<Video>()
+                .eq(Video::getId, videoId)
+                .eq(publish != null, Video::getPublish, publish));
     }
 
     /**
@@ -286,7 +308,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     public void deleteVideos(Integer[] ids) {
         //先删除博文标签多对多关联
         Arrays.stream(ids).forEach(videoId -> {
-            tagService.deleteTagLink(videoId, ModuleTypeConstants.VIDEO);
+            tagLinkService.deleteTagLink(videoId, ModuleTypeConstants.VIDEO);
         });
         baseMapper.deleteBatchIds(Arrays.asList(ids));
 
@@ -295,6 +317,23 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
 
         cleanVideosCache(ids);
+    }
+
+    /**
+     * 根据标题查询所有已发布的视频
+     *
+     * @param title 标题
+     * @return 所有已发布的视频
+     */
+    @Override
+    public List<Video> listVideosByPublishAndTitle(String title) {
+        return baseMapper.selectList(new LambdaQueryWrapper<Video>()
+                .eq(Video::getPublish, Video.PUBLISH_TRUE)
+                .and(qw ->
+                        qw.like(ObjectUtil.isNotEmpty(title), Video::getTitle, title)
+                                .or()
+                                .like(ObjectUtil.isNotEmpty(title), Video::getAlternateName, title))
+                .orderByDesc(Video::getId));
     }
 
     /**
@@ -331,7 +370,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             params.put("categoryId", String.valueOf(categoryId));
         }
 
-        Page<VideoDTO> videoDTOPage = new Query<VideoDTO>(params).getPage();
+        Page<VideoDTO> videoDTOPage = new Query<VideoDTO>(page, limit).getPage();
         List<VideoDTO> videoDTOList = baseMapper.queryPageCondition(videoDTOPage, params);
         if (videoDTOList == null){
             videoDTOList = new ArrayList<>();

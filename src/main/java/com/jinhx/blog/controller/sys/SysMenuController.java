@@ -1,15 +1,15 @@
 package com.jinhx.blog.controller.sys;
 
 import com.jinhx.blog.common.aop.annotation.SuperAdmin;
-import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.enums.MenuTypeEnum;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.sys.SysMenu;
-import com.jinhx.blog.common.enums.MenuTypeEnum;
 import com.jinhx.blog.entity.sys.vo.SysMenuVO;
-import com.jinhx.blog.service.sys.SysMenuService;
 import com.jinhx.blog.service.sys.ShiroService;
+import com.jinhx.blog.service.sys.SysMenuService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import java.util.Set;
 
 /**
  * SysMenuController
+ *
  * @author jinhx
  * @since 2018-10-19
  */
@@ -34,6 +35,7 @@ public class SysMenuController {
 
     /**
      * 获取用户的所有菜单列表
+     *
      * @return 用户的所有菜单列表
      */
     @GetMapping("/manage/sys/menu/nav")
@@ -84,6 +86,7 @@ public class SysMenuController {
 
     /**
      * 获取单个菜单信息
+     *
      * @param menuId 菜单id
      * @return 菜单信息
      */
@@ -95,6 +98,8 @@ public class SysMenuController {
 
     /**
      * 保存
+     *
+     * @param menu menu
      */
     @PostMapping("/manage/sys/menu/save")
     @RequiresPermissions("sys:menu:save")
@@ -108,8 +113,8 @@ public class SysMenuController {
 
     /**
      * 更新
-     * @param menu
-     * @return
+     *
+     * @param menu menu
      */
     @SuperAdmin()
     @PutMapping("/manage/sys/menu/update")
@@ -124,8 +129,8 @@ public class SysMenuController {
 
     /**
      * 删除
-     * @param menuId
-     * @return
+     *
+     * @param menuId menuId
      */
     @SuperAdmin()
     @DeleteMapping("/manage/sys/menu/delete/{menuId}")
@@ -142,6 +147,8 @@ public class SysMenuController {
 
     /**
      * 验证参数是否正确
+     *
+     * @param menu menu
      */
     private void verifyForm(SysMenu menu) {
         if (StringUtils.isBlank(menu.getName())) {

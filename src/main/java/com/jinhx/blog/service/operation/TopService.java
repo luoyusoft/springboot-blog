@@ -8,67 +8,83 @@ import com.jinhx.blog.entity.operation.vo.TopVO;
 import java.util.List;
 
 /**
- * <p>
- * 置顶 服务类
- * </p>
+ * TopService
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-22
  */
 public interface TopService extends IService<Top> {
 
     /**
      * 分页查询
-     * @param page
-     * @param limit
-     * @return
+     *
+     * @param page page
+     * @param limit limit
+     * @return PageUtils
      */
      PageUtils queryPage(Integer page, Integer limit);
 
     /**
-     * 获取推荐列表
-     * @return
+     * 获取置顶列表
+     *
+     * @param module module
+     * @param title title
+     * @return List<TopVO>
      */
     List<TopVO> select(Integer module, String title);
 
     /**
      * 新增
-     * @param top
+     *
+     * @param top top
      */
     void insertTop(Top top);
 
     /**
      * 更新
-     * @param top
+     *
+     * @param top top
      */
     void updateTop(Top top);
 
     /**
      * 置顶
-     * @param id
+     *
+     * @param id id
      */
     void updateTopTop(Integer id);
 
     /**
      * 删除
-     * @param ids
+     *
+     * @param ids ids
      */
     void deleteTopsByIds(List<Integer> ids);
 
     /**
-     * 查找
-     * @param linkId
-     * @param module
-     */
-    Top selectTopByLinkIdAndType(Integer linkId, Integer module);
-
-    /**
      * 查找最大顺序
+     *
+     * @return 最大顺序
      */
     Integer selectTopMaxOrderNum();
 
+    /**
+     * 是否已置顶
+     *
+     * @param module module
+     * @param linkId linkId
+     * @return 是否已置顶
+     */
+    Boolean isTopByModuleAndLinkId(Integer module, Integer linkId);
+
     /********************** portal ********************************/
 
+    /**
+     * 查询列表
+     *
+     * @param module module
+     * @return List<TopVO>
+     */
     List<TopVO> listTopVO(Integer module);
 
 }

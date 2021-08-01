@@ -3,15 +3,15 @@ package com.jinhx.blog.controller.messagewall;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
-import com.jinhx.blog.service.messagewall.MessageWallService;
 import com.jinhx.blog.common.util.FormatUtils;
+import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.messagewall.MessageWall;
 import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
+import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
+import com.jinhx.blog.service.messagewall.MessageWallService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +21,8 @@ import javax.annotation.Resource;
 /**
  * MessageWallController
  *
- * @author luoyu
- * @date 2018/11/20 20:25
- * @description
+ * @author jinhx
+ * @since 2018-11-24
  */
 @RestController
 public class MessageWallController {
@@ -33,6 +32,7 @@ public class MessageWallController {
 
     /**
      * 后台获取首页信息
+     *
      * @return 首页信息
      */
     @GetMapping("/manage/messagewall/homeinfo")
@@ -44,6 +44,7 @@ public class MessageWallController {
 
     /**
      * 后台新增留言
+     *
      * @param messageWall 留言
      */
     @PostMapping("/manage/messagewall")
@@ -59,6 +60,7 @@ public class MessageWallController {
 
     /**
      * 后台分页查询留言列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param name 昵称
@@ -79,6 +81,7 @@ public class MessageWallController {
 
     /**
      * 后台批量删除
+     *
      * @param ids ids
      */
     @DeleteMapping("/manage/messagewall")
@@ -100,6 +103,7 @@ public class MessageWallController {
 
     /**
      * 新增留言
+     *
      * @param messageWall 留言对象
      * @return Response
      */
@@ -142,6 +146,7 @@ public class MessageWallController {
 
     /**
      * 按楼层分页获取留言列表
+     *
      * @param page 页码
      * @param limit 页数
      * @return 留言列表

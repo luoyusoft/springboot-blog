@@ -1,8 +1,13 @@
 package com.jinhx.blog.service.article.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinhx.blog.adaptor.article.ArticleAdaptor;
+import com.jinhx.blog.adaptor.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.config.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
@@ -12,19 +17,17 @@ import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.*;
 import com.jinhx.blog.entity.article.Article;
-import com.jinhx.blog.entity.article.dto.ArticleDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
-import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.sys.dto.SysUserDTO;
 import com.jinhx.blog.mapper.article.ArticleMapper;
 import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.cache.CacheServer;
-import com.jinhx.blog.service.operation.CategoryService;
 import com.jinhx.blog.service.operation.RecommendService;
+import com.jinhx.blog.service.operation.TagLinkService;
 import com.jinhx.blog.service.operation.TagService;
 import com.jinhx.blog.service.operation.TopService;
 import com.jinhx.blog.service.sys.SysUserService;
@@ -43,22 +46,24 @@ import javax.annotation.Resource;
 import java.util.*;
 
 /**
- * articleAdminServiceImpl
+ * ArticleServiceImpl
+ *
  * @author jinhx
- * @date 2018/11/21 12:48
- * @description
+ * @since 2018-11-21
  */
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
-    // 每天重新计算点赞，key
+    /**
+     * 每天重新计算点赞，key
+     */
     private static final String BLOG_ARTICLE_LIKE_LOCK_KEY = "blog:article:like:lock:";
 
     @Autowired
     private TagService tagService;
 
     @Autowired
-    private CategoryService categoryService;
+    private TagLinkService tagLinkService;
 
     @Autowired
     private RecommendService recommendService;
@@ -78,17 +83,22 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Resource
     private RabbitMQUtils rabbitmqUtils;
 
+    @Autowired
+    private ArticleAdaptor articleAdaptor;
+
     @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     /**
      * 获取首页信息
+     *
      * @return 首页信息
      */
     @Override
     public HomeArticleInfoVO getHomeArticleInfoVO() {
-        Integer publishCount = baseMapper.selectPublishCount();
-        Integer allCount = baseMapper.selectAllCount();
+        Integer publishCount = baseMapper.selectCount(new LambdaQueryWrapper<Article>()
+                .eq(Article::getPublish, Article.PUBLISH_TRUE));
+        Integer allCount = baseMapper.selectCount(new LambdaQueryWrapper<>());
 
         HomeArticleInfoVO homeArticleInfoVO = new HomeArticleInfoVO();
         homeArticleInfoVO.setPublishCount(publishCount);
@@ -98,6 +108,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     /**
      * 分页查询文章列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param title 标题
@@ -105,50 +116,40 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, String title) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-        params.put("title", title);
+        IPage<Article> articleIPage = baseMapper.selectPage(new Query<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
+                .eq(ObjectUtil.isNotEmpty(title), Article::getTitle, title)
+                .orderByDesc(Article::getUpdateTime)
+                .select(Article::getId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
+                        Article::getCover, Article::getCoverType, Article::getCategoryId, Article::getPublish, Article::getOpen,
+                        Article::getCreaterId, Article::getUpdaterId, Article::getCreateTime, Article::getUpdateTime));
 
-        Page<ArticleDTO> articleDTOPage = new Query<ArticleDTO>(params).getPage();
-        List<ArticleDTO> articleDTOList = baseMapper.listArticleDTO(articleDTOPage, params);
-        // 查询所有分类
-        List<Category> categoryList = categoryService.list(new QueryWrapper<Category>().lambda().eq(Category::getModule, ModuleTypeConstants.ARTICLE));
-        // 封装ArticleVo
-        List<ArticleVO> articleVOList = new ArrayList<>();
-        Optional.ofNullable(articleDTOList).ifPresent((articleDTOs ->
-                articleDTOs.forEach(articleDTO -> {
-                    // 设置类别
-                    articleDTO.setCategoryListStr(categoryService.renderCategoryArr(articleDTO.getCategoryId(), categoryList));
-                    // 设置标签列表
-                    articleDTO.setTagList(tagService.listByLinkId(articleDTO.getId(), ModuleTypeConstants.ARTICLE));
+        if (CollectionUtils.isEmpty(articleIPage.getRecords())){
+            return new PageUtils(articleIPage);
+        }
 
-                    ArticleVO articleVO = new ArticleVO();
-                    BeanUtils.copyProperties(articleDTO, articleVO);
-                    if (recommendService.selectRecommendByLinkIdAndType(articleDTO.getId(), ModuleTypeConstants.ARTICLE) != null) {
-                        articleVO.setRecommend(true);
-                    } else {
-                        articleVO.setRecommend(false);
-                    }
-
-                    articleVO.setAuthor(sysUserService.getNicknameByUserId(articleDTO.getCreaterId()));
-
-                    articleVOList.add(articleVO);
-                })));
-        Page<ArticleVO> articleVOPage = new Page<>();
-        BeanUtils.copyProperties(articleDTOPage, articleVOPage);
-        articleVOPage.setRecords(articleVOList);
-        return new PageUtils(articleVOPage);
+        List<ArticleVO> articleVOs = articleAdaptor.adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
+                .setCategoryListStr()
+                .setTagList()
+                .setRecommend()
+                .setAuthor()
+                .build(articleIPage.getRecords()));
+        IPage<ArticleVO> articleVOIPage = new Page<>();
+        BeanUtils.copyProperties(articleIPage, articleVOIPage);
+        articleVOIPage.setRecords(articleVOs);
+        return new PageUtils(articleVOIPage);
     }
 
     /**
      * 保存文章
+     *
      * @param articleVO 文章信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveArticle(ArticleVO articleVO) {
-        baseMapper.insert(articleVO);
+        Article article = articleAdaptor.adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
+                .build(articleVO));
+        baseMapper.insert(article);
         tagService.saveTagAndNew(articleVO.getTagList(),articleVO.getId(), ModuleTypeConstants.ARTICLE);
         // 当文章是发布状态时，需要新增到es中
         if (articleVO.getPublish()){
@@ -164,14 +165,45 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     /**
+     * 批量删除
+     *
+     * @param ids 文章id列表
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteArticles(Integer[] ids) {
+        Arrays.stream(ids).forEach(articleId -> {
+            Article article = baseMapper.selectById(articleId);
+            if (Objects.isNull(article)){
+                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
+            }
+            if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
+                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者删除");
+            }
+
+            //先删除博文标签多对多关联
+            tagLinkService.deleteTagLink(articleId, ModuleTypeConstants.ARTICLE);
+            baseMapper.deleteBatchIds(Arrays.asList(articleId));
+
+            recommendService.deleteRecommendsByLinkIdsAndType(Arrays.asList(articleId), ModuleTypeConstants.ARTICLE);
+        });
+
+        // 发送rabbitmq消息同步到es
+        rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
+
+        cleanArticlesCache(ids);
+    }
+
+    /**
      * 更新文章
+     *
      * @param articleVO 文章信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateArticle(ArticleVO articleVO) {
         Article article = baseMapper.selectById(articleVO.getId());
-        if (article == null){
+        if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
         if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
@@ -179,11 +211,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         // 删除多对多所属标签
-        tagService.deleteTagLink(articleVO.getId(), ModuleTypeConstants.ARTICLE);
+        tagLinkService.deleteTagLink(articleVO.getId(), ModuleTypeConstants.ARTICLE);
         // 更新所属标签
         tagService.saveTagAndNew(articleVO.getTagList(),articleVO.getId(), ModuleTypeConstants.ARTICLE);
-        baseMapper.updateArticleById(articleVO);
-        if (articleVO.getRecommend() != null){
+        baseMapper.updateById(articleVO);
+        if (!Objects.isNull(articleVO.getRecommend())){
             if (articleVO.getRecommend()){
                 if (recommendService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){
                     Integer maxOrderNum = recommendService.selectRecommendMaxOrderNum();
@@ -220,39 +252,49 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     /**
      * 更新文章状态
+     *
      * @param articleVO 文章信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateArticleStatus(ArticleVO articleVO) {
         Article article = baseMapper.selectById(articleVO.getId());
-        if (article == null){
+        if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
         if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者修改");
         }
 
-        if (articleVO.getPublish() != null){
+        if (!Objects.isNull(articleVO.getPublish())){
             // 更新发布，公开状态
-            baseMapper.updateArticleById(articleVO);
+            baseMapper.updateById(articleVO);
             if (article.getPublish() && articleVO.getPublish()){
-                rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY, JsonUtils.objectToJson(baseMapper.selectArticleById(articleVO.getId())));
+                rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
+                        JsonUtils.objectToJson(baseMapper.selectOne(new LambdaQueryWrapper<Article>()
+                                .eq(Article::getId, articleVO.getId())
+                                .eq(Article::getPublish, Article.PUBLISH_TRUE))));
             }else if (article.getPublish() && !articleVO.getPublish()){
                 Integer[] ids = {articleVO.getId()};
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
             }else if (!article.getPublish() && articleVO.getPublish()){
-                rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY, JsonUtils.objectToJson(baseMapper.selectArticleById(articleVO.getId())));
+                rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
+                        JsonUtils.objectToJson(baseMapper.selectOne(new LambdaQueryWrapper<Article>()
+                                .eq(Article::getId, articleVO.getId())
+                                .eq(Article::getPublish, Article.PUBLISH_TRUE))));
             }
         }else if (articleVO.getOpen() != null){
             // 更新公开状态
-            baseMapper.updateArticleById(articleVO);
+            baseMapper.updateById(articleVO);
             if (article.getPublish()){
-                rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY, JsonUtils.objectToJson(baseMapper.selectArticleById(articleVO.getId())));
+                rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
+                        JsonUtils.objectToJson(baseMapper.selectOne(new LambdaQueryWrapper<Article>()
+                                .eq(Article::getId, articleVO.getId())
+                                .eq(Article::getPublish, Article.PUBLISH_TRUE))));
             }
         }
 
-        if (articleVO.getRecommend() != null){
+        if (!Objects.isNull(articleVO.getRecommend())){
             // 更新推荐状态
             if (articleVO.getRecommend()){
                 if (recommendService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){
@@ -275,13 +317,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     /**
      * 根据文章id获取文章信息
+     *
      * @param articleId 文章id
+     * @param publish publish
      * @return 文章信息
      */
     @Override
-    public ArticleVO getArticle(Integer articleId) {
-        Article article = baseMapper.selectById(articleId);
-        if (article == null){
+    public ArticleVO getArticleVO(Integer articleId, Boolean publish) {
+        Article article = getArticle(articleId, publish);
+        if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
 
@@ -289,31 +333,38 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "后台查看未公开的文章只能由创建者查看");
         }
 
-        ArticleVO articleVO = new ArticleVO();
-        BeanUtils.copyProperties(article, articleVO);
-        // 查询所属标签
-        articleVO.setTagList(tagService.listByLinkId(articleId, ModuleTypeConstants.ARTICLE));
-        Recommend recommend = recommendService.selectRecommendByLinkIdAndType(articleId, ModuleTypeConstants.ARTICLE);
-        if (recommend != null){
-            articleVO.setRecommend(true);
-        }else {
-            articleVO.setRecommend(false);
-        }
+        return articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                .setCategoryListStr()
+                .setTagList()
+                .setRecommend()
+                .setAuthor()
+                .build(article));
+    }
 
-        articleVO.setAuthor(sysUserService.getNicknameByUserId(article.getCreaterId()));
-
-        return articleVO;
+    /**
+     * 根据文章id获取文章信息
+     *
+     * @param articleId 文章id
+     * @param publish publish
+     * @return 文章信息
+     */
+    @Override
+    public Article getArticle(Integer articleId, Boolean publish) {
+        return baseMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .eq(Article::getId, articleId)
+                .eq(publish != null, Article::getPublish, publish));
     }
 
     /**
      * 查看未公开文章时检测密码是否正确
+     *
      * @param articleId 文章id
      * @param password 密码
      */
     @Override
     public void checkPassword(Integer articleId, String password) {
         Article article = baseMapper.selectById(articleId);
-        if (article == null){
+        if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
 
@@ -334,56 +385,58 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     /**
      * 判断类别下是否有文章
-     * @param categoryId
-     * @return
+     *
+     * @param categoryId categoryId
+     * @return 是否有文章
      */
     @Override
-    public boolean checkByCategory(Integer categoryId) {
-        return baseMapper.checkByCategory(categoryId) > 0;
+    public boolean checkByCategoryId(Integer categoryId) {
+        return baseMapper.selectCount(new LambdaQueryWrapper<Article>()
+                .like(categoryId != null, Article::getCategoryId, categoryId)) > 0;
     }
 
     /**
      * 判断上传文件下是否有文章
-     * @param url
-     * @return
+     *
+     * @param url url
+     * @return 是否有文章
      */
     @Override
     public boolean checkByFile(String url) {
-        return baseMapper.checkByFile(url) > 0;
+        return baseMapper.selectCount(new LambdaQueryWrapper<Article>()
+                .eq(ObjectUtil.isNotEmpty(url), Article::getCover, url)) > 0;
     }
 
     /**
-     * 批量删除
-     * @param ids 文章id列表
+     * 查询所有已发布的文章
+     *
+     * @return 所有已发布的文章
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteArticles(Integer[] ids) {
-        Arrays.stream(ids).forEach(articleId -> {
-            Article article = baseMapper.selectById(articleId);
-            if (article == null){
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
-            }
-            if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者删除");
-            }
+    public List<Article> listArticlesByPublish() {
+        return baseMapper.selectList(new LambdaQueryWrapper<Article>()
+                .eq(Article::getPublish, Article.PUBLISH_TRUE));
+    }
 
-            //先删除博文标签多对多关联
-            tagService.deleteTagLink(articleId, ModuleTypeConstants.ARTICLE);
-            baseMapper.deleteBatchIds(Arrays.asList(articleId));
-
-            recommendService.deleteRecommendsByLinkIdsAndType(Arrays.asList(articleId), ModuleTypeConstants.ARTICLE);
-        });
-
-        // 发送rabbitmq消息同步到es
-        rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
-
-        cleanArticlesCache(ids);
+    /**
+     * 根据标题查询所有已发布的文章
+     *
+     * @param title 标题
+     * @return 所有已发布的文章
+     */
+    @Override
+    public List<Article> listArticlesByPublishAndTitle(String title) {
+        return baseMapper.selectList(new LambdaQueryWrapper<Article>()
+                .eq(Article::getPublish, Article.PUBLISH_TRUE)
+                .like(ObjectUtil.isNotEmpty(title), Article::getTitle, title)
+                .orderByDesc(Article::getId));
     }
 
     /**
      * 清除缓存
-     */
+     *
+     * @param ids ids
+     * */
     private void cleanArticlesCache(Integer[] ids){
         taskExecutor.execute(() ->{
             cacheServer.cleanArticlesCache(ids);
@@ -394,6 +447,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     /**
      * 分页获取文章列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @param categoryId 分类
@@ -405,32 +459,30 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Cacheable(value = RedisKeyConstants.ARTICLES)
     @Override
     public PageUtils listArticles(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-        params.put("latest", latest);
-        params.put("like", like);
-        params.put("read", read);
-        if (categoryId != null){
-            params.put("categoryId", String.valueOf(categoryId));
+        IPage<Article> articleIPage = baseMapper.selectPage(new Query<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
+                .eq(Article::getPublish, Article.PUBLISH_TRUE)
+                .like(categoryId != null, Article::getCategoryId, categoryId)
+                .orderByDesc(latest, Article::getCreateTime)
+                .orderByDesc(like, Article::getLikeNum)
+                .orderByDesc(read, Article::getReadNum));
+
+        if (CollectionUtils.isEmpty(articleIPage.getRecords())){
+            return new PageUtils(articleIPage);
         }
 
-        Page<ArticleDTO> articleDTOPage = new Query<ArticleDTO>(params).getPage();
-        List<ArticleDTO> articleList = baseMapper.queryPageCondition(articleDTOPage, params);
-        if (articleList == null){
-            articleList = new ArrayList<>();
-        }
-
-        articleList.forEach(articleListItem -> {
-            articleListItem.setAuthor(sysUserService.getNicknameByUserId(articleListItem.getCreaterId()));
-        });
-
-        articleDTOPage.setRecords(articleList);
-        return new PageUtils(articleDTOPage);
+        List<ArticleVO> articleVOs = articleAdaptor.adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
+                .setTagList()
+                .setAuthor()
+                .build(articleIPage.getRecords()));
+        IPage<ArticleVO> articleVOIPage = new Page<>();
+        BeanUtils.copyProperties(articleIPage, articleVOIPage);
+        articleVOIPage.setRecords(articleVOs);
+        return new PageUtils(articleVOIPage);
     }
 
     /**
      * 分页获取首页文章列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @return 首页文章列表
@@ -438,57 +490,68 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Cacheable(value = RedisKeyConstants.ARTICLES)
     @Override
     public PageUtils listHomeArticles(Integer page, Integer limit) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
+        List<Integer> linkIds = recommendService.selectLinkIdsByModule(ModuleTypeConstants.ARTICLE);
 
-        Page<ArticleVO> articleVOPage = new Query<ArticleVO>(params).getPage();
-        List<ArticleDTO> articleList = baseMapper.queryHomePageCondition(articleVOPage, params);
-        if (articleList == null){
-            articleList = new ArrayList<>();
+        IPage<Article> articleIPage = baseMapper.selectPage(new Query<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
+                .eq(Article::getPublish, Article.PUBLISH_TRUE)
+                .notIn(!CollectionUtils.isEmpty(linkIds), Article::getId)
+                .orderByDesc(Article::getCreateTime));
+
+        if (CollectionUtils.isEmpty(articleIPage.getRecords())){
+            return new PageUtils(articleIPage);
         }
 
         List<TopVO> topVOs = topService.listTopVO(ModuleTypeConstants.ARTICLE);
-        ArticleVO[] articleVOS = new ArticleVO[articleList.size()];
-        if (!CollectionUtils.isEmpty(topVOs) && !CollectionUtils.isEmpty(articleList)){
+        ArticleVO[] articleVOs = new ArticleVO[articleIPage.getRecords().size()];
+        if (!CollectionUtils.isEmpty(topVOs)){
             topVOs.forEach(topVOsItem -> {
                 if (topVOsItem.getOrderNum() > (page - 1) * limit && topVOsItem.getOrderNum() < page * limit){
-                    Article article = baseMapper.selectArticleById(topVOsItem.getLinkId());
-                    ArticleVO articleVO = new ArticleVO();
-                    BeanUtils.copyProperties(article, articleVO);
-                    articleVO.setTop(true);
-                    articleVO.setTagList(tagService.listByLinkId(topVOsItem.getLinkId(), ModuleTypeConstants.ARTICLE));
-                    articleVO.setAuthor(sysUserService.getNicknameByUserId(articleVO.getCreaterId()));
-                    articleVOS[(topVOsItem.getOrderNum() - (page - 1) * limit) -1] = articleVO;
+                    Article article = baseMapper.selectOne(new LambdaUpdateWrapper<Article>()
+                            .eq(Article::getId, topVOsItem.getLinkId())
+                            .eq(Article::getPublish, Article.PUBLISH_TRUE));
+
+                    if (Objects.isNull(article)){
+                        return;
+                    }
+
+                    ArticleVO articleVO = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                            .setTagList()
+                            .setAuthor()
+                            .build(article));
+                    articleVO.setTop(Article.TOP_TRUE);
+                    articleVOs[(topVOsItem.getOrderNum() - (page - 1) * limit) -1] = articleVO;
                 }
             });
-            Queue<ArticleDTO> articleDTOQueue = new LinkedList<>(articleList);
-            for (int i = 0; i < articleVOS.length; i++) {
-                if (articleVOS[i] == null){
-                    ArticleDTO articleDTO = articleDTOQueue.poll();
-                    ArticleVO articleVO = new ArticleVO();
-                    BeanUtils.copyProperties(articleDTO, articleVO);
-                    articleVOS[i] = articleVO;
+
+            Queue<Article> articleQueue = new LinkedList<>(articleIPage.getRecords());
+            for (int i = 0; i < articleVOs.length; i++) {
+                if (Objects.isNull(articleVOs[i])){
+                    articleVOs[i] = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                            .setTagList()
+                            .setAuthor()
+                            .build(articleQueue.poll()));
                 }
             }
         }
 
-        // 封装ArticleVo
-        articleVOPage.setRecords(Arrays.asList(articleVOS));
-        return new PageUtils(articleVOPage);
+        IPage<ArticleVO> articleVOIPage = new Page<>();
+        BeanUtils.copyProperties(articleIPage, articleVOIPage);
+        articleVOIPage.setRecords(Arrays.asList(articleVOs));
+        return new PageUtils(articleVOIPage);
     }
 
     /**
-     * 获取ArticleDTO对象
+     * 获取ArticleVO对象
+     *
      * @param id id
      * @param password password
-     * @return ArticleDTO
+     * @return ArticleVO
      */
     @Cacheable(value = RedisKeyConstants.ARTICLE, key = "#id + ':' + #password")
     @Override
-    public ArticleDTO getArticleDTO(Integer id, String password) {
+    public ArticleVO getArticleVOByPassword(Integer id, String password) {
         Article article = baseMapper.selectById(id);
-        if (article == null){
+        if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
 
@@ -497,7 +560,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请输入密码");
             }
             SysUserDTO sysUserDTO = sysUserService.getSysUserDTOByUserId(article.getCreaterId());
-            if (sysUserDTO == null){
+            if (Objects.isNull(sysUserDTO)){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章创建者不存在");
             }
 
@@ -506,34 +569,42 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
         }
 
-        ArticleDTO articleDTO = new ArticleDTO();
-        BeanUtils.copyProperties(article, articleDTO);
-        articleDTO.setTagList(tagService.listByLinkId(id, ModuleTypeConstants.ARTICLE));
-        articleDTO.setAuthor(sysUserService.getNicknameByUserId(articleDTO.getCreaterId()));
+        ArticleVO articleVO = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                .setTagList()
+                .setAuthor()
+                .build(article));
         // 浏览数量
-        baseMapper.updateReadNum(id);
-        return articleDTO;
+        baseMapper.update(null, new LambdaUpdateWrapper<Article>()
+                .eq(Article::getId, article.getId())
+                .setSql("read_num = read_num + 1"));
+        return articleVO;
     }
 
     /**
      * 获取热读榜
+     *
      * @return 热读文章列表
      */
     @Cacheable(value = RedisKeyConstants.ARTICLES, key = "'hostread'")
     @Override
     public List<ArticleVO> listHotReadArticles() {
-        List<ArticleDTO> articleDTOList = baseMapper.getHotReadList();
-        List<ArticleVO> articleVOList = new ArrayList<>();
-        articleDTOList.forEach(articleDTOListItem -> {
-            ArticleVO articleVO = new ArticleVO();
-            BeanUtils.copyProperties(articleDTOListItem, articleVO);
-            articleVOList.add(articleVO);
-        });
-        return articleVOList;
+        List<Article> articles = baseMapper.selectList(new LambdaQueryWrapper<Article>()
+                .eq(Article::getPublish, Article.PUBLISH_TRUE)
+                .eq(Article::getOpen, Article.OPEN_TRUE)
+                // 只能调用一次,多次调用以最后一次为准 有sql注入的风险,请谨慎使用
+                .last("limit 5")
+                .orderByDesc(Article::getReadNum)
+                .select(Article::getId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
+                        Article::getCover, Article::getCoverType, Article::getCategoryId, Article::getPublish, Article::getOpen,
+                        Article::getCreaterId, Article::getUpdaterId, Article::getCreateTime, Article::getUpdateTime));
+
+        return articleAdaptor.adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
+                .build(articles));
     }
 
     /**
      * 文章点赞
+     *
      * @param id id
      * @return 点赞结果
      */
@@ -549,18 +620,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "1天只能点赞1次，请明天再来点赞");
         }
 
-        return baseMapper.updateLikeNum(id);
+        return baseMapper.update(null, new LambdaUpdateWrapper<Article>()
+                .eq(Article::getId, id)
+                .setSql("like_num = like_num + 1")) > 0;
     }
 
     /**
      * 根据文章id获取公开状态
+     *
      * @param articleId 文章id
      * @return 公开状态
      */
     @Override
     public Boolean getArticleOpenById(Integer articleId) {
         Article article = baseMapper.selectById(articleId);
-        if (article == null){
+        if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
         return article.getOpen();

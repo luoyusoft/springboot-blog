@@ -8,11 +8,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>
- * 搜索
- * </p>
+ * SearchListVO
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-22
  */
 @Data

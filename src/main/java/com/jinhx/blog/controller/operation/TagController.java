@@ -1,9 +1,9 @@
 package com.jinhx.blog.controller.operation;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
@@ -22,11 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
- * 标签 前端控制器
- * </p>
+ * TagController
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-01-21
  */
 @RestController
@@ -39,7 +37,13 @@ public class TagController {
     private TagLinkMapper tagLinkMapper;
 
     /**
-     * 列表
+     * 分页查询
+     *
+     * @param page page
+     * @param limit limit
+     * @param name name
+     * @param module module
+     * @return PageUtils
      */
     @GetMapping("/manage/operation/tag/list")
     @RequiresPermissions("operation:tag:list")
@@ -50,6 +54,9 @@ public class TagController {
 
     /**
      * 列表
+     *
+     * @param module module
+     * @return 列表
      */
     @GetMapping("/manage/operation/tag/select")
     @RequiresPermissions("operation:tag:list")
@@ -60,6 +67,9 @@ public class TagController {
 
     /**
      * 信息
+     *
+     * @param id id
+     * @return 信息
      */
     @GetMapping("/manage/operation/tag/info/{id}")
     @RequiresPermissions("operation:tag:info")
@@ -70,6 +80,8 @@ public class TagController {
 
     /**
      * 保存
+     *
+     * @param tag tag
      */
     @PostMapping("/manage/operation/tag/save")
     @RequiresPermissions("operation:tag:save")
@@ -82,6 +94,8 @@ public class TagController {
 
     /**
      * 修改
+     *
+     * @param tag tag
      */
     @PutMapping("/manage/operation/tag/update")
     @RequiresPermissions("operation:tag:update")
@@ -94,6 +108,8 @@ public class TagController {
 
     /**
      * 删除
+     *
+     * @param ids ids
      */
     @DeleteMapping("/manage/operation/tag/delete")
     @RequiresPermissions("operation:tag:delete")
@@ -124,6 +140,7 @@ public class TagController {
 
     /**
      * 获取标签列表
+     *
      * @param module 模块
      * @return 标签列表
      */

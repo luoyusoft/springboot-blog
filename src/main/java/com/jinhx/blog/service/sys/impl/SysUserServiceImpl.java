@@ -1,6 +1,6 @@
 package com.jinhx.blog.service.sys.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * SysUserServiceImpl
@@ -40,6 +42,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 查询用户菜单列表
+     *
      * @param userId 用户id
      * @return 用户菜单列表
      */
@@ -50,6 +53,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 分页查询用户信息列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param username 用户名
@@ -58,18 +62,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, String username, Integer id) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-
-        IPage<SysUser> sysUserPage = baseMapper.selectPage(
-                new Query<SysUser>(params).getPage(),
-                new QueryWrapper<SysUser>().lambda()
+        IPage<SysUser> sysUserIPage = baseMapper.selectPage(new Query<SysUser>(page, limit).getPage(),
+                new LambdaQueryWrapper<SysUser>()
                         .eq(id != null, SysUser::getId, id)
                         .like(StringUtils.isNotBlank(username), SysUser::getUsername, username));
 
         List<SysUserDTO> sysUserDTOList = new ArrayList<>();
-        sysUserPage.getRecords().forEach(item -> {
+        sysUserIPage.getRecords().forEach(item -> {
             // 如果当前用户不是超级管理员，则不展示超级管理员
             if(!SysAdminUtils.isSuperAdmin() && SysAdminUtils.isHaveSuperAdmin(sysUserRoleService.getRoleIdListByUserId(item.getId()))){
                 return;
@@ -81,7 +80,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         });
 
         IPage<SysUserDTO> sysUserDTOPage = new Page<>();
-        BeanUtils.copyProperties(sysUserPage, sysUserDTOPage);
+        BeanUtils.copyProperties(sysUserIPage, sysUserDTOPage);
         sysUserDTOPage.setRecords(sysUserDTOList);
 
         return new PageUtils(sysUserDTOPage);
@@ -89,6 +88,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 更新密码
+     *
      * @param userId 用户id
      * @param password 旧密码
      * @param newPassword 新密码
@@ -112,6 +112,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 重置密码
+     *
      * @param userId 用户id
      * @param password 新密码
      * @return 重置结果
@@ -138,6 +139,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 新增用户信息
+     *
      * @param sysUserDTO 用户信息
      * @return 新增结果
      */
@@ -166,6 +168,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 根据用户id更新用户信息
+     *
      * @param sysUserDTO 用户信息
      * @return 更新结果
      */
@@ -199,6 +202,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 根据用户id列表批量删除用户
+     *
      * @param userIds 用户id列表
      */
     @Override
@@ -218,6 +222,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 根据用户id查询用户有权限所有菜单列表
+     *
      * @param userId 用户id
      * @return 用户有权限所有菜单列表
      */
@@ -228,6 +233,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 根据用户名获取SysUserDTO
+     *
      * @param username 用户名
      * @return SysUserDTO
      */
@@ -245,6 +251,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 根据用户id获取SysUserDTO
+     *
      * @param userId 用户id
      * @return SysUserDTO
      */
@@ -262,6 +269,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     /**
      * 根据用户id获取用户昵称
+     *
      * @param userId 用户id
      * @return 用户昵称
      */

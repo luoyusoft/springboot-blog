@@ -7,6 +7,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * MinioItem
+ *
+ * @author jinhx
+ * @since 2018-11-30
+ */
 @Data
 public class MinioItem {
 

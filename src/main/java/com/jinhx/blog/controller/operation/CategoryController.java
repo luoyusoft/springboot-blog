@@ -1,7 +1,7 @@
 package com.jinhx.blog.controller.operation;
 
-import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -14,11 +14,9 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * <p>
- *  前端控制器
- * </p>
+ * CategoryController
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-12-17
  */
 @RestController
@@ -28,37 +26,46 @@ public class CategoryController {
     private CategoryService categoryService;
 
     /**
-     * 列表
+     * 查询所有菜单
+     *
+     * @param name name
+     * @param module module
+     * @return List<Category>
      */
     @GetMapping("/manage/operation/category/list")
     @RequiresPermissions("operation:category:list")
     public Response list(@RequestParam("name") String name, @RequestParam("module") Integer module){
-        List<Category> categoryList = categoryService.queryWithParentName(name, module);
-        return Response.success(categoryList);
+        return Response.success(categoryService.queryWithParentName(name, module));
     }
 
     /**
      * 树状列表
+     *
+     * @param module module
+     * @return 分类列表
      */
     @GetMapping("/manage/operation/category/select")
     @RequiresPermissions("operation:category:list")
     public Response select(@RequestParam("module") Integer module){
-        List<Category> categoryList = categoryService.select(module);
-        return Response.success(categoryList);
+        return Response.success(categoryService.select(module));
     }
 
     /**
      * 信息
+     *
+     * @param id id
+     * @return Category
      */
     @GetMapping("/manage/operation/category/info/{id}")
     @RequiresPermissions("operation:category:info")
     public Response info(@PathVariable("id") Integer id){
-        Category category = categoryService.info(id);
-        return Response.success(category);
+        return Response.success(categoryService.info(id));
     }
 
     /**
      * 保存
+     *
+     * @param category category
      */
     @PostMapping("/manage/operation/category/save")
     @RequiresPermissions("operation:category:save")
@@ -72,6 +79,8 @@ public class CategoryController {
 
     /**
      * 修改
+     *
+     * @param category category
      */
     @PutMapping("/manage/operation/category/update")
     @RequiresPermissions("operation:category:update")
@@ -82,6 +91,8 @@ public class CategoryController {
 
     /**
      * 删除
+     *
+     * @param id id
      */
     @DeleteMapping("/manage/operation/category/delete/{id}")
     @RequiresPermissions("operation:category:delete")
@@ -94,6 +105,7 @@ public class CategoryController {
 
     /**
      * 获取分类列表
+     *
      * @param module 模块
      * @return 分类列表
      */

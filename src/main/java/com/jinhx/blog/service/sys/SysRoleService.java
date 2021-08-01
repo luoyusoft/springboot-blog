@@ -17,6 +17,7 @@ public interface SysRoleService extends IService<SysRole> {
 
     /**
      * 获取角色列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param roleName 角色名
@@ -26,12 +27,14 @@ public interface SysRoleService extends IService<SysRole> {
 
     /**
      * 根据角色id列表批量删除角色
+     *
      * @param roleIds 角色id列表
      */
     void deleteBatch(Integer[] roleIds);
 
     /**
      * 查询角色列表
+     *
      * @param createrId 创建者id
      * @return 角色列表
      */
@@ -39,6 +42,7 @@ public interface SysRoleService extends IService<SysRole> {
 
     /**
      * 新增角色信息
+     *
      * @param sysRole 角色信息
      * @return 新增结果
      */
@@ -46,6 +50,7 @@ public interface SysRoleService extends IService<SysRole> {
 
     /**
      * 更新角色信息
+     *
      * @param sysRole 角色信息
      * @return 更新结果
      */

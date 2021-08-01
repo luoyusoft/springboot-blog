@@ -5,11 +5,9 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * <p>
- * ip信息
- * </p>
+ * IPInfo
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-19
  */
 @Data

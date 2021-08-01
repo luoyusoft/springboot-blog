@@ -6,11 +6,9 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * <p>
- * 系统用户Token
- * </p>
+ * SysUserToken
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-19
  */
 @Data

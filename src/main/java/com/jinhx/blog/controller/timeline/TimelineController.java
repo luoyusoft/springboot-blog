@@ -13,9 +13,8 @@ import java.util.List;
 /**
  * TimelineController
  *
- * @author luoyu
- * @date 2019/02/24
- * @description 时间线
+ * @author jinhx
+ * @since 2019-10-08
  */
 @RestController
 public class TimelineController {
@@ -27,6 +26,7 @@ public class TimelineController {
 
     /**
      * 获取时间线列表
+     *
      * @return 时间线列表
      */
     @GetMapping("/timeline/listtimelines")

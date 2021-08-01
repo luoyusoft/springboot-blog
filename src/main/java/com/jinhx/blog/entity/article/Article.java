@@ -10,11 +10,9 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * <p>
- * 文章
- * </p>
+ * Article
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-07
  */
 @Data
@@ -24,6 +22,21 @@ import java.io.Serializable;
 public class Article extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 发布状态
+     */
+    public static final Boolean PUBLISH_TRUE = true;
+
+    /**
+     * 公开状态
+     */
+    public static final Boolean OPEN_TRUE = true;
+
+    /**
+     * 置顶状态
+     */
+    public static final Boolean TOP_TRUE = true;
 
     @ApiModelProperty(value = "文章标题")
     private String title;

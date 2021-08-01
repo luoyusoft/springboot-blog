@@ -2,7 +2,6 @@ package com.jinhx.blog.service.file.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -182,8 +181,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         params.put("page", String.valueOf(page));
         params.put("limit", String.valueOf(limit));
 
-        IPage<File> fileResourceIPage = baseMapper.selectPage(new Query<File>(params).getPage(),
-                new QueryWrapper<File>().lambda()
+        IPage<File> fileResourceIPage = baseMapper.selectPage(new Query<File>(page, limit).getPage(),
+                new LambdaQueryWrapper<File>()
                         .eq(module != null, File::getModule, module)
                         .like(!StringUtils.isEmpty(fileName), File::getFileName, fileName)
                         .like(!StringUtils.isEmpty(fileMd5), File::getFileMd5, fileMd5)

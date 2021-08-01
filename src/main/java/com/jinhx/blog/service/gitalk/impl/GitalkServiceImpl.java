@@ -5,11 +5,11 @@ import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
-import com.jinhx.blog.mapper.video.VideoMapper;
-import com.jinhx.blog.entity.article.dto.ArticleDTO;
+import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import com.jinhx.blog.entity.video.dto.VideoDTO;
-import com.jinhx.blog.mapper.article.ArticleMapper;
+import com.jinhx.blog.mapper.video.VideoMapper;
+import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.gitalk.GitalkService;
 import com.rabbitmq.client.Channel;
 import com.xxl.job.core.log.XxlJobLogger;
@@ -44,7 +44,7 @@ public class GitalkServiceImpl implements GitalkService {
     private RabbitMQUtils rabbitmqUtils;
 
     @Autowired
-    private ArticleMapper articleMapper;
+    private ArticleService articleService;
 
     @Autowired
     private VideoMapper videoMapper;
@@ -56,11 +56,12 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initArticleList(){
-        List<ArticleDTO> articleDTOList = articleMapper.selectArticleDTOList();
-        XxlJobLogger.log("初始化gitalk文章数据，查到个数：{}", articleDTOList.size());
-        log.info("初始化gitalk文章数据，查到个数：{}", articleDTOList.size());
-        if (!CollectionUtils.isEmpty(articleDTOList)){
-            articleDTOList.forEach(x -> {
+        List<Article> articles = articleService.listArticlesByPublish();
+
+        XxlJobLogger.log("初始化gitalk文章数据，查到个数：{}", articles.size());
+        log.info("初始化gitalk文章数据，查到个数：{}", articles.size());
+        if (!CollectionUtils.isEmpty(articles)){
+            articles.forEach(x -> {
                 InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
                 initGitalkRequest.setId(x.getId());
                 initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_ARTICLE);

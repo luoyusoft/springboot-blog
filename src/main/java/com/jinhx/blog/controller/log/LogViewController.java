@@ -35,7 +35,12 @@ public class LogViewController {
     }
 
     /**
-     * 获取列表
+     * 分页查询日志
+     *
+     * @param page page
+     * @param limit limit
+     * @param module module
+     * @return PageUtils
      */
     @GetMapping("/manage/log/list")
     @RequiresPermissions("log:list")

@@ -7,8 +7,10 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @author luoyu
- * @date 2019-06-13
+ * UserVO
+ *
+ * @author jinhx
+ * @since 2019-06-13
  */
 @Data
 @ApiModel(description = "websocket用户VO")

@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 
 /**
  * SysRoleController
+ *
  * @author jinhx
- * @date 2018/10/25 15:32
- * @description
+ * @since 2018-10-08
  */
 @RestController
 public class SysRoleController {
@@ -37,6 +37,7 @@ public class SysRoleController {
 
     /**
      * 获取角色列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param roleName 角色名
@@ -50,6 +51,8 @@ public class SysRoleController {
 
     /**
      * 角色列表
+     *
+     * @return 角色列表
      */
     @GetMapping("/manage/sys/role/select")
     @RequiresPermissions("sys:role:select")
@@ -68,6 +71,7 @@ public class SysRoleController {
 
     /**
      * 新增角色信息
+     *
      * @param sysRole 角色信息
      * @return 新增结果
      */
@@ -85,6 +89,7 @@ public class SysRoleController {
 
     /**
      * 更新角色信息
+     *
      * @param sysRole 角色信息
      * @return 更新结果
      */
@@ -102,6 +107,7 @@ public class SysRoleController {
 
     /**
      * 获取角色菜单列表
+     *
      * @param roleId 角色id
      * @return 角色菜单列表
      */
@@ -117,6 +123,7 @@ public class SysRoleController {
 
     /**
      * 根据角色id列表批量删除角色
+     *
      * @param roleIds 角色id列表
      */
     @SuperAdmin()

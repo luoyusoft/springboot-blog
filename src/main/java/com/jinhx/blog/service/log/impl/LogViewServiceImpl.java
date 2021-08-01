@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * LogViewServiceImpl
@@ -76,11 +74,7 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, Integer module) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-
-        IPage<LogView> logViewIPage = baseMapper.selectPage(new Query<LogView>(params).getPage(),
+        IPage<LogView> logViewIPage = baseMapper.selectPage(new Query<LogView>(page, limit).getPage(),
                 new LambdaQueryWrapper<LogView>()
                 .eq(ObjectUtil.isNotNull(module), LogView::getModule, module)
                 .orderByDesc(LogView::getCreateTime)

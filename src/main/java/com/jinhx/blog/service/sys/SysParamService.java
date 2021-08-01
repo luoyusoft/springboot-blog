@@ -16,11 +16,12 @@ public interface SysParamService extends IService<SysParam> {
 
     /**
      * 分页查询
-     * @param page
-     * @param limit
-     * @param menuUrl
-     * @param type
-     * @return
+     *
+     * @param page page
+     * @param limit limit
+     * @param menuUrl menuUrl
+     * @param type type
+     * @return PageUtils
      */
      PageUtils queryPage(Integer page, Integer limit, String menuUrl, String type);
 

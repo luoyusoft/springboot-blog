@@ -18,26 +18,9 @@
         id, name, module,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <delete id="deleteTagLink">
-        delete from tag_link
-        where link_id = #{linkId} and module = #{module}
-    </delete>
-
-    <select id="listByLinkId" resultMap="BaseResultMap">
-        select bt.* from tag bt left join tag_link bat on bt.id=bat.tag_id
-        <where>
-            <if test="linkId!=null">
-                and bat.link_id = #{linkId}
-            </if>
-            <if test="module!=null">
-                and bt.module = #{module}
-            </if>
-        </where>
-    </select>
-
     <!-- *************************** portal ****************************** -->
 
-    <select id="listTagArticleDTO" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
+    <select id="listTagVOsByArticle" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
         select t.name, sum(t.num) as linkNum
         from (
                  select distinct t.module,
@@ -55,7 +38,7 @@
         order by linkNum desc
     </select>
 
-    <select id="listTagVideoDTO" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
+    <select id="listTagVOsByVideo" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
         select t.name, sum(t.num) as linkNum
         from (
                  select distinct t.module,

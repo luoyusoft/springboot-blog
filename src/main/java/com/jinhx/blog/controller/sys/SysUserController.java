@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * SysUserController
+ *
  * @author jinhx
  * @since 2018-10-08
  */
@@ -31,6 +32,7 @@ public class SysUserController {
 
     /**
      * 获取登录用户信息
+     *
      * @return 登录用户信息
      */
     @GetMapping("/manage/sys/user/info")
@@ -40,6 +42,7 @@ public class SysUserController {
 
     /**
      * 分页查询用户信息列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param username 用户名
@@ -55,6 +58,7 @@ public class SysUserController {
 
     /**
      * 更新密码
+     *
      * @param passwordVO 密码信息
      * @return 更新结果
      */
@@ -82,6 +86,7 @@ public class SysUserController {
 
     /**
      * 重置密码
+     *
      * @param passwordVO 密码信息
      * @return 重置结果
      */
@@ -105,6 +110,7 @@ public class SysUserController {
 
     /**
      * 新增用户信息
+     *
      * @param sysUserDTO 用户信息
      * @return 新增结果
      */
@@ -123,6 +129,7 @@ public class SysUserController {
 
     /**
      * 根据用户id更新用户信息
+     *
      * @param sysUserDTO 用户信息
      * @return 更新结果
      */
@@ -138,6 +145,7 @@ public class SysUserController {
 
     /**
      * 根据用户id列表批量删除用户
+     *
      * @param userIds 用户id列表
      */
     @PostMapping("/manage/sys/user/delete")
@@ -161,7 +169,10 @@ public class SysUserController {
     }
 
     /**
-     * 用户信息
+     * 根据用户id获取SysUserDTO
+     *
+     * @param userId 用户id
+     * @return SysUserDTO
      */
     @GetMapping("/manage/sys/user/info/{userId}")
     @RequiresPermissions("sys:user:info")

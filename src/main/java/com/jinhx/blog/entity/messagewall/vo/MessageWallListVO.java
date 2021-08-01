@@ -6,11 +6,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>
- * 留言墙
- * </p>
+ * HomeMessageWallInfoVO
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-07
  */
 @Data

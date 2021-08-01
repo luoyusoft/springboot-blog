@@ -20,6 +20,7 @@ public interface VideoService extends IService<Video> {
 
     /**
      * 获取首页信息
+     *
      * @return 首页信息
      */
     HomeVideoInfoVO getHommeVideoInfoVO();
@@ -40,12 +41,6 @@ public interface VideoService extends IService<Video> {
     void saveVideo(VideoVO videoVO);
 
     /**
-     * 批量删除
-     * @param ids 文章id数组
-     */
-    void deleteVideos(Integer[] ids);
-
-    /**
      * 更新视频
      * @param videoVO
      */
@@ -59,10 +54,21 @@ public interface VideoService extends IService<Video> {
 
     /**
      * 获取视频对象
-     * @param videoId
-     * @return
+     *
+     * @param videoId videoId
+     * @param publish publish
+     * @return VideoVO
      */
-    VideoVO getVideo(Integer videoId);
+    VideoVO getVideoVO(Integer videoId, Boolean publish);
+
+    /**
+     * 获取视频对象
+     *
+     * @param videoId videoId
+     * @param publish publish
+     * @return Video
+     */
+    Video getVideo(Integer videoId, Boolean publish);
 
     /**
      * 判断类别下是否有文章
@@ -77,6 +83,20 @@ public interface VideoService extends IService<Video> {
      * @return
      */
     boolean checkByFile(String url);
+
+    /**
+     * 批量删除
+     * @param ids 文章id数组
+     */
+    void deleteVideos(Integer[] ids);
+
+    /**
+     * 根据标题查询所有已发布的视频
+     *
+     * @param title 标题
+     * @return 所有已发布的视频
+     */
+    List<Video> listVideosByPublishAndTitle(String title);
 
     /********************** portal ********************************/
 

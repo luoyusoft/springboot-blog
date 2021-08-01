@@ -10,11 +10,9 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * <p>
- * 访问日志
- * </p>
+ * LogView
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-15
  */
 @Data

@@ -8,41 +8,43 @@ import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
 import java.util.List;
 
 /**
- * <p>
- * 友链 服务类
- * </p>
+ * FriendLinkService
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-14
  */
 public interface FriendLinkService extends IService<FriendLink> {
 
     /**
      * 获取首页信息
+     *
      * @return 首页信息
      */
     HomeFriendLinkInfoVO getHommeFriendLinkInfoVO();
 
     /**
      * 分页查询
-     * @param page
-     * @param limit
-     * @param title
-     * @return
+     *
+     * @param page page
+     * @param limit limit
+     * @param title title
+     * @return PageUtils
      */
      PageUtils queryPage(Integer page, Integer limit, String title);
 
     /**
      * 判断上传文件下是否有友链
-     * @param url
-     * @return
+     *
+     * @param url url
+     * @return 是否有友链
      */
-    boolean checkByFile(String url);
+    Boolean checkByFile(String url);
 
     /********************** portal ********************************/
 
     /**
      * 获取友链列表
+     *
      * @return 友链列表
      */
     List<FriendLink> listFriendLinks();

@@ -1,11 +1,11 @@
 package com.jinhx.blog.controller.sys;
 
+import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.base.Response;
-import com.jinhx.blog.entity.sys.vo.SysLoginVO;
-import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.entity.sys.dto.SysUserDTO;
+import com.jinhx.blog.entity.sys.vo.SysLoginVO;
 import com.jinhx.blog.service.sys.SysCaptchaService;
 import com.jinhx.blog.service.sys.SysUserService;
 import com.jinhx.blog.service.sys.SysUserTokenService;
@@ -25,9 +25,9 @@ import java.io.IOException;
 
 /**
  * SysLoginController
+ *
  * @author jinhx
- * @date 2018/10/19 18:47
- * @description
+ * @since 2018-10-07
  */
 @RestController
 public class SysLoginController {
@@ -43,8 +43,8 @@ public class SysLoginController {
 
     /**
      * 获取验证码
+     *
      * @param uuid uuid
-     * @return 验证码
      */
     @GetMapping("captcha.jpg")
     public void captcha(HttpServletResponse response, String uuid) throws IOException {
@@ -61,6 +61,7 @@ public class SysLoginController {
 
     /**
      * 登录
+     *
      * @param sysLoginVO sysLoginVO
      * @return token
      */

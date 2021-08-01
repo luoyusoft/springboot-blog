@@ -1,13 +1,11 @@
 package com.jinhx.blog.entity.log.vo;
 
 import lombok.Data;
-
 /**
  * HomeLogInfoVO
  *
- * @author luoyu
- * @date 2019/01/08 19:04
- * @description
+ * @author jinhx
+ * @since 2019-02-15
  */
 @Data
 public class HomeLogInfoVO {

@@ -43,6 +43,7 @@ public class ChatController {
 
     /**
      * 新增用户
+     *
      * @param request request
      * @return 用户信息
      */
@@ -62,6 +63,7 @@ public class ChatController {
 
     /**
      * 用户登录
+     *
      * @param request request
      * @param user 用户对象
      * @return 用户信息
@@ -100,6 +102,7 @@ public class ChatController {
 
     /**
      * 用户登录
+     *
      * @param request request
      * @param user 用户对象
      * @return 用户信息
@@ -142,6 +145,7 @@ public class ChatController {
 
     /**
      * 获取当前窗口用户信息
+     *
      * @param id id
      * @return 当前窗口用户信息
      */
@@ -155,6 +159,7 @@ public class ChatController {
 
     /**
      * 向指定窗口推送消息
+     *
      * @param toId    接收方ID
      * @param message 消息对象
      */
@@ -167,6 +172,7 @@ public class ChatController {
 
     /**
      * 获取在线用户列表
+     *
      * @return 在线用户列表
      */
     @GetMapping("/listonlineusers")
@@ -176,6 +182,7 @@ public class ChatController {
 
     /**
      * 获取公共聊天消息列表
+     *
      * @return 消息列表
      */
     @GetMapping("/listcommonmessages")
@@ -185,6 +192,7 @@ public class ChatController {
 
     /**
      * 获取指定用户的聊天消息列表
+     *
      * @param fromId 推送方ID
      * @param toId   接收方ID
      * @return 消息列表

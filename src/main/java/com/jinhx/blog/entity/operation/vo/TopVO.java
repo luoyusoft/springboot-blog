@@ -2,17 +2,19 @@ package com.jinhx.blog.entity.operation.vo;
 
 import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.operation.Top;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 /**
- * TopDTO
+ * TopVO
  *
- * @author luoyu
- * @date 2019/02/22 10:49
- * @description
+ * @author jinhx
+ * @since 2019-02-17
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class TopVO extends Top {
 
@@ -27,5 +29,8 @@ public class TopVO extends Top {
     private String cover;
 
     private List<Tag> tagList;
+
+    @ApiModelProperty(value = "置顶标题")
+    private String title;
 
 }

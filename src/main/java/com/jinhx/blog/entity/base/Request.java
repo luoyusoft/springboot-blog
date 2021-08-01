@@ -1,22 +1,22 @@
 package com.jinhx.blog.entity.base;
 
-
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * Response
+ * Request
  *
- * @author luoyu
- * @date 2018/10/07 13:28
- * @description 通用请求类
+ * @author jinhx
+ * @since 2018-11-07
  */
 @Data
 public class Request implements Serializable {
 
     private String channel;
+
     private Object data;
+
     private String time;
 
     /**

@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * BillTypeServiceImpl
@@ -47,18 +45,12 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-        params.put("incomeExpenditureType", incomeExpenditureType);
-
-
-        IPage<BillType> billPage = baseMapper.selectPage(new Query<BillType>(params).getPage(),
+        IPage<BillType> billIPage = baseMapper.selectPage(new Query<BillType>(page, limit).getPage(),
                 new LambdaQueryWrapper<BillType>()
                         .eq(ObjectUtil.isNotNull(incomeExpenditureType), BillType::getIncomeExpenditureType, incomeExpenditureType)
                         .orderByDesc(BillType::getCreateTime));
 
-        return new PageUtils(billPage);
+        return new PageUtils(billIPage);
     }
 
     /**

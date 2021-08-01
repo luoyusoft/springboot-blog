@@ -1,9 +1,8 @@
 package com.jinhx.blog.controller.video;
 
-import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.service.video.VideoService;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
@@ -11,6 +10,7 @@ import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.video.dto.VideoDTO;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
+import com.jinhx.blog.service.video.VideoService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +19,8 @@ import javax.annotation.Resource;
 /**
  * VideoController
  *
- * @author luoyu
- * @date 2018/11/20 20:25
- * @description
+ * @author jinhx
+ * @since 2018-11-08
  */
 @RestController
 public class VideoController {
@@ -55,8 +54,7 @@ public class VideoController {
     @GetMapping("/manage/video/info/{videoId}")
     @RequiresPermissions("video:list")
     public Response info(@PathVariable("videoId") Integer videoId) {
-        VideoVO videoVO = videoService.getVideo(videoId);
-        return Response.success(videoVO);
+        return Response.success(videoService.getVideoVO(videoId, null));
     }
 
     /**

@@ -1,9 +1,8 @@
 package com.jinhx.blog.controller.sys;
 
 import com.jinhx.blog.common.aop.annotation.SuperAdmin;
-import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -15,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * SysParamController
+ *
  * @author jinhx
- * @since 2018-12-28
+ * @since 2018-10-08
  */
 @RestController
 @Slf4j
@@ -30,7 +29,13 @@ public class SysParamController {
     private SysParamService paramService;
 
     /**
-     * 列表
+     * 分页查询
+     *
+     * @param page page
+     * @param limit limit
+     * @param menuUrl menuUrl
+     * @param type type
+     * @return PageUtils
      */
     @GetMapping("/manage/sys/param/list")
     @RequiresPermissions("sys:param:list")
@@ -40,6 +45,8 @@ public class SysParamController {
 
     /**
      * 获取所有参数
+     *
+     * @return 所有参数
      */
     @GetMapping("/manage/sys/param/all")
     public Response listAll(){
@@ -48,6 +55,9 @@ public class SysParamController {
 
     /**
      * 信息
+     *
+     * @param id id
+     * @return 信息
      */
     @GetMapping("/manage/sys/param/info/{id}")
     @RequiresPermissions("sys:param:info")
@@ -57,6 +67,8 @@ public class SysParamController {
 
     /**
      * 保存
+     *
+     * @param param param
      */
     @PostMapping("/manage/sys/param/save")
     @RequiresPermissions("sys:param:save")
@@ -69,6 +81,8 @@ public class SysParamController {
 
     /**
      * 修改
+     *
+     * @param param param
      */
     @SuperAdmin()
     @PutMapping("/manage/sys/param/update")
@@ -82,6 +96,8 @@ public class SysParamController {
 
     /**
      * 删除
+     *
+     * @param ids ids
      */
     @SuperAdmin()
     @DeleteMapping("/manage/sys/param/delete")

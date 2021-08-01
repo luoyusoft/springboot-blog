@@ -1,13 +1,13 @@
 package com.jinhx.blog.controller.operation;
 
-import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.operation.Recommend;
+import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.entity.operation.vo.RecommendVO;
 import com.jinhx.blog.service.operation.RecommendService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -18,11 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
- * 推荐 前端控制器
- * </p>
+ * RecommendController
  *
- * @author luoyu
+ * @author jinhx
  * @since 2019-02-22
  */
 @RestController
@@ -33,6 +31,8 @@ public class RecommendController {
 
     /**
      * 获取首页信息
+     *
+     * @return 首页信息
      */
     @GetMapping("/manage/operation/recommend/homeinfo")
     public Response getHomeRecommendInfoVO() {
@@ -41,7 +41,8 @@ public class RecommendController {
     }
 
     /**
-     * 列表
+     * 分页查询
+     *
      * @param page 页码
      * @param limit 每页数量
      * @return 推荐列表
@@ -54,7 +55,11 @@ public class RecommendController {
     }
 
     /**
-     * 查找
+     * 获取推荐列表
+     *
+     * @param module module
+     * @param title title
+     * @return 推荐列表
      */
     @GetMapping("/manage/operation/recommend/select")
     @RequiresPermissions("operation:recommend:list")
@@ -68,6 +73,9 @@ public class RecommendController {
 
     /**
      * 信息
+     *
+     * @param id id
+     * @return 信息
      */
     @GetMapping("/manage/operation/recommend/info/{id}")
     @RequiresPermissions("operation:recommend:info")
@@ -77,7 +85,9 @@ public class RecommendController {
     }
 
     /**
-     * 保存
+     * 新增
+     *
+     * @param recommend recommend
      */
     @PostMapping("/manage/operation/recommend/save")
     @RequiresPermissions("operation:recommend:save")
@@ -92,7 +102,9 @@ public class RecommendController {
     }
 
     /**
-     * 修改
+     * 更新
+     *
+     * @param recommend recommend
      */
     @PutMapping("/manage/operation/recommend/update")
     @RequiresPermissions("operation:recommend:update")
@@ -108,6 +120,8 @@ public class RecommendController {
 
     /**
      * 推荐置顶
+     *
+     * @param id id
      */
     @PutMapping("/manage/operation/recommend/top/{id}")
     @RequiresPermissions("operation:recommend:update")
@@ -122,6 +136,8 @@ public class RecommendController {
 
     /**
      * 删除
+     *
+     * @param ids ids
      */
     @DeleteMapping("/manage/operation/recommend/delete")
     @RequiresPermissions("operation:recommend:delete")
@@ -142,6 +158,7 @@ public class RecommendController {
 
     /**
      * 获取推荐列表
+     *
      * @param module 模块
      * @return 推荐列表
      */

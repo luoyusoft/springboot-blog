@@ -1,11 +1,9 @@
 package com.jinhx.blog.entity.sys;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.common.util.SysAdminUtils;
+import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
-import com.jinhx.blog.common.validator.group.AddGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,15 +14,11 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.List;
-
 
 /**
- * <p>
- * 用户管理
- * </p>
+ * SysUser
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-08
  */
 @Data

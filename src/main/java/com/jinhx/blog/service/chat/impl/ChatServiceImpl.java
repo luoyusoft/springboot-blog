@@ -297,7 +297,7 @@ public class ChatServiceImpl implements ChatService {
             sort(list);
             return list;
         } else {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 

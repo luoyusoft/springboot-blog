@@ -10,11 +10,9 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * <p>
- * 云存储分片源表
- * </p>
+ * FileChunk
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-30
  */
 @Data

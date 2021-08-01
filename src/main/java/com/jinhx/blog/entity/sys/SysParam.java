@@ -13,11 +13,9 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * <p>
- * 系统参数
- * </p>
+ * SysParam
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-12-28
  */
 @Data

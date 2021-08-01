@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * SearchController
  *
- * @author luoyu
- * @date 2019/03/13 15:04
- * @description
+ * @author jinhx
+ * @since 2019-03-07
  */
 @RestController
 public class SearchController {
@@ -26,6 +25,7 @@ public class SearchController {
 
     /**
      * 搜索，包括文章，视频
+     *
      * @param keyword 关键字
      * @return 搜索结果，包括文章，视频
      */

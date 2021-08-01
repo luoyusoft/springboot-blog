@@ -1,6 +1,5 @@
 package com.jinhx.blog.entity.base;
 
-
 import com.jinhx.blog.common.enums.ResponseEnums;
 import lombok.Data;
 
@@ -11,17 +10,20 @@ import java.time.format.DateTimeFormatter;
 /**
  * Response
  *
- * @author luoyu
- * @date 2018/10/07 13:28
- * @description 通用返回类
+ * @author jinhx
+ * @since 2018-11-07
  */
 @Data
 public class Response implements Serializable {
 
     private String msg;
+
     private int code;
+
     private Object data;
+
     private String time;
+
     private String srs;
 
     private Response() {

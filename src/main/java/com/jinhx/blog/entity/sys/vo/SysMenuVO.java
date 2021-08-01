@@ -8,17 +8,16 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * <p>
- * 菜单管理
- * </p>
+ * SysMenuVO
  *
- * @author luoyu
- * @since 2018-10-19
+ * @author jinhx
+ * @since 2018-10-26
  */
 @Data
 public class SysMenuVO implements Serializable {
 
     List<SysMenu> menuList;
+
     Set<String> permissions;
 
 }

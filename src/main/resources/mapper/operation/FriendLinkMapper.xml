@@ -20,12 +20,4 @@
         id, title, url, avatar,description,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <select id="checkByFile" resultType="java.lang.Integer">
-        select count(*) from friend_link where avatar = #{url}
-    </select>
-
-    <select id="selectCount" resultType="java.lang.Integer">
-        select count(*) from friend_link
-    </select>
-
 </mapper>

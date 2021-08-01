@@ -16,6 +16,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 查询用户菜单列表
+     *
      * @param userId 用户id
      * @return 用户菜单列表
      */
@@ -23,6 +24,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 分页查询用户信息列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param username 用户名
@@ -33,6 +35,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 更新密码
+     *
      * @param userId 用户id
      * @param password 旧密码
      * @param newPassword 新密码
@@ -42,6 +45,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 重置密码
+     *
      * @param userId 用户id
      * @param password 新密码
      * @return 重置结果
@@ -50,6 +54,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 新增用户信息
+     *
      * @param sysUserDTO 用户信息
      * @return 新增结果
      */
@@ -57,6 +62,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 根据用户id更新用户信息
+     *
      * @param sysUserDTO 用户信息
      * @return 更新结果
      */
@@ -64,12 +70,14 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 根据用户id列表批量删除用户
+     *
      * @param userIds 用户id列表
      */
     boolean deleteBatch(Integer[] userIds);
 
     /**
      * 根据用户id查询用户有权限所有菜单列表
+     *
      * @param userId 用户id
      * @return 用户有权限所有菜单列表
      */
@@ -77,6 +85,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 根据用户名获取SysUserDTO
+     *
      * @param username 用户名
      * @return SysUserDTO
      */
@@ -84,6 +93,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 根据用户id获取SysUserDTO
+     *
      * @param userId 用户id
      * @return SysUserDTO
      */
@@ -91,6 +101,7 @@ public interface SysUserService extends IService<SysUser> {
 
     /**
      * 根据用户id获取用户昵称
+     *
      * @param userId 用户id
      * @return 用户昵称
      */

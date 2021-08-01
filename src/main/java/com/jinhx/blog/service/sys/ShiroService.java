@@ -1,25 +1,23 @@
 package com.jinhx.blog.service.sys;
 
-
 import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.SysUserToken;
-import com.jinhx.blog.entity.sys.dto.SysUserDTO;
 
 import java.util.Set;
 
 /**
  * ShiroService
  *
- * @author luoyu
- * @date 2018/10/08 19:58
- * @description service接口类
+ * @author jinhx
+ * @since 2018-10-08
  */
 public interface ShiroService {
 
     /**
      * 获取用户的所有权限
-     * @param userId
-     * @return
+     *
+     * @param userId userId
+     * @return Set<String>
      */
     Set<String> getUserPermissions(Integer userId);
 

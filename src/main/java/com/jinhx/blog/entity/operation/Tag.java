@@ -1,8 +1,8 @@
 package com.jinhx.blog.entity.operation;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.entity.base.BaseEntity;
 import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,11 +13,9 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * <p>
- * 标签
- * </p>
+ * Tag
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-11-07
  */
 @Data

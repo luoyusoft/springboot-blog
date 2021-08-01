@@ -1,8 +1,8 @@
 package com.jinhx.blog.entity.sys;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.entity.base.BaseEntity;
 import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,11 +12,9 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * <p>
- * 角色与菜单对应关系
- * </p>
+ * SysRoleMenu
  *
- * @author luoyu
+ * @author jinhx
  * @since 2018-10-19
  */
 @Data

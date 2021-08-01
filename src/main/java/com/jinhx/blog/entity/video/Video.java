@@ -16,12 +16,10 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * <p>
- * 视频
- * </p>
+ * Video
  *
- * @author luoyu
- * @since 2018-11-07
+ * @author jinhx
+ * @since 2018-11-22
  */
 @Data
 @ApiModel(value="Video对象", description="视频表")
@@ -30,6 +28,11 @@ import java.time.LocalDate;
 public class Video extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 发布状态
+     */
+    public static final Boolean PUBLISH_TRUE = true;
 
     @ApiModelProperty(value = "视频标题")
     private String title;

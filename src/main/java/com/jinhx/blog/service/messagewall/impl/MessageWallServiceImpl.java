@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -108,11 +107,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
      */
     @Override
     public PageUtils manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        params.put("limit", String.valueOf(limit));
-
-        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new Query<MessageWall>(params).getPage(), new LambdaQueryWrapper<MessageWall>()
+        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new Query<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
                 .like(ObjectUtil.isNotEmpty(name), MessageWall::getName, name)
                 .eq(floorNum != null, MessageWall::getFloorNum, floorNum)
                 .orderByDesc(MessageWall::getId));
