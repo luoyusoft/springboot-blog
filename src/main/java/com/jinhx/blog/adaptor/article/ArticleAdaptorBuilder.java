@@ -34,11 +34,11 @@ public class ArticleAdaptorBuilder<T> {
 
     public static class Builder<T> {
         // Optional parameters - initialize with default values
-        private Boolean categoryListStr;
-        private Boolean tagList;
-        private Boolean recommend;
-        private Boolean top;
-        private Boolean author;
+        private Boolean categoryListStr = false;
+        private Boolean tagList = false;
+        private Boolean recommend = false;
+        private Boolean top = false;
+        private Boolean author = false;
         private T data;
 
         /**

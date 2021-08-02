@@ -38,13 +38,13 @@ public class RecommendAdaptorBuilder<T> {
 
     public static class Builder<T> {
         // Optional parameters - initialize with default values
-        private Boolean description;
-        private Boolean readNum;
-        private Boolean watchNum;
-        private Boolean likeNum;
-        private Boolean cover;
-        private Boolean tagList;
-        private Boolean title;
+        private Boolean description = false;
+        private Boolean readNum = false;
+        private Boolean watchNum = false;
+        private Boolean likeNum = false;
+        private Boolean cover = false;
+        private Boolean tagList = false;
+        private Boolean title = false;
         private T data;
 
         /**

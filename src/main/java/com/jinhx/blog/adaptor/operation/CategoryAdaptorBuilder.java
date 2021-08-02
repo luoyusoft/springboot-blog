@@ -26,7 +26,7 @@ public class CategoryAdaptorBuilder<T> {
 
     public static class Builder<T> {
         // Optional parameters - initialize with default values
-        private Boolean parentName;
+        private Boolean parentName = false;
         private T data;
 
         /**
