@@ -197,7 +197,9 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         }
 
         Integer maxFloorNum = baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                .orderByDesc(MessageWall::getFloorNum)).getFloorNum() - (page - 1) * limit;
+                .orderByDesc(MessageWall::getFloorNum)
+                // 只能调用一次,多次调用以最后一次为准 有sql注入的风险,请谨慎使用
+                .last("limit 1")).getFloorNum() - (page - 1) * limit;
         Integer minFloorNum = maxFloorNum - limit + 1;
 
         messageWallListVO.setHaveMoreFloor(minFloorNum > 1);
