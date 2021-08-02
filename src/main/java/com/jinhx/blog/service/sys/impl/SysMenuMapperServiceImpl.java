@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.enums.MenuTypeEnum;
 import com.jinhx.blog.common.util.MapUtils;
 import com.jinhx.blog.entity.sys.SysMenu;
+import com.jinhx.blog.service.sys.SysMenuMapperService;
 import com.jinhx.blog.service.sys.SysRoleMenuMapperService;
 import com.jinhx.blog.service.sys.SysUserMapperService;
 import com.jinhx.blog.mapper.sys.SysMenuMapper;
-import com.jinhx.blog.service.sys.SysMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ import java.util.List;
  * @description 1、查询用户所属菜单，2、递归构造Z-Tree需要格式的菜单
  */
 @Service
-public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements SysMenuService {
+public class SysMenuMapperServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements SysMenuMapperService {
 
     @Autowired
     private SysUserMapperService sysUserMapperService;

@@ -8,8 +8,8 @@ import com.jinhx.blog.common.util.RabbitMQUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import com.jinhx.blog.entity.video.dto.VideoDTO;
+import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.mapper.video.VideoMapper;
-import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.gitalk.GitalkService;
 import com.rabbitmq.client.Channel;
 import com.xxl.job.core.log.XxlJobLogger;
@@ -44,7 +44,7 @@ public class GitalkServiceImpl implements GitalkService {
     private RabbitMQUtils rabbitmqUtils;
 
     @Autowired
-    private ArticleService articleService;
+    private ArticleMapperService articleMapperService;
 
     @Autowired
     private VideoMapper videoMapper;
@@ -56,7 +56,7 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initArticleList(){
-        List<Article> articles = articleService.listArticlesByPublish();
+        List<Article> articles = articleMapperService.listArticlesByPublish();
 
         XxlJobLogger.log("初始化gitalk文章数据，查到个数：{}", articles.size());
         log.info("初始化gitalk文章数据，查到个数：{}", articles.size());

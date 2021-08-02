@@ -1,15 +1,17 @@
 package com.jinhx.blog.service.bill.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.bill.Bill;
 import com.jinhx.blog.mapper.bill.BillMapper;
 import com.jinhx.blog.service.bill.BillMapperService;
-import com.jinhx.blog.service.bill.BillService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,10 +21,7 @@ import java.util.List;
  * @since 2021-07-28
  */
 @Service
-public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements BillService {
-
-    @Autowired
-    private BillMapperService billMapperService;
+public class BillMapperServiceImpl extends ServiceImpl<BillMapper, Bill> implements BillMapperService {
 
     /**
      * 查询单个账单信息
@@ -32,7 +31,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public Bill getBill(Integer billId) {
-        return billMapperService.getBill(billId);
+        return baseMapper.selectById(billId);
     }
 
     /**
@@ -44,10 +43,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      * @return 账单列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
-        IPage<Bill> billIPage = billMapperService.queryPage(page, limit, incomeExpenditureType);
-
-        return new PageUtils(billIPage);
+    public IPage<Bill> queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
+        return baseMapper.selectPage(new Query<Bill>(page, limit).getPage(),
+                new LambdaQueryWrapper<Bill>()
+                        .eq(ObjectUtil.isNotNull(incomeExpenditureType), Bill::getIncomeExpenditureType, incomeExpenditureType)
+                        .orderByDesc(Bill::getDate));
     }
 
     /**
@@ -58,7 +58,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public Boolean insertBill(Bill bill) {
-        return billMapperService.insertBill(bill);
+        return baseMapper.insert(bill) > 0;
     }
 
     /**
@@ -69,7 +69,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public Boolean insertBills(List<Bill> bills) {
-        return billMapperService.insertBills(bills);
+        return bills.stream().mapToInt(item -> baseMapper.insert(item)).sum() == bills.size();
     }
 
     /**
@@ -80,7 +80,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public Boolean updateBill(Bill bill) {
-        return billMapperService.updateBill(bill);
+        return baseMapper.updateById(bill) > 0;
     }
 
     /**
@@ -91,7 +91,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Override
     public Boolean updateBills(List<Bill> bills) {
-        return billMapperService.updateBills(bills);
+        return bills.stream().mapToInt(item -> baseMapper.updateById(item)).sum() == bills.size();
     }
 
     /**
@@ -101,8 +101,9 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      * @return 删除结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteBills(Integer[] billIds) {
-        return billMapperService.deleteBills(billIds);
+        return baseMapper.deleteBatchIds(Arrays.asList(billIds)) == billIds.length;
     }
 
 }

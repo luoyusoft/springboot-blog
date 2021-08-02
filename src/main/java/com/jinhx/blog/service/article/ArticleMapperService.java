@@ -1,9 +1,8 @@
 package com.jinhx.blog.service.article;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
-import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
  * @author jinhx
  * @since 2018-11-21
  */
-public interface ArticleService extends IService<Article> {
+public interface ArticleMapperService extends IService<Article> {
 
     /**
      * 获取首页信息
@@ -31,44 +30,28 @@ public interface ArticleService extends IService<Article> {
      * @param title 标题
      * @return 文章列表
      */
-    PageUtils queryPage(Integer page, Integer limit, String title);
+    IPage<Article> queryPage(Integer page, Integer limit, String title);
 
     /**
      * 保存文章
      *
-     * @param articleVO 文章信息
+     * @param article 文章信息
      */
-    void saveArticle(ArticleVO articleVO);
+    void saveArticle(Article article);
 
     /**
      * 批量删除
      *
      * @param ids 文章id列表
      */
-    void deleteArticles(Integer[] ids);
+    void deleteArticles(List<Integer> ids);
 
     /**
      * 更新文章
      *
-     * @param articleVO 文章信息
+     * @param article 文章信息
      */
-    void updateArticle(ArticleVO articleVO);
-
-    /**
-     * 更新文章状态
-     *
-     * @param articleVO 文章信息
-     */
-    void updateArticleStatus(ArticleVO articleVO);
-
-    /**
-     * 根据文章id获取文章信息
-     *
-     * @param articleId 文章id
-     * @param publish publish
-     * @return 文章信息
-     */
-    ArticleVO getArticleVO(Integer articleId, Boolean publish);
+    void updateArticleById(Article article);
 
     /**
      * 根据文章id获取文章信息
@@ -78,14 +61,6 @@ public interface ArticleService extends IService<Article> {
      * @return 文章信息
      */
     Article getArticle(Integer articleId, Boolean publish);
-
-    /**
-     * 查看未公开文章时检测密码是否正确
-     *
-     * @param articleId 文章id
-     * @param password 密码
-     */
-    void checkPassword(Integer articleId, String password);
 
     /**
      * 判断类别下是否有文章
@@ -130,7 +105,7 @@ public interface ArticleService extends IService<Article> {
      * @param read 阅读量排序
      * @return 文章列表
      */
-    PageUtils listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read);
+    IPage<Article> listArticles(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read);
 
     /**
      * 分页获取首页文章列表
@@ -139,31 +114,14 @@ public interface ArticleService extends IService<Article> {
      * @param limit 每页数量
      * @return 首页文章列表
      */
-    PageUtils listHomeArticles(Integer page, Integer limit);
-
-    /**
-     * 获取ArticleVO对象
-     *
-     * @param id id
-     * @param password password
-     * @return ArticleVO
-     */
-    ArticleVO getArticleVOByPassword(Integer id, String password);
+    IPage<Article> listHomeArticles(Integer page, Integer limit, List<Integer> linkIds);
 
     /**
      * 获取热读榜
      *
      * @return 热读文章列表
      */
-    List<ArticleVO> listHotReadArticles();
-
-    /**
-     * 文章点赞
-     *
-     * @param id id
-     * @return 点赞结果
-     */
-    Boolean updateArticle(Integer id) throws Exception;
+    List<Article> listHotReadArticles();
 
     /**
      * 根据文章id获取公开状态

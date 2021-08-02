@@ -20,10 +20,10 @@ import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.mapper.operation.TopMapper;
-import com.jinhx.blog.service.article.ArticleService;
+import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.TopService;
-import com.jinhx.blog.service.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +46,10 @@ import java.util.List;
 public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopService {
 
     @Resource
-    private ArticleService articleService;
+    private ArticleMapperService articleMapperService;
 
     @Resource
-    private VideoService videoService;
+    private VideoMapperService videoMapperService;
 
     @Autowired
     private CacheServer cacheServer;
@@ -99,7 +99,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         List<TopVO> TopVOList = Lists.newArrayList();
 
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            List<Article> articles = articleService.listArticlesByPublishAndTitle(title);
+            List<Article> articles = articleMapperService.listArticlesByPublishAndTitle(title);
             if (CollectionUtils.isNotEmpty(articles)){
                 articles.forEach(articlesItem -> {
                     TopVO TopVO = new TopVO();
@@ -112,7 +112,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            List<Video> videoList = videoService.listVideosByPublishAndTitle(title);
+            List<Video> videoList = videoMapperService.listVideosByPublishAndTitle(title);
             if (videoList != null && videoList.size() > 0){
                 videoList.forEach(videoListItem -> {
                     TopVO TopVO = new TopVO();
@@ -139,7 +139,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(top.getModule())){
-            Article article = articleService.getArticle(top.getLinkId(), Article.PUBLISH_TRUE);
+            Article article = articleMapperService.getArticle(top.getLinkId(), Article.PUBLISH_TRUE);
             if(ObjectUtils.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
@@ -157,7 +157,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         }
 
         if (ModuleTypeConstants.VIDEO.equals(top.getModule())){
-            Video video = videoService.getVideo(top.getLinkId(), Video.PUBLISH_TRUE);
+            Video video = videoMapperService.getVideo(top.getLinkId(), Video.PUBLISH_TRUE);
             if(ObjectUtils.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
@@ -190,7 +190,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(top.getModule())){
-            Article article = articleService.getArticle(top.getLinkId(), Article.PUBLISH_TRUE);
+            Article article = articleMapperService.getArticle(top.getLinkId(), Article.PUBLISH_TRUE);
             if(ObjectUtils.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
@@ -208,7 +208,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         }
 
         if (ModuleTypeConstants.VIDEO.equals(top.getModule())){
-            Video video = videoService.getVideo(top.getLinkId(), Video.PUBLISH_TRUE);
+            Video video = videoMapperService.getVideo(top.getLinkId(), Video.PUBLISH_TRUE);
             if(ObjectUtils.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }

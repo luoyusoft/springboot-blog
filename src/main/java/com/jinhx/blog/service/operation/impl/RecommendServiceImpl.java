@@ -21,10 +21,11 @@ import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.entity.operation.vo.RecommendVO;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.mapper.operation.RecommendMapper;
-import com.jinhx.blog.service.article.ArticleService;
+import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.operation.RecommendMapperService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.RecommendService;
-import com.jinhx.blog.service.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +50,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend> implements RecommendService {
 
-    @Resource
-    private ArticleService articleService;
+    @Autowired
+    private RecommendMapperService recommendMapperService;
 
     @Resource
-    private VideoService videoService;
+    private ArticleMapperService articleMapperService;
+
+    @Resource
+    private VideoMapperService videoMapperService;
 
     @Autowired
     private CacheServer cacheServer;
@@ -85,8 +89,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      */
     @Override
     public PageUtils queryPage(Integer page, Integer limit) {
-        IPage<Recommend> recommendIPage = baseMapper.selectPage(new Query<Recommend>(page, limit).getPage(),
-                new LambdaQueryWrapper<Recommend>().orderByAsc(Recommend::getOrderNum));
+        IPage<Recommend> recommendIPage = recommendMapperService.queryPage(page, limit);
 
         if (CollectionUtils.isEmpty(recommendIPage.getRecords())){
             return new PageUtils(recommendIPage);
@@ -115,7 +118,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         List<RecommendVO> recommendVOList = new ArrayList<>();
 
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            List<Article> articles = articleService.listArticlesByPublishAndTitle(title);
+            List<Article> articles = articleMapperService.listArticlesByPublishAndTitle(title);
             if (CollectionUtils.isNotEmpty(articles)){
                 articles.forEach(articlesItem -> {
                     RecommendVO recommendVO = new RecommendVO();
@@ -128,7 +131,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            List<Video> videoList = videoService.listVideosByPublishAndTitle(title);
+            List<Video> videoList = videoMapperService.listVideosByPublishAndTitle(title);
             if (CollectionUtils.isNotEmpty(videoList)){
                 videoList.forEach(videoListItem -> {
                     RecommendVO recommendVO = new RecommendVO();
@@ -170,7 +173,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
-            Article article = articleService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
+            Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
             if(ObjectUtils.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
@@ -188,7 +191,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         }
 
         if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
-            Video video = videoService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
+            Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
             if(ObjectUtils.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
@@ -220,7 +223,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
-            Article article = articleService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
+            Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
             if(ObjectUtils.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
@@ -238,7 +241,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         }
 
         if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
-            Video video = videoService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
+            Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
             if(ObjectUtils.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
@@ -359,9 +362,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
     @Cacheable(value = RedisKeyConstants.RECOMMENDS, key = "#module")
     @Override
     public List<RecommendVO> listRecommends(Integer module) {
-        List<Recommend> recommends = baseMapper.selectList(new LambdaQueryWrapper<Recommend>()
-                .eq(Recommend::getModule, module)
-                .orderByAsc(Recommend::getOrderNum));
+        List<Recommend> recommends = recommendMapperService.listRecommends(module);
         if (CollectionUtils.isEmpty(recommends)){
             return Collections.emptyList();
         }

@@ -13,8 +13,8 @@ import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.dto.SysUserDTO;
 import com.jinhx.blog.service.sys.SysUserRoleMapperService;
+import com.jinhx.blog.service.sys.SysUserMapperService;
 import com.jinhx.blog.mapper.sys.SysUserMapper;
-import com.jinhx.blog.service.sys.SysUserService;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -34,7 +34,7 @@ import java.util.List;
  * @since 2018-10-08
  */
 @Service
-public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
+public class SysUserMapperServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserMapperService {
 
     @Autowired
     private SysUserRoleMapperService sysUserRoleMapperService;

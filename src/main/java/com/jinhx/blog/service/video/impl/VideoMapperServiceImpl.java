@@ -21,14 +21,14 @@ import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.dto.VideoDTO;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
+import com.jinhx.blog.mapper.video.VideoMapper;
+import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.CategoryMapperService;
 import com.jinhx.blog.service.operation.RecommendMapperService;
 import com.jinhx.blog.service.operation.TagLinkMapperService;
 import com.jinhx.blog.service.operation.TagMapperService;
 import com.jinhx.blog.service.sys.SysUserMapperService;
-import com.jinhx.blog.mapper.video.VideoMapper;
-import com.jinhx.blog.service.cache.CacheServer;
-import com.jinhx.blog.service.video.VideoService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -47,7 +47,7 @@ import java.util.*;
  * @description
  */
 @Service
-public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements VideoService {
+public class VideoMapperServiceImpl extends ServiceImpl<VideoMapper, Video> implements VideoMapperService {
 
     // 每天重新计算点赞，key
     private static final String BLOG_VIDEO_LIKE_LOCK_KEY = "blog:video:like:lock:";
@@ -159,7 +159,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             tagLink.setTagId(item.getId());
             tagLink.setModule(ModuleTypeConstants.VIDEO);
             tagLinkMapperService.save(tagLink);
-        });        InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
+        });
+        InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
         initGitalkRequest.setId(videoVO.getId());
         initGitalkRequest.setTitle(videoVO.getTitle());
         initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);
@@ -273,7 +274,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         if (!CollectionUtils.isEmpty(tagLinks)){
             videoVO.setTagList(tagMapperService.listByLinkId(tagLinks));
         }
-
         Recommend recommend = recommendMapperService.selectRecommendByLinkIdAndType(videoId, ModuleTypeConstants.VIDEO);
         if (recommend != null){
             videoVO.setRecommend(true);

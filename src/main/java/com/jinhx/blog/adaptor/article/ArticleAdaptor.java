@@ -7,11 +7,9 @@ import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.operation.Category;
-import com.jinhx.blog.service.operation.CategoryService;
-import com.jinhx.blog.service.operation.RecommendService;
-import com.jinhx.blog.service.operation.TagService;
-import com.jinhx.blog.service.operation.TopService;
-import com.jinhx.blog.service.sys.SysUserService;
+import com.jinhx.blog.entity.operation.TagLink;
+import com.jinhx.blog.service.operation.*;
+import com.jinhx.blog.service.sys.SysUserMapperService;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,19 +28,22 @@ import java.util.List;
 public class ArticleAdaptor {
 
     @Autowired
-    private TagService tagService;
+    private TagMapperService tagMapperService;
 
     @Autowired
-    private CategoryService categoryService;
+    private TagLinkMapperService tagLinkMapperService;
 
     @Autowired
-    private RecommendService recommendService;
+    private CategoryMapperService categoryMapperService;
 
     @Autowired
-    private TopService topService;
+    private RecommendMapperService recommendMapperService;
 
     @Autowired
-    private SysUserService sysUserService;
+    private TopMapperService topMapperService;
+
+    @Autowired
+    private SysUserMapperService sysUserMapperService;
 
     /**
      * 将ArticleVO转换为Article
@@ -76,27 +77,30 @@ public class ArticleAdaptor {
         BeanUtils.copyProperties(article, articleVO);
 
         if (articleAdaptorBuilder.getCategoryListStr()){
-            List<Category> categorys = categoryService.list(new LambdaQueryWrapper<Category>().eq(Category::getModule, ModuleTypeConstants.ARTICLE));
+            List<Category> categorys = categoryMapperService.list(new LambdaQueryWrapper<Category>().eq(Category::getModule, ModuleTypeConstants.ARTICLE));
 
             if(!CollectionUtils.isEmpty(categorys)){
-                articleVO.setCategoryListStr(categoryService.renderCategoryArr(articleVO.getCategoryId(), categorys));
+                articleVO.setCategoryListStr(categoryMapperService.renderCategoryArr(articleVO.getCategoryId(), categorys));
             }
         }
 
         if (articleAdaptorBuilder.getTagList()){
-            articleVO.setTagList(tagService.listByLinkId(articleVO.getId(), ModuleTypeConstants.ARTICLE));
+            List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(articleVO.getId(), ModuleTypeConstants.ARTICLE);
+            if (!CollectionUtils.isEmpty(tagLinks)){
+                articleVO.setTagList(tagMapperService.listByLinkId(tagLinks));
+            }
         }
 
         if (articleAdaptorBuilder.getRecommend()){
-            articleVO.setRecommend(recommendService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null);
+            articleVO.setRecommend(recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null);
         }
 
         if (articleAdaptorBuilder.getTop()){
-            articleVO.setTop(topService.isTopByModuleAndLinkId(ModuleTypeConstants.ARTICLE, articleVO.getId()));
+            articleVO.setTop(topMapperService.isTopByModuleAndLinkId(ModuleTypeConstants.ARTICLE, articleVO.getId()));
         }
 
         if (articleAdaptorBuilder.getAuthor()){
-            articleVO.setAuthor(sysUserService.getNicknameByUserId(articleVO.getCreaterId()));
+            articleVO.setAuthor(sysUserMapperService.getNicknameByUserId(articleVO.getCreaterId()));
         }
 
         return articleVO;

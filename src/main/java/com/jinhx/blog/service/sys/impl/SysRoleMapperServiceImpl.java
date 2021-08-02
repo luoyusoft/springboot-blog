@@ -10,9 +10,9 @@ import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.sys.SysRole;
 import com.jinhx.blog.service.sys.SysRoleMenuMapperService;
+import com.jinhx.blog.service.sys.SysRoleMapperService;
 import com.jinhx.blog.service.sys.SysUserRoleMapperService;
 import com.jinhx.blog.mapper.sys.SysRoleMapper;
-import com.jinhx.blog.service.sys.SysRoleService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import java.util.List;
  * @description
  */
 @Service
-public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements SysRoleService {
+public class SysRoleMapperServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements SysRoleMapperService {
 
     @Autowired
     private SysRoleMenuMapperService sysRoleMenuMapperService;

@@ -10,10 +10,11 @@ import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
-import com.jinhx.blog.service.article.ArticleService;
-import com.jinhx.blog.service.operation.TagService;
+import com.jinhx.blog.entity.operation.TagLink;
+import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.operation.TagLinkMapperService;
+import com.jinhx.blog.service.operation.TagMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
-import com.jinhx.blog.service.sys.SysUserService;
 import com.rabbitmq.client.Channel;
 import com.xxl.job.core.log.XxlJobLogger;
 import lombok.extern.slf4j.Slf4j;
@@ -48,13 +49,13 @@ public class ArticleEsServerImpl implements ArticleEsServer {
     private RabbitMQUtils rabbitmqUtils;
 
     @Autowired
-    private ArticleService articleService;
+    private ArticleMapperService articleMapperService;
 
     @Autowired
-    private TagService tagService;
+    private TagMapperService tagMapperService;
 
     @Autowired
-    private SysUserService sysUserService;
+    private TagLinkMapperService tagLinkMapperService;
 
     @Autowired
     private ArticleAdaptor articleAdaptor;
@@ -68,7 +69,7 @@ public class ArticleEsServerImpl implements ArticleEsServer {
     public boolean initArticleList() throws Exception {
         if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
             if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
-                List<Article> articles = articleService.listArticlesByPublish();
+                List<Article> articles = articleMapperService.listArticlesByPublish();
                 XxlJobLogger.log("初始化es文章数据，查到个数：{}", articles.size());
                 log.info("初始化es文章数据，查到个数：{}", articles.size());
                 if(!CollectionUtils.isEmpty(articles)){
@@ -192,7 +193,10 @@ public class ArticleEsServerImpl implements ArticleEsServer {
             articleVO.setDescription(x.get("description").toString());
             articleVO.setLikeNum(Long.valueOf(x.get("likeNum").toString()));
             articleVO.setTop(false);
-            articleVO.setTagList(tagService.listByLinkId(articleVO.getId(), ModuleTypeConstants.ARTICLE));
+            List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(articleVO.getId(), ModuleTypeConstants.ARTICLE);
+            if (!CollectionUtils.isEmpty(tagLinks)){
+                articleVO.setTagList(tagMapperService.listByLinkId(tagLinks));
+            }
             articleVOList.add(articleVO);
         }
         return articleVOList;

@@ -1,8 +1,8 @@
 package com.jinhx.blog.service.job;
 
+import com.jinhx.blog.service.log.LogViewMapperService;
 import com.jinhx.blog.service.chat.ChatService;
 import com.jinhx.blog.service.gitalk.GitalkService;
-import com.jinhx.blog.service.log.LogViewService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.search.VideoEsServer;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -47,7 +47,7 @@ public class XxlJobService {
     private ChatService chatService;
 
     @Autowired
-    private LogViewService logViewService;
+    private LogViewMapperService logViewMapperService;
 
     /**
      * 初始化es文章数据
@@ -95,7 +95,7 @@ public class XxlJobService {
      */
     @XxlJob("cleanCityInfo")
     public ReturnT<String> cleanCityInfo(String param) throws Exception {
-        logViewService.cleanCityInfo();
+        logViewMapperService.cleanCityInfo();
         return ReturnT.SUCCESS;
     }
 

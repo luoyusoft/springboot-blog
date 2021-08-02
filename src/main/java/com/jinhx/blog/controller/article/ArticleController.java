@@ -51,9 +51,10 @@ public class ArticleController {
     }
 
     /**
-     * 保存文章
+     * 信息
      *
-     * @param articleVO 文章信息
+     * @param articleId 文章id
+     * @return 文章信息
      */
     @GetMapping("/manage/article/info/{articleId}")
     @RequiresPermissions("article:list")
@@ -134,10 +135,10 @@ public class ArticleController {
      */
     @GetMapping("/article/listarticles")
     @LogView(module = 0)
-    public Response listArticles(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+    public Response listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                  @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
                                  @RequestParam("like") Boolean like, @RequestParam("read") Boolean read) {
-        return Response.success(articleService.listArticles(page, limit, latest, categoryId, like, read));
+        return Response.success(articleService.listArticleVOs(page, limit, latest, categoryId, like, read));
     }
 
     /**

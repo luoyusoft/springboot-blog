@@ -6,12 +6,14 @@ import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.util.ElasticSearchUtils;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
+import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.entity.video.dto.VideoDTO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
+import com.jinhx.blog.service.operation.TagLinkMapperService;
+import com.jinhx.blog.service.operation.TagMapperService;
+import com.jinhx.blog.service.sys.SysUserMapperService;
 import com.jinhx.blog.mapper.video.VideoMapper;
-import com.jinhx.blog.service.operation.TagService;
 import com.jinhx.blog.service.search.VideoEsServer;
-import com.jinhx.blog.service.sys.SysUserService;
 import com.rabbitmq.client.Channel;
 import com.xxl.job.core.log.XxlJobLogger;
 import lombok.extern.slf4j.Slf4j;
@@ -50,10 +52,13 @@ public class VideoEsServerImpl implements VideoEsServer {
     private VideoMapper videoMapper;
 
     @Autowired
-    private TagService tagService;
+    private TagMapperService tagMapperService;
 
     @Autowired
-    private SysUserService sysUserService;
+    private TagLinkMapperService tagLinkMapperService;
+
+    @Autowired
+    private SysUserMapperService sysUserMapperService;
 
     /**
      * 初始化es视频数据
@@ -71,7 +76,7 @@ public class VideoEsServerImpl implements VideoEsServer {
                     videoDTOList.forEach(x -> {
                         VideoVO videoVO = new VideoVO();
                         BeanUtils.copyProperties(x, videoVO);
-                        videoVO.setAuthor(sysUserService.getNicknameByUserId(videoVO.getCreaterId()));
+                        videoVO.setAuthor(sysUserMapperService.getNicknameByUserId(videoVO.getCreaterId()));
                         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_ADD_ROUTINGKEY, JsonUtils.objectToJson(videoVO));
                     });
                     return true;
@@ -192,7 +197,10 @@ public class VideoEsServerImpl implements VideoEsServer {
             videoVO.setSynopsis(x.get("synopsis").toString());
             videoVO.setLikeNum(Long.valueOf(x.get("likeNum").toString()));
             videoVO.setTop(false);
-            videoVO.setTagList(tagService.listByLinkId(videoVO.getId(), ModuleTypeConstants.VIDEO));
+            List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(videoVO.getId(), ModuleTypeConstants.VIDEO);
+            if (!CollectionUtils.isEmpty(tagLinks)){
+                videoVO.setTagList(tagMapperService.listByLinkId(tagLinks));
+            }
             videoVOList.add(videoVO);
         }
         return videoVOList;

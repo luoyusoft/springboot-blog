@@ -1,15 +1,17 @@
 package com.jinhx.blog.service.bill.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.bill.BillType;
 import com.jinhx.blog.mapper.bill.BillTypeMapper;
 import com.jinhx.blog.service.bill.BillTypeMapperService;
-import com.jinhx.blog.service.bill.BillTypeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -19,10 +21,7 @@ import java.util.List;
  * @since 2021-07-28
  */
 @Service
-public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> implements BillTypeService {
-
-    @Autowired
-    private BillTypeMapperService billTypeMapperService;
+public class BillTypeMapperServiceImpl extends ServiceImpl<BillTypeMapper, BillType> implements BillTypeMapperService {
 
     /**
      * 查询单个账单类型信息
@@ -32,7 +31,7 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      */
     @Override
     public BillType getBillType(Integer billTypeId) {
-        return billTypeMapperService.getBillType(billTypeId);
+        return baseMapper.selectById(billTypeId);
     }
 
     /**
@@ -44,10 +43,11 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      * @return 账单类型列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
-        IPage<BillType> billIPage = billTypeMapperService.queryPage(page, limit, incomeExpenditureType);
-
-        return new PageUtils(billIPage);
+    public IPage<BillType> queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
+        return baseMapper.selectPage(new Query<BillType>(page, limit).getPage(),
+                new LambdaQueryWrapper<BillType>()
+                        .eq(ObjectUtil.isNotNull(incomeExpenditureType), BillType::getIncomeExpenditureType, incomeExpenditureType)
+                        .orderByDesc(BillType::getCreateTime));
     }
 
     /**
@@ -58,7 +58,7 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      */
     @Override
     public Boolean insertBillType(BillType billType) {
-        return billTypeMapperService.insertBillType(billType);
+        return baseMapper.insert(billType) > 0;
     }
 
     /**
@@ -69,7 +69,7 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      */
     @Override
     public Boolean insertBillTypes(List<BillType> billTypes) {
-        return billTypeMapperService.insertBillTypes(billTypes);
+        return billTypes.stream().mapToInt(item -> baseMapper.insert(item)).sum() == billTypes.size();
     }
 
     /**
@@ -80,7 +80,7 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      */
     @Override
     public Boolean updateBillType(BillType billType) {
-        return billTypeMapperService.updateBillType(billType);
+        return baseMapper.updateById(billType) > 0;
     }
 
     /**
@@ -91,7 +91,7 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      */
     @Override
     public Boolean updateBillTypes(List<BillType> billTypes) {
-        return billTypeMapperService.updateBillTypes(billTypes);
+        return billTypes.stream().mapToInt(item -> baseMapper.updateById(item)).sum() == billTypes.size();
     }
 
     /**
@@ -101,8 +101,9 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      * @return 删除结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteBillTypes(Integer[] billTypeIds) {
-        return billTypeMapperService.deleteBillTypes(billTypeIds);
+        return baseMapper.deleteBatchIds(Arrays.asList(billTypeIds)) == billTypeIds.length;
     }
 
 }

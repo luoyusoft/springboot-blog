@@ -1,0 +1,89 @@
+package com.jinhx.blog.service.operation;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinhx.blog.entity.operation.Category;
+import com.jinhx.blog.entity.operation.vo.CategoryVO;
+
+import java.util.List;
+
+/**
+ * CategoryService
+ *
+ * @author jinhx
+ * @since 2018-12-17
+ */
+public interface CategoryMapperService extends IService<Category> {
+
+    /**
+     * 树状列表
+     *
+     * @param module module
+     * @return 分类列表
+     */
+    List<Category> select(Integer module);
+
+    /**
+     * 信息
+     *
+     * @param id id
+     * @return Category
+     */
+    Category info(Integer id);
+
+    /**
+     * 保存
+     *
+     * @param category category
+     */
+    void add(Category category);
+
+    /**
+     * 修改
+     *
+     * @param category category
+     */
+    void update(Category category);
+
+    /**
+     * 删除
+     *
+     * @param id id
+     */
+    void delete(Integer id);
+
+    /**
+     * 根据父级别查询子级别
+     *
+     * @param id id
+     * @return List<Category>
+     */
+    List<Category> queryListByParentId(Integer id);
+
+    /**
+     * 根据id查询
+     *
+     * @param id id
+     * @return Category
+     */
+    Category getById(Integer id);
+
+    /**
+     * 根据类别Id数组查询类别数组
+     *
+     * @param categoryIds categoryIds
+     * @param categoryList categoryList
+     * @return String
+     */
+    String renderCategoryArr(String categoryIds, List<Category> categoryList);
+
+    /********************** portal ********************************/
+
+    /**
+     * 获取分类列表
+     *
+     * @param module 模块
+     * @return 分类列表
+     */
+    List<Category> listCategories(String module);
+
+}

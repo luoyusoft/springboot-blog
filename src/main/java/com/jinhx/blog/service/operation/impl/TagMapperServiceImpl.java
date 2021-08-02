@@ -13,9 +13,9 @@ import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.entity.operation.vo.TagVO;
 import com.jinhx.blog.mapper.operation.TagMapper;
-import com.jinhx.blog.service.operation.TagLinkMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
-import com.jinhx.blog.service.operation.TagService;
+import com.jinhx.blog.service.operation.TagLinkMapperService;
+import com.jinhx.blog.service.operation.TagMapperService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +38,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagService {
-
-    @Resource
-    private TagLinkMapperService tagLinkMapperService;
-
-    @Autowired
-    private CacheServer cacheServer;
-
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
+public class TagMapperServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagMapperService {
 
     /**
      * 分页查询
@@ -71,13 +62,11 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     /**
      * 根据关联Id获取列表
      *
-     * @param linkId linkId
-     * @param module module
+     * @param tagLinks tagLinks
      * @return List<Tag>
      */
     @Override
-    public List<Tag> listByLinkId(Integer linkId, Integer module) {
-        List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(linkId, module);
+    public List<Tag> listByLinkId(List<TagLink> tagLinks) {
         if (CollectionUtils.isEmpty(tagLinks)){
             return Collections.emptyList();
         }
@@ -89,57 +78,13 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     /**
      * 添加所属标签，包含新增标签
      *
-     * @param tagList tagList
-     * @param linkId linkId
-     * @param module module
+     * @param tag tag
      */
     @Override
-    public void saveTagAndNew(List<Tag> tagList, Integer linkId, Integer module) {
-        Optional.ofNullable(tagList)
-                .ifPresent(tagListValue -> tagListValue.forEach(tag -> {
-                    if (ObjectUtils.isNull(tag.getId())) {
-                        baseMapper.insert(tag);
-                    }
-                    TagLink tagLink = new TagLink();
-                    tagLink.setLinkId(linkId);
-                    tagLink.setTagId(tag.getId());
-                    tagLink.setModule(module);
-                    tagLinkMapperService.save(tagLink);
-                }));
-
-        cleanTagsAllCache(module);
-    }
-
-    /**
-     * 清除缓存
-     */
-    private void cleanTagsAllCache(Integer module){
-        taskExecutor.execute(() ->{
-            cacheServer.cleanTagsAllCache(module);
-        });
+    public void saveTagAndNew(Tag tag) {
+        baseMapper.insert(tag);
     }
 
     /********************** portal ********************************/
-
-    /**
-     * 获取标签列表
-     *
-     * @param module 模块
-     * @return 标签列表
-     */
-    @Cacheable(value = RedisKeyConstants.TAGS, key = "#module")
-    @Override
-    public List<TagVO> listTags(Integer module) {
-        List<TagVO> tagVOs = Lists.newArrayList();
-        if(ModuleTypeConstants.ARTICLE.equals(module)){
-            tagVOs = baseMapper.listTagVOsByArticle(module);
-            return tagVOs.stream().filter(tagVOListItem -> Integer.parseInt(tagVOListItem.getLinkNum()) > 0).collect(Collectors.toList());
-        }
-        if(ModuleTypeConstants.VIDEO.equals(module)){
-            tagVOs = baseMapper.listTagVOsByVideo(module);
-            return tagVOs.stream().filter(tagVOListItem -> Integer.parseInt(tagVOListItem.getLinkNum()) > 0).collect(Collectors.toList());
-        }
-        return tagVOs;
-    }
 
 }

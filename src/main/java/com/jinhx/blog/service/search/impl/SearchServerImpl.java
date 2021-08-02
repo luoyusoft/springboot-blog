@@ -3,9 +3,9 @@ package com.jinhx.blog.service.search.impl;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
-import com.jinhx.blog.entity.operation.vo.TopVO;
+import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.search.vo.SearchListVO;
-import com.jinhx.blog.service.operation.TopService;
+import com.jinhx.blog.service.operation.TopMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.search.SearchServer;
 import com.jinhx.blog.service.search.VideoEsServer;
@@ -34,7 +34,7 @@ public class SearchServerImpl implements SearchServer {
     private VideoEsServer videoEsServer;
 
     @Autowired
-    private TopService topService;
+    private TopMapperService topMapperService;
 
     /**
      * 搜索，包括文章，视频
@@ -47,7 +47,7 @@ public class SearchServerImpl implements SearchServer {
     public SearchListVO search(String keyword) throws Exception {
         // 处理文章
         List<ArticleVO> articleVOList = articleEsServer.searchArticleList(keyword);
-        List<TopVO> articleTopVOs = topService.listTopVO(ModuleTypeConstants.ARTICLE);
+        List<Top> articleTops = topMapperService.listTops(ModuleTypeConstants.ARTICLE);
         ArticleVO[] articleVOTopArray = new ArticleVO[articleVOList.size()];
         Queue<ArticleVO> articleVONoTopQueue = new LinkedList<>();
         List<ArticleVO> articleVOResultList = new ArrayList<>();
@@ -55,13 +55,13 @@ public class SearchServerImpl implements SearchServer {
         Set<Integer> articleVOTopSet = new HashSet<>();
         Set<Integer> articleVONoToSet = new HashSet<>();
 
-        if (!CollectionUtils.isEmpty(articleTopVOs)){
+        if (!CollectionUtils.isEmpty(articleTops)){
             articleVOList.forEach(articleDTOListItem -> {
-                articleTopVOs.forEach(topVOsItem -> {
-                    if(topVOsItem.getLinkId().equals(articleDTOListItem.getId())){
+                articleTops.forEach(topsItem -> {
+                    if(topsItem.getLinkId().equals(articleDTOListItem.getId())){
                         if (!articleVOTopSet.contains(articleDTOListItem.getId()) && !articleVONoToSet.contains(articleDTOListItem.getId())) {
                             articleDTOListItem.setTop(true);
-                            articleVOTopArray[topVOsItem.getOrderNum()-1] = articleDTOListItem;
+                            articleVOTopArray[topsItem.getOrderNum()-1] = articleDTOListItem;
                             articleVOTopSet.add(articleDTOListItem.getId());
                         }
                     }else {
@@ -84,7 +84,7 @@ public class SearchServerImpl implements SearchServer {
 
         // 处理视频
 //        List<VideoVO> videoVOList = videoEsServer.searchVideoList(keyword);
-//        List<TopVO> videoTopVOs = topService.listTopVO(ModuleTypeConstants.VIDEO);
+//        List<TopVO> videoTopVOs = topMapperService.listTopVO(ModuleTypeConstants.VIDEO);
 //        VideoVO[] videoVOTopArray = new VideoVO[videoVOList.size()];
 //        Queue<VideoVO> videoVONoTopQueue = new LinkedList<>();
 //        List<VideoVO> videoVOResultList = new ArrayList<>();

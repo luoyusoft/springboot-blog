@@ -17,7 +17,7 @@ import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.mapper.file.FileMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.service.file.FileChunkMapperService;
-import com.jinhx.blog.service.file.FileService;
+import com.jinhx.blog.service.file.FileMapperService;
 import com.jinhx.blog.service.operation.FriendLinkMapperService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -42,7 +42,7 @@ import java.util.*;
  * @since 2018-11-07
  */
 @Service
-public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
+public class FileMapperServiceImpl extends ServiceImpl<FileMapper, File> implements FileMapperService {
 
     @Autowired
     private MinioUtils minioUtils;
@@ -443,5 +443,4 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "部分文件已有关联，删除失败，列表：" + failList.toString());
         }
     }
-
 }

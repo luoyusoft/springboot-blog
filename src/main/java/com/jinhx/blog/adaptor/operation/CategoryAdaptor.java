@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
-import com.jinhx.blog.service.operation.CategoryService;
+import com.jinhx.blog.service.operation.CategoryMapperService;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class CategoryAdaptor {
 
     @Autowired
-    private CategoryService categoryService;
+    private CategoryMapperService categoryMapperService;
 
     /**
      * 将Category转换为CategoryVO
@@ -40,7 +40,7 @@ public class CategoryAdaptor {
         BeanUtils.copyProperties(category, categoryVO);
 
         if (categoryAdaptorBuilder.getParentName()){
-            Category parentCategory = categoryService.getById(categoryVO.getParentId());
+            Category parentCategory = categoryMapperService.getById(categoryVO.getParentId());
             if (ObjectUtils.isNotNull(parentCategory)){
                 categoryVO.setParentName(parentCategory.getName());
             }

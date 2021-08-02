@@ -1,33 +1,21 @@
 package com.jinhx.blog.service.operation.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.adaptor.operation.CategoryAdaptor;
-import com.jinhx.blog.adaptor.operation.CategoryAdaptorBuilder;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.CategoryRankEnum;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.operation.Category;
-import com.jinhx.blog.entity.operation.vo.CategoryVO;
 import com.jinhx.blog.mapper.operation.CategoryMapper;
-import com.jinhx.blog.service.article.ArticleMapperService;
-import com.jinhx.blog.service.video.VideoMapperService;
-import com.jinhx.blog.service.cache.CacheServer;
-import com.jinhx.blog.service.operation.CategoryService;
+import com.jinhx.blog.service.operation.CategoryMapperService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.util.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,22 +27,7 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
-public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
-
-    @Resource
-    private VideoMapperService videoMapperService;
-
-    @Resource
-    private ArticleMapperService articleMapperService;
-
-    @Resource
-    private CategoryAdaptor categoryAdaptor;
-
-    @Autowired
-    private CacheServer cacheServer;
-
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
+public class CategoryMapperServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryMapperService {
 
     /**
      * 树状列表
@@ -96,8 +69,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public void add(Category category) {
         verifyCategory(category);
         baseMapper.insert(category);
-
-        cleanCategorysAllCache();
     }
 
     /**
@@ -108,8 +79,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public void update(Category category) {
         baseMapper.updateById(category);
-
-        cleanCategorysAllCache();
     }
 
     /**
@@ -119,23 +88,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public void delete(Integer id) {
-        //判断是否有子菜单或按钮
-        List<Category> categorys = queryListByParentId(id);
-        if(!CollectionUtils.isEmpty(categorys)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请先删除子级别");
-        }
-        // 判断是否有文章
-        if(articleMapperService.checkByCategoryId(id)) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有文章，无法删除");
-        }
-        // 判断是否有视频
-        if(videoMapperService.checkByCategory(id)) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有视频，无法删除");
-        }
-
         baseMapper.deleteById(id);
-
-        cleanCategorysAllCache();
     }
 
     /**
@@ -172,28 +125,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "上级目录只能为二级类型");
             }
         }
-    }
-
-    /**
-     * 查询所有菜单
-     *
-     * @param name name
-     * @param module module
-     * @return List<Category>
-     */
-    @Override
-    public List<CategoryVO> queryWithParentName(String name, Integer module) {
-        List<Category> categories = baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(!ObjectUtil.isNotNull(module), Category::getModule, module)
-                .like(!ObjectUtil.isNotEmpty(name), Category::getName, name));
-
-        if (CollectionUtils.isEmpty(categories)){
-            return Collections.emptyList();
-        }
-
-        return categoryAdaptor.adaptorCategorysToCategoryVOs(new CategoryAdaptorBuilder.Builder<List<Category>>()
-                .setParentName()
-                .build(categories));
     }
 
     /**
@@ -247,15 +178,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         }
 
         return String.join(",",categoryStrList);
-    }
-
-    /**
-     * 清除缓存
-     */
-    private void cleanCategorysAllCache(){
-        taskExecutor.execute(() ->{
-            cacheServer.cleanCategorysAllCache();
-        });
     }
 
     /********************** portal ********************************/

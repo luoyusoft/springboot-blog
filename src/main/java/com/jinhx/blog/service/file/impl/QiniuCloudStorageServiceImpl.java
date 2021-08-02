@@ -6,8 +6,8 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.DateUtils;
 import com.jinhx.blog.entity.file.File;
 import com.jinhx.blog.entity.file.vo.FileVO;
+import com.jinhx.blog.service.file.FileMapperService;
 import com.jinhx.blog.service.file.CloudStorageService;
-import com.jinhx.blog.service.file.FileService;
 import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
 import com.qiniu.storage.Configuration;
@@ -38,7 +38,7 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
     private CloudStorageProperties cloudStorageProperties;
 
     @Autowired
-    private FileService fileService;
+    private FileMapperService fileMapperService;
 
     private UploadManager uploadManager;
 
@@ -84,7 +84,7 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
             fileResource.setBucketName(cloudStorageProperties.getQiniuBucketName());
             fileResource.setStorageType(File.STORAGE_TYPE_QINIUYUN);
             fileResource.setUrl(url);
-            fileService.save(fileResource);
+            fileMapperService.save(fileResource);
             FileVO fileVO = new FileVO();
             fileVO.setFileName(fileName);
             fileVO.setUrl(url);

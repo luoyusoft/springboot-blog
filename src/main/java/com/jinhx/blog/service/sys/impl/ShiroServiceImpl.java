@@ -3,8 +3,8 @@ package com.jinhx.blog.service.sys.impl;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.SysUserToken;
+import com.jinhx.blog.service.sys.SysUserMapperService;
 import com.jinhx.blog.service.sys.ShiroService;
-import com.jinhx.blog.service.sys.SysUserService;
 import com.jinhx.blog.service.sys.SysUserTokenService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class ShiroServiceImpl implements ShiroService {
 
     @Autowired
-    private SysUserService sysUserService;
+    private SysUserMapperService sysUserMapperService;
 
     @Autowired
     private SysUserTokenService sysUserTokenService;
@@ -39,7 +39,7 @@ public class ShiroServiceImpl implements ShiroService {
      */
     @Override
     public Set<String> getUserPermissions(Integer userId) {
-        List<String> permsList = sysUserService.getAllPermsByUserId(userId);
+        List<String> permsList = sysUserMapperService.getAllPermsByUserId(userId);
         //返回用户权限列表
         return permsList.stream()
                 // 过滤空置的字符串
@@ -67,7 +67,7 @@ public class ShiroServiceImpl implements ShiroService {
      */
     @Override
     public SysUser getSysUserDTOByUserId(Integer userId) {
-        return sysUserService.getSysUserDTOByUserId(userId);
+        return sysUserMapperService.getSysUserDTOByUserId(userId);
     }
 
     /**
