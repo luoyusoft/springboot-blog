@@ -24,7 +24,7 @@
 
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 
-        <mybatisplus.version>3.4.2</mybatisplus.version>
+        <mybatisplus.version>3.4.3.1</mybatisplus.version>
         <shiro.version>1.7.1</shiro.version>
         <kaptcha.version>0.0.9</kaptcha.version>
         <redis.pool.version>2.6.0</redis.pool.version>
@@ -35,7 +35,7 @@
         <qiniu.version>[7.2.0, 7.2.99]</qiniu.version>
         <lombok.version>1.18.4</lombok.version>
         <elasticsearch.version>7.7.0</elasticsearch.version>
-        <mybatis.plus.generator.version>3.4.1</mybatis.plus.generator.version>
+        <mybatis.plus.generator.version>3.5.0</mybatis.plus.generator.version>
         <velocity.engine.core.version>2.2</velocity.engine.core.version>
         <freemarker.version>2.3.29</freemarker.version>
         <knife4j.spring.boot.starter.version>2.0.8</knife4j.spring.boot.starter.version>
