@@ -8,7 +8,6 @@ import com.jinhx.blog.common.api.IPApi;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.log.LogView;
-import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 import com.jinhx.blog.entity.sys.IPInfo;
 import com.jinhx.blog.mapper.log.LogViewMapper;
 import com.jinhx.blog.service.log.LogViewMapperService;
@@ -17,9 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -34,35 +30,6 @@ public class LogViewMapperServiceImpl extends ServiceImpl<LogViewMapper, LogView
 
     @Autowired
     private IPApi ipApi;
-
-    /**
-     * 获取首页信息
-     *
-     * @return 首页信息
-     */
-    @Override
-    public HomeLogInfoVO getHommeLogInfoVO() {
-        Integer allPV = baseMapper.selectCount(new LambdaQueryWrapper<>());
-        Integer allUV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
-                .groupBy(LogView::getIp, LogView::getBrowserName, LogView::getBrowserVersion, LogView::getDeviceManufacturer,
-                        LogView::getDeviceType, LogView::getOsVersion));
-
-        // 当天零点
-        LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        Integer todayPV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
-                .ge(LogView::getCreateTime, createTime));
-        Integer todayUV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
-                .ge(LogView::getCreateTime, createTime)
-                .groupBy(LogView::getIp, LogView::getBrowserName, LogView::getBrowserVersion, LogView::getDeviceManufacturer,
-                        LogView::getDeviceType, LogView::getOsVersion));
-
-        HomeLogInfoVO homeLogInfoVO = new HomeLogInfoVO();
-        homeLogInfoVO.setAllPV(allPV);
-        homeLogInfoVO.setAllUV(allUV);
-        homeLogInfoVO.setTodayPV(todayPV);
-        homeLogInfoVO.setTodayUV(todayUV);
-        return homeLogInfoVO;
-    }
 
     /**
      * 分页查询日志

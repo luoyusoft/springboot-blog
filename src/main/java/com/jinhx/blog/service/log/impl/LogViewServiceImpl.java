@@ -2,6 +2,7 @@ package com.jinhx.blog.service.log.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.api.IPApi;
@@ -43,18 +44,17 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
     @Override
     public HomeLogInfoVO getHommeLogInfoVO() {
         Integer allPV = baseMapper.selectCount(new LambdaQueryWrapper<>());
-        Integer allUV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
-                .groupBy(LogView::getIp, LogView::getBrowserName, LogView::getBrowserVersion, LogView::getDeviceManufacturer,
-                        LogView::getDeviceType, LogView::getOsVersion));
+        Integer allUV = baseMapper.selectCount(new QueryWrapper<LogView>()
+                .select("distinct ip,browser_name,browser_version,device_manufacturer,device_type,os_version"));
 
         // 当天零点
         LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         Integer todayPV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
                 .ge(LogView::getCreateTime, createTime));
-        Integer todayUV = baseMapper.selectCount(new LambdaQueryWrapper<LogView>()
-                .ge(LogView::getCreateTime, createTime)
-                .groupBy(LogView::getIp, LogView::getBrowserName, LogView::getBrowserVersion, LogView::getDeviceManufacturer,
-                        LogView::getDeviceType, LogView::getOsVersion));
+        Integer todayUV = baseMapper.selectCount(new QueryWrapper<LogView>()
+                .select("distinct ip,browser_name,browser_version,device_manufacturer,device_type,os_version")
+                .lambda()
+                .ge(LogView::getCreateTime, createTime));
 
         HomeLogInfoVO homeLogInfoVO = new HomeLogInfoVO();
         homeLogInfoVO.setAllPV(allPV);

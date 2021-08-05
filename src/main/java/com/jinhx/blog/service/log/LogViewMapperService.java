@@ -3,7 +3,6 @@ package com.jinhx.blog.service.log;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.log.LogView;
-import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 
 /**
  * LogViewServiceImpl
@@ -12,13 +11,6 @@ import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
  * @since 2019-02-24
  */
 public interface LogViewMapperService extends IService<LogView> {
-
-    /**
-     * 获取首页信息
-     *
-     * @return 首页信息
-     */
-    HomeLogInfoVO getHommeLogInfoVO();
 
     /**
      * 分页查询日志
