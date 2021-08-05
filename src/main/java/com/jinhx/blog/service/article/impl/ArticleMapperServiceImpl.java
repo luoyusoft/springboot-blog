@@ -190,7 +190,7 @@ public class ArticleMapperServiceImpl extends ServiceImpl<ArticleMapper, Article
     public IPage<Article> listHomeArticles(Integer page, Integer limit, List<Integer> linkIds) {
         return baseMapper.selectPage(new Query<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
                 .eq(Article::getPublish, Article.PUBLISH_TRUE)
-                .notIn(!CollectionUtils.isEmpty(linkIds), Article::getId)
+                .notIn(!CollectionUtils.isEmpty(linkIds), Article::getId, linkIds)
                 .orderByDesc(Article::getCreateTime));
     }
 
