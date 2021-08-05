@@ -2,37 +2,16 @@ package com.jinhx.blog.service.operation.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.google.common.collect.Lists;
-import com.jinhx.blog.adaptor.operation.TopAdaptor;
-import com.jinhx.blog.adaptor.operation.TopAdaptorBuilder;
-import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
-import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.operation.Top;
-import com.jinhx.blog.entity.operation.vo.TopVO;
-import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.mapper.operation.TopMapper;
-import com.jinhx.blog.service.article.ArticleMapperService;
-import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.TopMapperService;
-import com.jinhx.blog.service.video.VideoMapperService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -90,8 +69,10 @@ public class TopMapperServiceImpl extends ServiceImpl<TopMapper, Top> implements
      */
     @Override
     public Integer selectTopMaxOrderNum() {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Top>()
-                .orderByDesc(Top::getOrderNum)).getOrderNum();
+        return baseMapper.selectList(new LambdaQueryWrapper<Top>()
+                .select(Top::getOrderNum)
+                .orderByDesc(Top::getOrderNum)
+                .last("limit 1")).get(0).getOrderNum();
     }
 
     /**

@@ -63,8 +63,10 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         // 当天零点
         LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         HomeMessageWallInfoVO homeMessageWallInfoVO = new HomeMessageWallInfoVO();
-        homeMessageWallInfoVO.setMaxFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                .orderByDesc(MessageWall::getFloorNum)).getFloorNum());
+        homeMessageWallInfoVO.setMaxFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .select(MessageWall::getFloorNum)
+                .orderByDesc(MessageWall::getFloorNum)
+                .last("limit 1")).get(0).getFloorNum());
         homeMessageWallInfoVO.setAllCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
         homeMessageWallInfoVO.setTodayCount(baseMapper.selectCount(new LambdaQueryWrapper<MessageWall>()
                 .ge(MessageWall::getCreateTime, createTime)));
@@ -81,8 +83,10 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         // 新楼层
         if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
             messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                    .orderByDesc(MessageWall::getFloorNum)).getFloorNum() + 1);
+            messageWall.setFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                    .select(MessageWall::getFloorNum)
+                    .orderByDesc(MessageWall::getFloorNum)
+                    .last("limit 1")).get(0).getFloorNum() + 1);
         } else {
             if (messageWall.getFloorNum() == null){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
@@ -165,8 +169,10 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         // 新楼层
         if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
             messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                    .orderByDesc(MessageWall::getFloorNum)).getFloorNum() + 1);
+            messageWall.setFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                    .select(MessageWall::getFloorNum)
+                    .orderByDesc(MessageWall::getFloorNum)
+                    .last("limit 1")).get(0).getFloorNum() + 1);
         }else {
             if (messageWall.getFloorNum() == null){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
@@ -196,10 +202,11 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
             return messageWallListVO;
         }
 
-        Integer maxFloorNum = baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
+        Integer maxFloorNum = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .select(MessageWall::getFloorNum)
                 .orderByDesc(MessageWall::getFloorNum)
                 // 只能调用一次,多次调用以最后一次为准 有sql注入的风险,请谨慎使用
-                .last("limit 1")).getFloorNum() - (page - 1) * limit;
+                .last("limit 1")).get(0).getFloorNum() - (page - 1) * limit;
         Integer minFloorNum = maxFloorNum - limit + 1;
 
         messageWallListVO.setHaveMoreFloor(minFloorNum > 1);

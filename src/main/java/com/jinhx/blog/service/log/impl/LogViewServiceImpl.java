@@ -90,13 +90,14 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
         log.info("开始清洗log_view表");
         XxlJobLogger.log("开始清洗log_view表");
 
-        LogView maxLogView = baseMapper.selectOne(new LambdaQueryWrapper<LogView>()
+        LogView maxLogView = baseMapper.selectList(new LambdaQueryWrapper<LogView>()
                 .eq(LogView::getCountry, null)
                 .or()
                 .eq(LogView::getRegion, null)
                 .or()
                 .eq(LogView::getCity, null)
-                .orderByDesc(LogView::getId));
+                .orderByDesc(LogView::getId)
+                .last("limit 1")).get(0);
 
         if (maxLogView == null){
             return;

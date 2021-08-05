@@ -11,7 +11,6 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.messagewall.MessageWall;
-import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
 import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
 import com.jinhx.blog.entity.messagewall.vo.MessageWallVO;
 import com.jinhx.blog.mapper.messagewall.MessageWallMapper;
@@ -21,9 +20,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -54,24 +50,6 @@ public class MessageWallMapperServiceImpl extends ServiceImpl<MessageWallMapper,
     private String messageWallDefaultManageWebsite;
 
     /**
-     * 后台获取首页信息
-     *
-     * @return 首页信息
-     */
-    @Override
-    public HomeMessageWallInfoVO manageGetHomeMessageWallInfoVO() {
-        // 当天零点
-        LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        HomeMessageWallInfoVO homeMessageWallInfoVO = new HomeMessageWallInfoVO();
-        homeMessageWallInfoVO.setMaxFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                .orderByDesc(MessageWall::getFloorNum)).getFloorNum());
-        homeMessageWallInfoVO.setAllCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
-        homeMessageWallInfoVO.setTodayCount(baseMapper.selectCount(new LambdaQueryWrapper<MessageWall>()
-                .ge(MessageWall::getCreateTime, createTime)));
-        return homeMessageWallInfoVO;
-    }
-
-    /**
      * 后台新增留言
      *
      * @param messageWall 留言
@@ -81,8 +59,10 @@ public class MessageWallMapperServiceImpl extends ServiceImpl<MessageWallMapper,
         // 新楼层
         if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
             messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                    .orderByDesc(MessageWall::getFloorNum)).getFloorNum() + 1);
+            messageWall.setFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                    .select(MessageWall::getFloorNum)
+                    .orderByDesc(MessageWall::getFloorNum)
+                    .last("limit 1")).get(0).getFloorNum() + 1);
         } else {
             if (messageWall.getFloorNum() == null){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
@@ -165,8 +145,10 @@ public class MessageWallMapperServiceImpl extends ServiceImpl<MessageWallMapper,
         // 新楼层
         if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
             messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                    .orderByDesc(MessageWall::getFloorNum)).getFloorNum() + 1);
+            messageWall.setFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                    .select(MessageWall::getFloorNum)
+                    .orderByDesc(MessageWall::getFloorNum)
+                    .last("limit 1")).get(0).getFloorNum() + 1);
         }else {
             if (messageWall.getFloorNum() == null){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
@@ -196,8 +178,10 @@ public class MessageWallMapperServiceImpl extends ServiceImpl<MessageWallMapper,
             return messageWallListVO;
         }
 
-        Integer maxFloorNum = baseMapper.selectOne(new LambdaQueryWrapper<MessageWall>()
-                .orderByDesc(MessageWall::getFloorNum)).getFloorNum() - (page - 1) * limit;
+        Integer maxFloorNum = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .select(MessageWall::getFloorNum)
+                .orderByDesc(MessageWall::getFloorNum)
+                .last("limit 1")).get(0).getFloorNum() - (page - 1) * limit;
         Integer minFloorNum = maxFloorNum - limit + 1;
 
         messageWallListVO.setHaveMoreFloor(minFloorNum > 1);

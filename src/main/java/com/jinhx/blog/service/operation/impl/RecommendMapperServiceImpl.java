@@ -192,8 +192,10 @@ public class RecommendMapperServiceImpl extends ServiceImpl<RecommendMapper, Rec
      */
     @Override
     public Integer selectRecommendMaxOrderNum() {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                .orderByDesc(Recommend::getOrderNum)).getOrderNum();
+        return baseMapper.selectList(new LambdaQueryWrapper<Recommend>()
+                .select(Recommend::getOrderNum)
+                .orderByDesc(Recommend::getOrderNum)
+                .last("limit 1")).get(0).getOrderNum();
     }
 
     /********************** portal ********************************/

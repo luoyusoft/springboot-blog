@@ -3,7 +3,6 @@ package com.jinhx.blog.service.messagewall;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.messagewall.MessageWall;
-import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
 import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
 
 /**
@@ -13,13 +12,6 @@ import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
  * @since 2021-04-11
  */
 public interface MessageWallMapperService extends IService<MessageWall> {
-
-    /**
-     * 后台获取首页信息
-     *
-     * @return 首页信息
-     */
-    HomeMessageWallInfoVO manageGetHomeMessageWallInfoVO();
 
     /**
      * 后台新增留言

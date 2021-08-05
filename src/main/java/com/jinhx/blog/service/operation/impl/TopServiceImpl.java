@@ -21,9 +21,9 @@ import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.mapper.operation.TopMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
-import com.jinhx.blog.service.video.VideoMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.TopService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -276,8 +276,10 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
      */
     @Override
     public Integer selectTopMaxOrderNum() {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Top>()
-                .orderByDesc(Top::getOrderNum)).getOrderNum();
+        return baseMapper.selectList(new LambdaQueryWrapper<Top>()
+                .select(Top::getOrderNum)
+                .orderByDesc(Top::getOrderNum)
+                .last("limit 1")).get(0).getOrderNum();
     }
 
     /**
