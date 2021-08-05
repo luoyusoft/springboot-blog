@@ -334,6 +334,7 @@
                             <jvmFlag>-Xms256m</jvmFlag>
                             <jvmFlag>-Xmx256m</jvmFlag>
                             <jvmFlag>-Duser.timezone=Asia/Shanghai</jvmFlag>
+                            <jvmFlag>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=12138</jvmFlag>
                             <!--                            <jvmFlag>-Xdebug</jvmFlag>-->
                             <!--                            <jvmFlag>-Xmy:flag=jib-rules</jvmFlag>-->
                         </jvmFlags>
@@ -352,6 +353,7 @@
                             <!-- 指定镜像端口 , 这里没用docfile的操作 -->
                             <port>8800</port>
                             <port>9999</port>
+                            <port>12138</port>
                             <port>465</port>
                         </ports>
                     </container>
