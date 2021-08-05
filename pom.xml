@@ -24,7 +24,7 @@
 
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 
-        <mybatisplus.version>3.4.3.1</mybatisplus.version>
+        <mybatisplus.version>3.4.2</mybatisplus.version>
         <shiro.version>1.7.1</shiro.version>
         <kaptcha.version>0.0.9</kaptcha.version>
         <redis.pool.version>2.6.0</redis.pool.version>
