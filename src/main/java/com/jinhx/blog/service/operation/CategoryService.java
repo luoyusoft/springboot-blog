@@ -1,6 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinhx.blog.entity.builder.CategoryAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
 
@@ -13,6 +14,22 @@ import java.util.List;
  * @since 2018-12-17
  */
 public interface CategoryService extends IService<Category> {
+
+    /**
+     * 将Category转换为CategoryVO
+     *
+     * @param categoryAdaptorBuilder categoryAdaptorBuilder
+     * @return CategoryVO
+     */
+    CategoryVO adaptorCategoryToCategoryVO(CategoryAdaptorBuilder<Category> categoryAdaptorBuilder);
+
+    /**
+     * 将Category列表按需转换为CategoryVO列表
+     *
+     * @param categoryAdaptorBuilder categoryAdaptorBuilder
+     * @return CategoryVO列表
+     */
+    List<CategoryVO> adaptorCategorysToCategoryVOs(CategoryAdaptorBuilder<List<Category>> categoryAdaptorBuilder);
 
     /**
      * 树状列表

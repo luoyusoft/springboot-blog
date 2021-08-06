@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.adaptor.operation.CategoryAdaptor;
-import com.jinhx.blog.adaptor.operation.CategoryAdaptorBuilder;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.entity.builder.CategoryAdaptorBuilder;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.CategoryRankEnum;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -15,11 +15,13 @@ import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
 import com.jinhx.blog.mapper.operation.CategoryMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.operation.CategoryMapperService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -48,13 +50,63 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     private ArticleMapperService articleMapperService;
 
     @Resource
-    private CategoryAdaptor categoryAdaptor;
+    private CategoryMapperService categoryMapperService;
 
     @Autowired
     private CacheServer cacheServer;
 
     @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * 将Category转换为CategoryVO
+     *
+     * @param categoryAdaptorBuilder categoryAdaptorBuilder
+     * @return CategoryVO
+     */
+    @Override
+    public CategoryVO adaptorCategoryToCategoryVO(CategoryAdaptorBuilder<Category> categoryAdaptorBuilder){
+        if(ObjectUtils.isNull(categoryAdaptorBuilder) || ObjectUtils.isNull(categoryAdaptorBuilder.getData())){
+            return null;
+        }
+        Category category = categoryAdaptorBuilder.getData();
+        CategoryVO categoryVO = new CategoryVO();
+        BeanUtils.copyProperties(category, categoryVO);
+
+        if (categoryAdaptorBuilder.getParentName()){
+            Category parentCategory = categoryMapperService.getById(categoryVO.getParentId());
+            if (ObjectUtils.isNotNull(parentCategory)){
+                categoryVO.setParentName(parentCategory.getName());
+            }
+        }
+
+        return categoryVO;
+    }
+
+    /**
+     * 将Category列表按需转换为CategoryVO列表
+     *
+     * @param categoryAdaptorBuilder categoryAdaptorBuilder
+     * @return CategoryVO列表
+     */
+    @Override
+    public List<CategoryVO> adaptorCategorysToCategoryVOs(CategoryAdaptorBuilder<List<Category>> categoryAdaptorBuilder){
+        if(ObjectUtils.isNull(categoryAdaptorBuilder) || CollectionUtils.isEmpty(categoryAdaptorBuilder.getData())){
+            return Collections.emptyList();
+        }
+        List<CategoryVO> categoryVOs = Lists.newArrayList();
+        categoryAdaptorBuilder.getData().forEach(category -> {
+            if (ObjectUtils.isNull(category)){
+                return;
+            }
+
+            categoryVOs.add(adaptorCategoryToCategoryVO(new CategoryAdaptorBuilder.Builder<Category>()
+                    .setParentName(categoryAdaptorBuilder.getParentName())
+                    .build(category)));
+        });
+
+        return categoryVOs;
+    }
 
     /**
      * 树状列表
@@ -191,7 +243,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             return Collections.emptyList();
         }
 
-        return categoryAdaptor.adaptorCategorysToCategoryVOs(new CategoryAdaptorBuilder.Builder<List<Category>>()
+        return adaptorCategorysToCategoryVOs(new CategoryAdaptorBuilder.Builder<List<Category>>()
                 .setParentName()
                 .build(categories));
     }

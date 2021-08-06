@@ -8,22 +8,25 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.adaptor.operation.TopAdaptor;
-import com.jinhx.blog.adaptor.operation.TopAdaptorBuilder;
+import com.jinhx.blog.entity.builder.TopAdaptorBuilder;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.video.Video;
+import com.jinhx.blog.entity.video.vo.VideoVO;
 import com.jinhx.blog.mapper.operation.TopMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.TopService;
 import com.jinhx.blog.service.video.VideoMapperService;
+import com.jinhx.blog.service.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +54,121 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
     @Resource
     private VideoMapperService videoMapperService;
 
+    @Resource
+    private ArticleService articleService;
+
+    @Resource
+    private VideoService videoService;
+
     @Autowired
     private CacheServer cacheServer;
 
-    @Autowired
-    private TopAdaptor topAdaptor;
-
     @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * 将Top转换为TopVO
+     *
+     * @param topAdaptorBuilder topAdaptorBuilder
+     * @return TopVO
+     */
+    @Override
+    public TopVO adaptorTopToTopVO(TopAdaptorBuilder<Top> topAdaptorBuilder){
+        if(ObjectUtils.isNull(topAdaptorBuilder) || ObjectUtils.isNull(topAdaptorBuilder.getData())){
+            return null;
+        }
+
+        Top top = topAdaptorBuilder.getData();
+        TopVO topVO = new TopVO();
+        BeanUtils.copyProperties(top, topVO);
+
+        if(ModuleTypeConstants.ARTICLE.equals(topVO.getModule())){
+            ArticleVO articleVO = articleService.getArticleVO(topVO.getLinkId(), Article.PUBLISH_TRUE);
+            if (ObjectUtils.isNotNull(articleVO)){
+                if (topAdaptorBuilder.getDescription()){
+                    topVO.setDescription(articleVO.getDescription());
+                }
+
+                if (topAdaptorBuilder.getReadNum()){
+                    topVO.setReadNum(articleVO.getReadNum());
+                }
+
+                if (topAdaptorBuilder.getLikeNum()){
+                    topVO.setLikeNum(articleVO.getLikeNum());
+                }
+
+                if (topAdaptorBuilder.getCover()){
+                    topVO.setCover(articleVO.getCover());
+                }
+
+                if (topAdaptorBuilder.getTagList()){
+                    topVO.setTagList(articleVO.getTagList());
+                }
+
+                if (topAdaptorBuilder.getTitle()){
+                    topVO.setTitle(articleVO.getTitle());
+                }
+            }
+        }
+
+        if(ModuleTypeConstants.VIDEO.equals(topVO.getModule())){
+            VideoVO videoVO = videoService.getVideoVO(topVO.getLinkId(), Video.PUBLISH_TRUE);
+            if (ObjectUtils.isNotNull(videoVO)){
+                if (topAdaptorBuilder.getWatchNum()){
+                    topVO.setWatchNum(videoVO.getWatchNum());
+                }
+
+                if (topAdaptorBuilder.getLikeNum()){
+                    topVO.setLikeNum(videoVO.getLikeNum());
+                }
+
+                if (topAdaptorBuilder.getCover()){
+                    topVO.setCover(videoVO.getCover());
+                }
+
+                if (topAdaptorBuilder.getTagList()){
+                    topVO.setTagList(videoVO.getTagList());
+                }
+
+                if (topAdaptorBuilder.getTitle()){
+                    topVO.setTitle(videoVO.getTitle());
+                }
+            }
+        }
+
+        return topVO;
+    }
+
+    /**
+     * 将Top列表按需转换为TopVO列表
+     *
+     * @param topAdaptorBuilder topAdaptorBuilder
+     * @return TopVO列表
+     */
+    @Override
+    public List<TopVO> adaptorTopsToTopVOs(TopAdaptorBuilder<List<Top>> topAdaptorBuilder){
+        if(ObjectUtils.isNull(topAdaptorBuilder) || org.apache.shiro.util.CollectionUtils.isEmpty(topAdaptorBuilder.getData())){
+            return Collections.emptyList();
+        }
+        List<TopVO> topVOs = Lists.newArrayList();
+        topAdaptorBuilder.getData().forEach(top -> {
+            if (ObjectUtils.isNull(top)){
+                return;
+            }
+
+            topVOs.add(adaptorTopToTopVO(new TopAdaptorBuilder.Builder<Top>()
+                    .setDescription(topAdaptorBuilder.getDescription())
+                    .setReadNum(topAdaptorBuilder.getReadNum())
+                    .setWatchNum(topAdaptorBuilder.getWatchNum())
+                    .setLikeNum(topAdaptorBuilder.getLikeNum())
+                    .setCover(topAdaptorBuilder.getCover())
+                    .setTagList(topAdaptorBuilder.getTagList())
+                    .setTitle(topAdaptorBuilder.getTitle())
+                    .build(top)));
+        });
+
+        return topVOs;
+    }
 
     /**
      * 分页查询
@@ -76,7 +186,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
             return new PageUtils(topIPage);
         }
 
-        List<TopVO> topVOs = topAdaptor.adaptorTopsToTopVOs(new TopAdaptorBuilder.Builder<List<Top>>()
+        List<TopVO> topVOs = adaptorTopsToTopVOs(new TopAdaptorBuilder.Builder<List<Top>>()
                 .setTitle()
                 .build(topIPage.getRecords()));
 
@@ -324,7 +434,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
             return Collections.emptyList();
         }
 
-        return topAdaptor.adaptorTopsToTopVOs(new TopAdaptorBuilder.Builder<List<Top>>()
+        return adaptorTopsToTopVOs(new TopAdaptorBuilder.Builder<List<Top>>()
                 .setAll()
                 .build(tops));
     }

@@ -1,6 +1,7 @@
 package com.jinhx.blog.service.article;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
@@ -15,6 +16,30 @@ import java.util.List;
  * @since 2018-11-21
  */
 public interface ArticleService extends IService<Article> {
+
+    /**
+     * 将Article按需转换为ArticleVO
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return ArticleVO
+     */
+    ArticleVO adaptorArticleToArticleVO(ArticleAdaptorBuilder<Article> articleAdaptorBuilder);
+
+    /**
+     * 将ArticleVO转换为Article
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return Article
+     */
+    Article adaptorArticleVOToArticle(ArticleAdaptorBuilder<ArticleVO> articleAdaptorBuilder);
+
+    /**
+     * 将Article列表按需转换为ArticleVO列表
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return ArticleVO列表
+     */
+    List<ArticleVO> adaptorArticlesToArticleVOs(ArticleAdaptorBuilder<List<Article>> articleAdaptorBuilder);
 
     /**
      * 获取首页信息

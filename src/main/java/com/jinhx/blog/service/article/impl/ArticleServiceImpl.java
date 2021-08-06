@@ -3,10 +3,11 @@ package com.jinhx.blog.service.article.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.adaptor.article.ArticleAdaptor;
-import com.jinhx.blog.adaptor.article.ArticleAdaptorBuilder;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.config.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
@@ -19,6 +20,7 @@ import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
+import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.entity.operation.Top;
@@ -27,13 +29,8 @@ import com.jinhx.blog.mapper.article.ArticleMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.cache.CacheServer;
-import com.jinhx.blog.service.operation.RecommendMapperService;
-import com.jinhx.blog.service.operation.TagLinkMapperService;
-import com.jinhx.blog.service.operation.TagMapperService;
-import com.jinhx.blog.service.operation.TopMapperService;
+import com.jinhx.blog.service.operation.*;
 import com.jinhx.blog.service.sys.SysUserMapperService;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -81,17 +78,110 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Autowired
     private SysUserMapperService sysUserMapperService;
 
+    @Autowired
+    private CategoryMapperService categoryMapperService;
+
     @Resource
     private RedisUtils redisUtils;
 
     @Resource
     private RabbitMQUtils rabbitmqUtils;
 
-    @Autowired
-    private ArticleAdaptor articleAdaptor;
-
     @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * 将Article按需转换为ArticleVO
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return ArticleVO
+     */
+    @Override
+    public ArticleVO adaptorArticleToArticleVO(ArticleAdaptorBuilder<Article> articleAdaptorBuilder){
+        if(ObjectUtils.isNull(articleAdaptorBuilder) || ObjectUtils.isNull(articleAdaptorBuilder.getData())){
+            return null;
+        }
+
+        Article article = articleAdaptorBuilder.getData();
+        ArticleVO articleVO = new ArticleVO();
+        BeanUtils.copyProperties(article, articleVO);
+
+        if (articleAdaptorBuilder.getCategoryListStr()){
+            List<Category> categorys = categoryMapperService.list(new LambdaQueryWrapper<Category>().eq(Category::getModule, ModuleTypeConstants.ARTICLE));
+
+            if(!CollectionUtils.isEmpty(categorys)){
+                articleVO.setCategoryListStr(categoryMapperService.renderCategoryArr(articleVO.getCategoryId(), categorys));
+            }
+        }
+
+        if (articleAdaptorBuilder.getTagList()){
+            List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(articleVO.getId(), ModuleTypeConstants.ARTICLE);
+            if (!CollectionUtils.isEmpty(tagLinks)){
+                articleVO.setTagList(tagMapperService.listByLinkId(tagLinks));
+            }
+        }
+
+        if (articleAdaptorBuilder.getRecommend()){
+            articleVO.setRecommend(recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null);
+        }
+
+        if (articleAdaptorBuilder.getTop()){
+            articleVO.setTop(topMapperService.isTopByModuleAndLinkId(ModuleTypeConstants.ARTICLE, articleVO.getId()));
+        }
+
+        if (articleAdaptorBuilder.getAuthor()){
+            articleVO.setAuthor(sysUserMapperService.getNicknameByUserId(articleVO.getCreaterId()));
+        }
+
+        return articleVO;
+    }
+
+    /**
+     * 将ArticleVO转换为Article
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return Article
+     */
+    @Override
+    public Article adaptorArticleVOToArticle(ArticleAdaptorBuilder<ArticleVO> articleAdaptorBuilder){
+        if(ObjectUtils.isNull(articleAdaptorBuilder) || ObjectUtils.isNull(articleAdaptorBuilder.getData())){
+            return null;
+        }
+
+        Article article = new Article();
+        BeanUtils.copyProperties(articleAdaptorBuilder.getData(), article);
+        return article;
+    }
+
+    /**
+     * 将Article列表按需转换为ArticleVO列表
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return ArticleVO列表
+     */
+    @Override
+    public List<ArticleVO> adaptorArticlesToArticleVOs(ArticleAdaptorBuilder<List<Article>> articleAdaptorBuilder){
+        if(ObjectUtils.isNull(articleAdaptorBuilder) || CollectionUtils.isEmpty(articleAdaptorBuilder.getData())){
+            return Collections.emptyList();
+        }
+        List<ArticleVO> articleVOs = Lists.newArrayList();
+        articleAdaptorBuilder.getData().forEach(article -> {
+            if (ObjectUtils.isNull(article)){
+                return;
+            }
+
+            articleVOs.add(adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                    .setCategoryListStr(articleAdaptorBuilder.getCategoryListStr())
+                    .setTagList(articleAdaptorBuilder.getTagList())
+                    .setRecommend(articleAdaptorBuilder.getRecommend())
+                    .setTop(articleAdaptorBuilder.getTop())
+                    .setAuthor(articleAdaptorBuilder.getAuthor())
+                    .build(article)));
+        });
+
+        return articleVOs;
+    }
+
 
     /**
      * 获取首页信息
@@ -119,7 +209,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             return new PageUtils(articleIPage);
         }
 
-        List<ArticleVO> articleVOs = articleAdaptor.adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
+        List<ArticleVO> articleVOs = adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
                 .setCategoryListStr()
                 .setTagList()
                 .setRecommend()
@@ -139,7 +229,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveArticle(ArticleVO articleVO) {
-        Article article = articleAdaptor.adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
+        Article article = adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
                 .build(articleVO));
         articleMapperService.saveArticle(article);
 
@@ -178,7 +268,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             if (Objects.isNull(article)){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
             }
-            if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
+            if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者删除");
             }
 
@@ -207,7 +297,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
-        if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
+        if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者修改");
         }
 
@@ -222,7 +312,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             tagLink.setModule(ModuleTypeConstants.ARTICLE);
             tagLinkMapperService.save(tagLink);
         });
-        articleMapperService.updateArticleById(articleAdaptor.adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
+        articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
                 .build(articleVO)));
         if (!Objects.isNull(articleVO.getRecommend())){
             if (articleVO.getRecommend()){
@@ -271,13 +361,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
-        if (!ObjectUtils.equals(article.getCreaterId(), SysAdminUtils.getUserId()) && !article.getOpen()){
+        if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者修改");
         }
 
         if (!Objects.isNull(articleVO.getPublish())){
             // 更新发布，公开状态
-            articleMapperService.updateArticleById(articleAdaptor.adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
+            articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
                     .build(articleVO)));
             if (article.getPublish() && articleVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
@@ -295,7 +385,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
         }else if (articleVO.getOpen() != null){
             // 更新公开状态
-            articleMapperService.updateArticleById(articleAdaptor.adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
+            articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
                     .build(articleVO)));
             if (article.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
@@ -340,11 +430,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
 
-        if (!ObjectUtils.equals(SysAdminUtils.getUserId(), article.getCreaterId()) && !article.getOpen()){
+        if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "后台查看未公开的文章只能由创建者查看");
         }
 
-        return articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+        return adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
                 .setCategoryListStr()
                 .setTagList()
                 .setRecommend()
@@ -377,8 +467,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
 
-        if (!ObjectUtils.equals(SysAdminUtils.getUserId(), article.getCreaterId()) && !article.getOpen()){
-            if (StringUtils.isEmpty(password)){
+        if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
+            if (ObjectUtils.isEmpty(password)){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请输入密码");
             }
             SysUserDTO sysUserDTO = sysUserMapperService.getSysUserDTOByUserId(article.getCreaterId());
@@ -468,7 +558,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             return new PageUtils(articleIPage);
         }
 
-        List<ArticleVO> articleVOs = articleAdaptor.adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
+        List<ArticleVO> articleVOs = adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
                 .setTagList()
                 .setAuthor()
                 .build(articleIPage.getRecords()));
@@ -509,7 +599,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                         return;
                     }
 
-                    ArticleVO articleVO = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                    ArticleVO articleVO = adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
                             .setTagList()
                             .setAuthor()
                             .build(article));
@@ -521,7 +611,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             Queue<Article> articleQueue = new LinkedList<>(articleIPage.getRecords());
             for (int i = 0; i < articleVOs.length; i++) {
                 if (Objects.isNull(articleVOs[i])){
-                    articleVOs[i] = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                    articleVOs[i] = adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
                             .setTagList()
                             .setAuthor()
                             .build(articleQueue.poll()));
@@ -550,8 +640,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
         }
 
-        if (!ObjectUtils.equals(SysAdminUtils.getUserId(), article.getCreaterId()) && !article.getOpen()){
-            if (StringUtils.isEmpty(password)){
+        if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
+            if (ObjectUtils.isEmpty(password)){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请输入密码");
             }
             SysUserDTO sysUserDTO = sysUserMapperService.getSysUserDTOByUserId(article.getCreaterId());
@@ -564,7 +654,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
         }
 
-        ArticleVO articleVO = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+        ArticleVO articleVO = adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
                 .setTagList()
                 .setAuthor()
                 .build(article));
@@ -585,7 +675,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public List<ArticleVO> listHotReadArticles() {
         List<Article> articles = articleMapperService.listHotReadArticles();
 
-        return articleAdaptor.adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
+        return adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
                 .build(articles));
     }
 

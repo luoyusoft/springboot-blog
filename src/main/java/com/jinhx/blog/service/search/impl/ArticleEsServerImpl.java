@@ -1,7 +1,6 @@
 package com.jinhx.blog.service.search.impl;
 
-import com.jinhx.blog.adaptor.article.ArticleAdaptor;
-import com.jinhx.blog.adaptor.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
@@ -12,6 +11,7 @@ import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.operation.TagLinkMapperService;
 import com.jinhx.blog.service.operation.TagMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
@@ -52,13 +52,13 @@ public class ArticleEsServerImpl implements ArticleEsServer {
     private ArticleMapperService articleMapperService;
 
     @Autowired
+    private ArticleService articleService;
+
+    @Autowired
     private TagMapperService tagMapperService;
 
     @Autowired
     private TagLinkMapperService tagLinkMapperService;
-
-    @Autowired
-    private ArticleAdaptor articleAdaptor;
 
     /**
      * 初始化es文章数据
@@ -74,7 +74,7 @@ public class ArticleEsServerImpl implements ArticleEsServer {
                 log.info("初始化es文章数据，查到个数：{}", articles.size());
                 if(!CollectionUtils.isEmpty(articles)){
                     articles.forEach(x -> {
-                        ArticleVO articleVO = articleAdaptor.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                        ArticleVO articleVO = articleService.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
                                 .setAuthor()
                                 .build(x));
 

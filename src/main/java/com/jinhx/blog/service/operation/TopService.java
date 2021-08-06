@@ -1,6 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinhx.blog.entity.builder.TopAdaptorBuilder;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.vo.TopVO;
@@ -14,6 +15,22 @@ import java.util.List;
  * @since 2019-02-22
  */
 public interface TopService extends IService<Top> {
+
+    /**
+     * 将Top转换为TopVO
+     *
+     * @param topAdaptorBuilder topAdaptorBuilder
+     * @return TopVO
+     */
+    TopVO adaptorTopToTopVO(TopAdaptorBuilder<Top> topAdaptorBuilder);
+
+    /**
+     * 将Top列表按需转换为TopVO列表
+     *
+     * @param topAdaptorBuilder topAdaptorBuilder
+     * @return TopVO列表
+     */
+    List<TopVO> adaptorTopsToTopVOs(TopAdaptorBuilder<List<Top>> topAdaptorBuilder);
 
     /**
      * 分页查询

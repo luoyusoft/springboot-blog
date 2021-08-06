@@ -1,6 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jinhx.blog.entity.builder.RecommendAdaptorBuilder;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
@@ -15,6 +16,22 @@ import java.util.List;
  * @since 2019-02-22
  */
 public interface RecommendService extends IService<Recommend> {
+
+    /**
+     * 将Recommend转换为RecommendVO
+     *
+     * @param recommendAdaptorBuilder recommendAdaptorBuilder
+     * @return RecommendVO
+     */
+    RecommendVO adaptorRecommendToRecommendVO(RecommendAdaptorBuilder<Recommend> recommendAdaptorBuilder);
+
+    /**
+     * 将Recommend列表按需转换为RecommendVO列表
+     *
+     * @param recommendAdaptorBuilder recommendAdaptorBuilder
+     * @return RecommendVO列表
+     */
+    List<RecommendVO> adaptorRecommendsToRecommendVOs(RecommendAdaptorBuilder<List<Recommend>> recommendAdaptorBuilder);
 
     /**
      * 获取首页信息
