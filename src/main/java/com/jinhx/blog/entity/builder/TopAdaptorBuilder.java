@@ -20,6 +20,11 @@ public class TopAdaptorBuilder<T> {
     private Boolean title;
     private T data;
 
+    public TopAdaptorBuilder<T> setData(T data) {
+        this.data = data;
+        return this;
+    }
+
     /**
      * 构造方法私有化
      *
@@ -52,6 +57,10 @@ public class TopAdaptorBuilder<T> {
          */
         public TopAdaptorBuilder<T> build(T data) {
             this.data = data;
+            return new TopAdaptorBuilder<>(this);
+        }
+
+        public TopAdaptorBuilder<T> build() {
             return new TopAdaptorBuilder<>(this);
         }
 

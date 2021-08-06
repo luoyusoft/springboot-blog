@@ -112,6 +112,8 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 
     /**
      * 清除缓存
+     *
+     * @param module module
      */
     private void cleanTagsAllCache(Integer module){
         taskExecutor.execute(() ->{

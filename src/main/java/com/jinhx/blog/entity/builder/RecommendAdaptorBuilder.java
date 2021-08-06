@@ -20,6 +20,11 @@ public class RecommendAdaptorBuilder<T> {
     private Boolean title;
     private T data;
 
+    public RecommendAdaptorBuilder<T> setData(T data) {
+        this.data = data;
+        return this;
+    }
+
     /**
      * 构造方法私有化
      *
@@ -52,6 +57,10 @@ public class RecommendAdaptorBuilder<T> {
          */
         public RecommendAdaptorBuilder<T> build(T data) {
             this.data = data;
+            return new RecommendAdaptorBuilder<>(this);
+        }
+
+        public RecommendAdaptorBuilder<T> build() {
             return new RecommendAdaptorBuilder<>(this);
         }
 

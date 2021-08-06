@@ -58,6 +58,7 @@ public class TopMapperServiceImpl extends ServiceImpl<TopMapper, Top> implements
      * @param ids ids
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTopsByIds(List<Integer> ids) {
         baseMapper.deleteBatchIds(ids);
     }

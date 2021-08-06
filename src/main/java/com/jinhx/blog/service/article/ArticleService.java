@@ -90,19 +90,11 @@ public interface ArticleService extends IService<Article> {
      * 根据文章id获取文章信息
      *
      * @param articleId 文章id
+     * @param articleAdaptorBuilder articleAdaptorBuilder
      * @param publish publish
      * @return 文章信息
      */
-    ArticleVO getArticleVO(Integer articleId, Boolean publish);
-
-    /**
-     * 根据文章id获取文章信息
-     *
-     * @param articleId 文章id
-     * @param publish publish
-     * @return 文章信息
-     */
-    Article getArticle(Integer articleId, Boolean publish);
+    ArticleVO getArticleVO(Integer articleId, Boolean publish, ArticleAdaptorBuilder<Article> articleAdaptorBuilder);
 
     /**
      * 查看未公开文章时检测密码是否正确

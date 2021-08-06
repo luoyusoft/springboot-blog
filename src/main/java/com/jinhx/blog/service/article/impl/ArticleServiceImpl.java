@@ -249,7 +249,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             initGitalkRequest.setTitle(articleVO.getTitle());
             initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_ARTICLE);
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
-            rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY, JsonUtils.objectToJson(articleVO));
+            rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
+                    JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
         }
 
         cleanArticlesCache(new Integer[]{});
@@ -312,8 +313,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             tagLink.setModule(ModuleTypeConstants.ARTICLE);
             tagLinkMapperService.save(tagLink);
         });
-        articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
-                .build(articleVO)));
+
+        // 更新
+        articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>().build(articleVO)));
+
         if (!Objects.isNull(articleVO.getRecommend())){
             if (articleVO.getRecommend()){
                 if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){
@@ -338,12 +341,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
 
         if (article.getPublish() && articleVO.getPublish()){
-            rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY, JsonUtils.objectToJson(articleVO));
+            rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
+                    JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
         }else if (article.getPublish() && !articleVO.getPublish()){
             Integer[] ids = {articleVO.getId()};
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
         }else if (!article.getPublish() && articleVO.getPublish()){
-            rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY, JsonUtils.objectToJson(articleVO));
+            rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
+                    JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
         }
 
         cleanArticlesCache(new Integer[]{articleVO.getId()});
@@ -367,21 +372,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         if (!Objects.isNull(articleVO.getPublish())){
             // 更新发布，公开状态
-            articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
-                    .build(articleVO)));
+            articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>().build(articleVO)));
+
             if (article.getPublish() && articleVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
-                        JsonUtils.objectToJson(baseMapper.selectOne(new LambdaQueryWrapper<Article>()
-                                .eq(Article::getId, articleVO.getId())
-                                .eq(Article::getPublish, Article.PUBLISH_TRUE))));
+                        JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
             }else if (article.getPublish() && !articleVO.getPublish()){
                 Integer[] ids = {articleVO.getId()};
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
             }else if (!article.getPublish() && articleVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
-                        JsonUtils.objectToJson(baseMapper.selectOne(new LambdaQueryWrapper<Article>()
-                                .eq(Article::getId, articleVO.getId())
-                                .eq(Article::getPublish, Article.PUBLISH_TRUE))));
+                        JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
             }
         }else if (articleVO.getOpen() != null){
             // 更新公开状态
@@ -389,9 +390,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     .build(articleVO)));
             if (article.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
-                        JsonUtils.objectToJson(baseMapper.selectOne(new LambdaQueryWrapper<Article>()
-                                .eq(Article::getId, articleVO.getId())
-                                .eq(Article::getPublish, Article.PUBLISH_TRUE))));
+                        JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
             }
         }
 
@@ -420,11 +419,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * 根据文章id获取文章信息
      *
      * @param articleId 文章id
+     * @param articleAdaptorBuilder articleAdaptorBuilder
      * @param publish publish
      * @return 文章信息
      */
     @Override
-    public ArticleVO getArticleVO(Integer articleId, Boolean publish) {
+    public ArticleVO getArticleVO(Integer articleId, Boolean publish, ArticleAdaptorBuilder<Article> articleAdaptorBuilder) {
         Article article = articleMapperService.getArticle(articleId, publish);
         if (Objects.isNull(article)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
@@ -434,24 +434,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "后台查看未公开的文章只能由创建者查看");
         }
 
-        return adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
-                .setCategoryListStr()
-                .setTagList()
-                .setRecommend()
-                .setAuthor()
-                .build(article));
-    }
-
-    /**
-     * 根据文章id获取文章信息
-     *
-     * @param articleId 文章id
-     * @param publish publish
-     * @return 文章信息
-     */
-    @Override
-    public Article getArticle(Integer articleId, Boolean publish) {
-        return articleMapperService.getArticle(articleId, publish);
+        return adaptorArticleToArticleVO(articleAdaptorBuilder.setData(article));
     }
 
     /**

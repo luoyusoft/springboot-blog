@@ -1,5 +1,6 @@
 package com.jinhx.blog.service.search.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
@@ -7,13 +8,13 @@ import com.jinhx.blog.common.util.ElasticSearchUtils;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
 import com.jinhx.blog.entity.operation.TagLink;
-import com.jinhx.blog.entity.video.dto.VideoDTO;
+import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.VideoVO;
 import com.jinhx.blog.service.operation.TagLinkMapperService;
 import com.jinhx.blog.service.operation.TagMapperService;
-import com.jinhx.blog.service.sys.SysUserMapperService;
-import com.jinhx.blog.mapper.video.VideoMapper;
 import com.jinhx.blog.service.search.VideoEsServer;
+import com.jinhx.blog.service.sys.SysUserMapperService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import com.rabbitmq.client.Channel;
 import com.xxl.job.core.log.XxlJobLogger;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -49,7 +49,7 @@ public class VideoEsServerImpl implements VideoEsServer {
     private RabbitMQUtils rabbitmqUtils;
 
     @Autowired
-    private VideoMapper videoMapper;
+    private VideoMapperService videoMapperService;
 
     @Autowired
     private TagMapperService tagMapperService;
@@ -69,11 +69,11 @@ public class VideoEsServerImpl implements VideoEsServer {
     public boolean initVideoList() throws Exception {
         if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX)){
             if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX)){
-                List<VideoDTO> videoDTOList = videoMapper.selectVideoDTOList();
-                XxlJobLogger.log("初始化es视频数据，查到个数：{}", videoDTOList.size());
-                log.info("初始化es视频数据，查到个数：{}", videoDTOList.size());
-                if(!CollectionUtils.isEmpty(videoDTOList)){
-                    videoDTOList.forEach(x -> {
+                List<Video> videos = videoMapperService.listVideosByPublish();
+                XxlJobLogger.log("初始化es视频数据，查到个数：{}", videos.size());
+                log.info("初始化es视频数据，查到个数：{}", videos.size());
+                if(CollectionUtils.isNotEmpty(videos)){
+                    videos.forEach(x -> {
                         VideoVO videoVO = new VideoVO();
                         BeanUtils.copyProperties(x, videoVO);
                         videoVO.setAuthor(sysUserMapperService.getNicknameByUserId(videoVO.getCreaterId()));

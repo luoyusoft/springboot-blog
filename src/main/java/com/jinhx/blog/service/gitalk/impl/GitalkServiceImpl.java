@@ -1,5 +1,6 @@
 package com.jinhx.blog.service.gitalk.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.api.GitalkApi;
 import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
@@ -7,10 +8,10 @@ import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
-import com.jinhx.blog.entity.video.dto.VideoDTO;
+import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.service.article.ArticleMapperService;
-import com.jinhx.blog.mapper.video.VideoMapper;
 import com.jinhx.blog.service.gitalk.GitalkService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import com.rabbitmq.client.Channel;
 import com.xxl.job.core.log.XxlJobLogger;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -47,7 +47,7 @@ public class GitalkServiceImpl implements GitalkService {
     private ArticleMapperService articleMapperService;
 
     @Autowired
-    private VideoMapper videoMapper;
+    private VideoMapperService videoMapperService;
 
     /**
      * 初始化gitalk文章数据
@@ -60,7 +60,7 @@ public class GitalkServiceImpl implements GitalkService {
 
         XxlJobLogger.log("初始化gitalk文章数据，查到个数：{}", articles.size());
         log.info("初始化gitalk文章数据，查到个数：{}", articles.size());
-        if (!CollectionUtils.isEmpty(articles)){
+        if (CollectionUtils.isNotEmpty(articles)){
             articles.forEach(x -> {
                 InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
                 initGitalkRequest.setId(x.getId());
@@ -79,11 +79,11 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initVideoList(){
-        List<VideoDTO> videoDTOList = videoMapper.selectVideoDTOList();
-        XxlJobLogger.log("初始化gitalk视频数据，查到个数：{}", videoDTOList.size());
-        log.info("初始化gitalk视频数据，查到个数：{}", videoDTOList.size());
-        if (!CollectionUtils.isEmpty(videoDTOList)){
-            videoDTOList.forEach(x -> {
+        List<Video> videos = videoMapperService.listVideosByPublish();
+        XxlJobLogger.log("初始化gitalk视频数据，查到个数：{}", videos.size());
+        log.info("初始化gitalk视频数据，查到个数：{}", videos.size());
+        if (CollectionUtils.isNotEmpty(videos)){
+            videos.forEach(x -> {
                 InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
                 initGitalkRequest.setId(x.getId());
                 initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);

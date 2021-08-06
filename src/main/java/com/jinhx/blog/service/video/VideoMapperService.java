@@ -1,20 +1,17 @@
 package com.jinhx.blog.service.video;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.video.Video;
-import com.jinhx.blog.entity.video.dto.VideoDTO;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
-import com.jinhx.blog.entity.video.vo.VideoVO;
 
 import java.util.List;
 
 /**
- * VideoService
+ * VideoMapperService
  *
- * @author luoyu
- * @date 2018/11/21 12:47
- * @description
+ * @author jinhx
+ * @since 2018-11-22
  */
 public interface VideoMapperService extends IService<Video> {
 
@@ -27,39 +24,34 @@ public interface VideoMapperService extends IService<Video> {
 
     /**
      * 分页查询视频列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param title 标题
      * @return 视频列表
      */
-    PageUtils queryPage(Integer page, Integer limit, String title);
+    IPage<Video> queryPage(Integer page, Integer limit, String title);
 
     /**
      * 保存视频
-     * @param videoVO
+     *
+     * @param video video
      */
-    void saveVideo(VideoVO videoVO);
+    void saveVideo(Video video);
 
     /**
      * 更新视频
-     * @param videoVO
-     */
-    void updateVideo(VideoVO videoVO);
-
-    /**
-     * 更新视频状态
-     * @param videoVO
-     */
-    void updateVideoStatus(VideoVO videoVO);
-
-    /**
-     * 获取视频对象
      *
-     * @param videoId videoId
-     * @param publish publish
-     * @return VideoVO
+     * @param video video
      */
-    VideoVO getVideoVO(Integer videoId, Boolean publish);
+    void updateVideo(Video video);
+
+    /**
+     * 更新视频
+     *
+     * @param video video
+     */
+    void updateVideoById(Video video);
 
     /**
      * 获取视频对象
@@ -71,24 +63,34 @@ public interface VideoMapperService extends IService<Video> {
     Video getVideo(Integer videoId, Boolean publish);
 
     /**
-     * 判断类别下是否有文章
-     * @param categoryId
-     * @return
+     * 判断类别下是否有视频
+     *
+     * @param categoryId categoryId
+     * @return 类别下是否有视频
      */
-    boolean checkByCategory(Integer categoryId);
+    Boolean checkByCategoryId(Integer categoryId);
 
     /**
-     * 判断上传文件下是否有文章
-     * @param url
-     * @return
+     * 判断上传文件下是否有视频
+     *
+     * @param url url
+     * @return 上传文件下是否有视频
      */
-    boolean checkByFile(String url);
+    Boolean checkByFile(String url);
 
     /**
      * 批量删除
-     * @param ids 文章id数组
+     *
+     * @param ids 视频id数组
      */
-    void deleteVideos(Integer[] ids);
+    void deleteVideos(List<Integer> ids);
+
+    /**
+     * 查询所有已发布的视频
+     *
+     * @return 所有已发布的视频
+     */
+    List<Video> listVideosByPublish();
 
     /**
      * 根据标题查询所有已发布的视频
@@ -102,6 +104,7 @@ public interface VideoMapperService extends IService<Video> {
 
     /**
      * 分页获取视频列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @param categoryId 分类
@@ -110,26 +113,13 @@ public interface VideoMapperService extends IService<Video> {
      * @param watch 观看量排序
      * @return 视频列表
      */
-    PageUtils listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch);
-
-    /**
-     * 获取VideoDTO对象
-     * @param id id
-     * @return VideoDTO
-     */
-    VideoDTO getVideoDTO(Integer id);
+    IPage<Video> listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch);
 
     /**
      * 获取热观榜
+     *
      * @return 热观视频列表
      */
-    List<VideoVO> listHotWatchVideos();
-
-    /**
-     * 视频点赞
-     * @param id id
-     * @return 点赞结果
-     */
-    Boolean updateVideo(Integer id) throws Exception;
+    List<Video> listHotWatchVideos();
 
 }

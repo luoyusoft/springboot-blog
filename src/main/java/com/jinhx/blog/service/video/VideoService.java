@@ -2,8 +2,8 @@ package com.jinhx.blog.service.video;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
-import com.jinhx.blog.entity.video.dto.VideoDTO;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
 
@@ -12,11 +12,34 @@ import java.util.List;
 /**
  * VideoService
  *
- * @author luoyu
- * @date 2018/11/21 12:47
- * @description
+ * @author jinhx
+ * @since 2018-11-22
  */
 public interface VideoService extends IService<Video> {
+
+    /**
+     * 将Video按需转换为VideoVO
+     *
+     * @param videoAdaptorBuilder videoAdaptorBuilder
+     * @return VideoVO
+     */
+    VideoVO adaptorVideoToVideoVO(VideoAdaptorBuilder<Video> videoAdaptorBuilder);
+
+    /**
+     * 将VideoVO转换为Video
+     *
+     * @param videoAdaptorBuilder videoAdaptorBuilder
+     * @return Video
+     */
+    Video adaptorVideoVOToVideo(VideoAdaptorBuilder<VideoVO> videoAdaptorBuilder);
+
+    /**
+     * 将Video列表按需转换为VideoVO列表
+     *
+     * @param videoAdaptorBuilder videoAdaptorBuilder
+     * @return VideoVO列表
+     */
+    List<VideoVO> adaptorVideosToVideoVOs(VideoAdaptorBuilder<List<Video>> videoAdaptorBuilder);
 
     /**
      * 获取首页信息
@@ -27,6 +50,7 @@ public interface VideoService extends IService<Video> {
 
     /**
      * 分页查询视频列表
+     *
      * @param page 页码
      * @param limit 页数
      * @param title 标题
@@ -36,19 +60,22 @@ public interface VideoService extends IService<Video> {
 
     /**
      * 保存视频
-     * @param videoVO
+     *
+     * @param videoVO videoVO
      */
     void saveVideo(VideoVO videoVO);
 
     /**
      * 更新视频
-     * @param videoVO
+     *
+     * @param videoVO videoVO
      */
     void updateVideo(VideoVO videoVO);
 
     /**
      * 更新视频状态
-     * @param videoVO
+     *
+     * @param videoVO videoVO
      */
     void updateVideoStatus(VideoVO videoVO);
 
@@ -57,38 +84,40 @@ public interface VideoService extends IService<Video> {
      *
      * @param videoId videoId
      * @param publish publish
+     * @param videoAdaptorBuilder videoAdaptorBuilder
      * @return VideoVO
      */
-    VideoVO getVideoVO(Integer videoId, Boolean publish);
+    VideoVO getVideoVO(Integer videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder);
 
     /**
-     * 获取视频对象
+     * 判断类别下是否有视频
      *
-     * @param videoId videoId
-     * @param publish publish
-     * @return Video
+     * @param categoryId categoryId
+     * @return 类别下是否有视频
      */
-    Video getVideo(Integer videoId, Boolean publish);
+    Boolean checkByCategoryId(Integer categoryId);
 
     /**
-     * 判断类别下是否有文章
-     * @param categoryId
-     * @return
+     * 判断上传文件下是否有视频
+     *
+     * @param url url
+     * @return 上传文件下是否有视频
      */
-    boolean checkByCategory(Integer categoryId);
-
-    /**
-     * 判断上传文件下是否有文章
-     * @param url
-     * @return
-     */
-    boolean checkByFile(String url);
+    Boolean checkByFile(String url);
 
     /**
      * 批量删除
-     * @param ids 文章id数组
+     *
+     * @param ids 视频id数组
      */
     void deleteVideos(Integer[] ids);
+
+    /**
+     * 查询所有已发布的视频
+     *
+     * @return 所有已发布的视频
+     */
+    List<Video> listVideosByPublish();
 
     /**
      * 根据标题查询所有已发布的视频
@@ -102,6 +131,7 @@ public interface VideoService extends IService<Video> {
 
     /**
      * 分页获取视频列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @param categoryId 分类
@@ -113,20 +143,23 @@ public interface VideoService extends IService<Video> {
     PageUtils listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch);
 
     /**
-     * 获取VideoDTO对象
+     * 获取VideoVO
+     *
      * @param id id
-     * @return VideoDTO
+     * @return VideoVO
      */
-    VideoDTO getVideoDTO(Integer id);
+    VideoVO getVideoVO(Integer id);
 
     /**
      * 获取热观榜
+     *
      * @return 热观视频列表
      */
     List<VideoVO> listHotWatchVideos();
 
     /**
      * 视频点赞
+     *
      * @param id id
      * @return 点赞结果
      */

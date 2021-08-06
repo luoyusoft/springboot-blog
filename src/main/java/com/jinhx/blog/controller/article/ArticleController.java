@@ -5,8 +5,10 @@ import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.base.Response;
+import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.service.article.ArticleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +61,7 @@ public class ArticleController {
     @GetMapping("/manage/article/info/{articleId}")
     @RequiresPermissions("article:list")
     public Response info(@PathVariable("articleId") Integer articleId) {
-        return Response.success(articleService.getArticleVO(articleId, null));
+        return Response.success(articleService.getArticleVO(articleId, null, new ArticleAdaptorBuilder.Builder<Article>().setAll().build()));
     }
 
     /**
@@ -196,7 +198,7 @@ public class ArticleController {
     /**
      * 根据文章id获取公开状态
      *
-     * @param articleId 文章id
+     * @param id 文章id
      * @return 公开状态
      */
     @GetMapping("/article/open")

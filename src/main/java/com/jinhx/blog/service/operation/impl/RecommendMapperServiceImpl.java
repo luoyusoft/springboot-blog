@@ -16,6 +16,7 @@ import com.jinhx.blog.mapper.operation.RecommendMapper;
 import com.jinhx.blog.service.operation.RecommendMapperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +64,7 @@ public class RecommendMapperServiceImpl extends ServiceImpl<RecommendMapper, Rec
      * @param module module
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteRecommendsByLinkIdsAndType(List<Integer> linkIds, int module) {
         baseMapper.delete(new LambdaQueryWrapper<Recommend>()
                 .in(Recommend::getLinkId, linkIds)

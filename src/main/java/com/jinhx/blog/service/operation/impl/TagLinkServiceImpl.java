@@ -61,6 +61,8 @@ public class TagLinkServiceImpl extends ServiceImpl<TagLinkMapper, TagLink> impl
 
     /**
      * 清除缓存
+     *
+     * @param module module
      */
     private void cleanTagsAllCache(Integer module){
         taskExecutor.execute(() ->{

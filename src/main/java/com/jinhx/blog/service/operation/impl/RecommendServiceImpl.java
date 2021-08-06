@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.entity.builder.RecommendAdaptorBuilder;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -16,6 +15,9 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.builder.RecommendAdaptorBuilder;
+import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.entity.operation.vo.RecommendVO;
@@ -91,7 +93,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         BeanUtils.copyProperties(recommend, recommendVO);
 
         if(ModuleTypeConstants.ARTICLE.equals(recommendVO.getModule())){
-            ArticleVO articleVO = articleService.getArticleVO(recommendVO.getLinkId(), Article.PUBLISH_TRUE);
+            ArticleVO articleVO = articleService.getArticleVO(recommendVO.getLinkId(), Article.PUBLISH_TRUE, new ArticleAdaptorBuilder.Builder<Article>().setAll().build());
             if (ObjectUtils.isNotNull(articleVO)){
                 if (recommendAdaptorBuilder.getDescription()){
                     recommendVO.setDescription(articleVO.getDescription());
@@ -120,7 +122,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         }
 
         if(ModuleTypeConstants.VIDEO.equals(recommendVO.getModule())){
-            VideoVO videoVO = videoService.getVideoVO(recommendVO.getLinkId(), Video.PUBLISH_TRUE);
+            VideoVO videoVO = videoService.getVideoVO(recommendVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
             if (ObjectUtils.isNotNull(videoVO)){
                 if (recommendAdaptorBuilder.getWatchNum()){
                     recommendVO.setWatchNum(videoVO.getWatchNum());

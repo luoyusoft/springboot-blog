@@ -55,11 +55,8 @@ public class ArticleMapperServiceImpl extends ServiceImpl<ArticleMapper, Article
     @Override
     public IPage<Article> queryPage(Integer page, Integer limit, String title) {
         return baseMapper.selectPage(new Query<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
-                .eq(ObjectUtil.isNotEmpty(title), Article::getTitle, title)
-                .orderByDesc(Article::getUpdateTime)
-                .select(Article::getId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
-                        Article::getCover, Article::getCoverType, Article::getCategoryId, Article::getPublish, Article::getOpen,
-                        Article::getCreaterId, Article::getUpdaterId, Article::getCreateTime, Article::getUpdateTime));
+                .like(ObjectUtil.isNotEmpty(title), Article::getTitle, title)
+                .orderByDesc(Article::getUpdateTime));
     }
 
     /**
@@ -68,7 +65,6 @@ public class ArticleMapperServiceImpl extends ServiceImpl<ArticleMapper, Article
      * @param article 文章信息
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void saveArticle(Article article) {
         baseMapper.insert(article);
     }
@@ -79,6 +75,7 @@ public class ArticleMapperServiceImpl extends ServiceImpl<ArticleMapper, Article
      * @param ids 文章id列表
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteArticles(List<Integer> ids) {
         baseMapper.deleteBatchIds(ids);
     }
@@ -176,7 +173,10 @@ public class ArticleMapperServiceImpl extends ServiceImpl<ArticleMapper, Article
                 .like(categoryId != null, Article::getCategoryId, categoryId)
                 .orderByDesc(latest, Article::getCreateTime)
                 .orderByDesc(like, Article::getLikeNum)
-                .orderByDesc(read, Article::getReadNum));
+                .orderByDesc(read, Article::getReadNum)
+                .select(Article::getId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
+                        Article::getCover, Article::getCoverType, Article::getCategoryId, Article::getPublish, Article::getOpen,
+                        Article::getCreaterId, Article::getUpdaterId, Article::getCreateTime, Article::getUpdateTime));
     }
 
     /**
@@ -191,7 +191,10 @@ public class ArticleMapperServiceImpl extends ServiceImpl<ArticleMapper, Article
         return baseMapper.selectPage(new Query<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
                 .eq(Article::getPublish, Article.PUBLISH_TRUE)
                 .notIn(!CollectionUtils.isEmpty(linkIds), Article::getId, linkIds)
-                .orderByDesc(Article::getCreateTime));
+                .orderByDesc(Article::getCreateTime)
+                .select(Article::getId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
+                        Article::getCover, Article::getCoverType, Article::getCategoryId, Article::getPublish, Article::getOpen,
+                        Article::getCreaterId, Article::getUpdaterId, Article::getCreateTime, Article::getUpdateTime));
     }
 
     /**

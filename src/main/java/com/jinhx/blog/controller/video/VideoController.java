@@ -7,7 +7,8 @@ import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
-import com.jinhx.blog.entity.video.dto.VideoDTO;
+import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
+import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
 import com.jinhx.blog.service.video.VideoService;
@@ -30,6 +31,8 @@ public class VideoController {
 
     /**
      * 获取首页信息
+     *
+     * @return 首页信息
      */
     @GetMapping("/manage/video/homeinfo")
     @RequiresPermissions("video:list")
@@ -39,7 +42,12 @@ public class VideoController {
     }
 
     /**
-     * 列表
+     * 分页查询视频列表
+     *
+     * @param page 页码
+     * @param limit 页数
+     * @param title 标题
+     * @return 视频列表
      */
     @GetMapping("/manage/video/list")
     @RequiresPermissions("video:list")
@@ -49,16 +57,21 @@ public class VideoController {
     }
 
     /**
-     * 信息
+     * 获取视频对象
+     *
+     * @param videoId videoId
+     * @return VideoVO
      */
     @GetMapping("/manage/video/info/{videoId}")
     @RequiresPermissions("video:list")
     public Response info(@PathVariable("videoId") Integer videoId) {
-        return Response.success(videoService.getVideoVO(videoId, null));
+        return Response.success(videoService.getVideoVO(videoId, null, new VideoAdaptorBuilder.Builder<Video>().setAll().build()));
     }
 
     /**
-     * 保存
+     * 保存视频
+     *
+     * @param videoVO videoVO
      */
     @PostMapping("/manage/video/save")
     @RequiresPermissions("video:save")
@@ -70,7 +83,9 @@ public class VideoController {
     }
 
     /**
-     * 修改
+     * 更新视频
+     *
+     * @param videoVO videoVO
      */
     @PutMapping("/manage/video/update")
     @RequiresPermissions("video:update")
@@ -80,7 +95,9 @@ public class VideoController {
     }
 
     /**
-     * 修改状态
+     * 更新视频状态
+     *
+     * @param videoVO videoVO
      */
     @PutMapping("/manage/video/update/status")
     @RequiresPermissions("video:update")
@@ -90,7 +107,9 @@ public class VideoController {
     }
 
     /**
-     * 删除
+     * 批量删除
+     *
+     * @param ids 视频id数组
      */
     @DeleteMapping("/manage/video/delete")
     @RequiresPermissions("video:delete")
@@ -110,33 +129,8 @@ public class VideoController {
     /********************** portal ********************************/
 
     /**
-     * 获取VideoDTO对象
-     * @param id id
-     * @return VideoDTO
-     */
-    @GetMapping("/video/{id}")
-    @LogView(module = 1)
-    public Response getVideo(@PathVariable Integer id){
-        VideoDTO videoDTO = videoService.getVideoDTO(id);
-        return Response.success(videoDTO);
-    }
-
-    /**
-     * 视频点赞
-     * @param id id
-     * @return 点赞结果
-     */
-    @PutMapping("/video/{id}")
-    @LogView(module = 1)
-    public Response updateVideo(@PathVariable Integer id) throws Exception{
-        if (id == null) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
-        }
-        return Response.success(videoService.updateVideo(id));
-    }
-
-    /**
      * 分页获取视频列表
+     *
      * @param page 页码
      * @param limit 每页数量
      * @param categoryId 分类
@@ -148,20 +142,48 @@ public class VideoController {
     @GetMapping("/video/listvideos")
     @LogView(module = 1)
     public Response listVideos(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
-                         @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
-                         @RequestParam("like") Boolean like, @RequestParam("watch") Boolean watch) {
+                               @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
+                               @RequestParam("like") Boolean like, @RequestParam("watch") Boolean watch) {
         PageUtils queryPageCondition = videoService.listVideos(page, limit, latest, categoryId, like, watch);
         return Response.success(queryPageCondition);
     }
 
     /**
+     * 获取VideoVO
+     *
+     * @param id id
+     * @return VideoVO
+     */
+    @GetMapping("/video/{id}")
+    @LogView(module = 1)
+    public Response getVideo(@PathVariable Integer id){
+        return Response.success(videoService.getVideoVO(id));
+    }
+
+    /**
      * 获取热观榜
+     *
      * @return 热观视频列表
      */
     @GetMapping("/videos/listhotwatchvideos")
     @LogView(module = 1)
     public Response listHotWatchVideos(){
         return Response.success(videoService.listHotWatchVideos());
+    }
+
+    /**
+     * 视频点赞
+     *
+     * @param id id
+     * @return 点赞结果
+     */
+    @PutMapping("/video/{id}")
+    @LogView(module = 1)
+    public Response updateVideo(@PathVariable Integer id) throws Exception{
+        if (id == null) {
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
+        }
+        return Response.success(videoService.updateVideo(id));
     }
 
 }

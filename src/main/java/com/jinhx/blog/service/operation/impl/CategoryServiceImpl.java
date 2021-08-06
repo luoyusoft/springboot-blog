@@ -171,7 +171,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public void delete(Integer id) {
-        //判断是否有子菜单或按钮
+        // 判断是否有子菜单或按钮
         List<Category> categorys = queryListByParentId(id);
         if(!CollectionUtils.isEmpty(categorys)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请先删除子级别");
@@ -181,7 +181,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有文章，无法删除");
         }
         // 判断是否有视频
-        if(videoMapperService.checkByCategory(id)) {
+        if(videoMapperService.checkByCategoryId(id)) {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有视频，无法删除");
         }
 

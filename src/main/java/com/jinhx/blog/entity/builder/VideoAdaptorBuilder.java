@@ -3,13 +3,13 @@ package com.jinhx.blog.entity.builder;
 import lombok.Data;
 
 /**
- * ArticleAdaptorBuilder
+ * VideoAdaptorBuilder
  *
  * @author jinhx
  * @since 2021-07-21
  */
 @Data
-public class ArticleAdaptorBuilder<T> {
+public class VideoAdaptorBuilder<T> {
 
     private Boolean categoryListStr;
     private Boolean tagList;
@@ -18,7 +18,7 @@ public class ArticleAdaptorBuilder<T> {
     private Boolean author;
     private T data;
 
-    public ArticleAdaptorBuilder<T> setData(T data) {
+    public VideoAdaptorBuilder<T> setData(T data) {
         this.data = data;
         return this;
     }
@@ -28,7 +28,7 @@ public class ArticleAdaptorBuilder<T> {
      *
      * @param builder builder
      */
-    private ArticleAdaptorBuilder(Builder<T> builder) {
+    private VideoAdaptorBuilder(Builder<T> builder) {
         this.categoryListStr = builder.categoryListStr;
         this.tagList = builder.tagList;
         this.recommend = builder.recommend;
@@ -49,13 +49,13 @@ public class ArticleAdaptorBuilder<T> {
         /**
          * 提供调用入口
          */
-        public ArticleAdaptorBuilder<T> build(T data) {
+        public VideoAdaptorBuilder<T> build(T data) {
             this.data = data;
-            return new ArticleAdaptorBuilder<>(this);
+            return new VideoAdaptorBuilder<>(this);
         }
 
-        public ArticleAdaptorBuilder<T> build() {
-            return new ArticleAdaptorBuilder<>(this);
+        public VideoAdaptorBuilder<T> build() {
+            return new VideoAdaptorBuilder<>(this);
         }
 
         public Builder() {

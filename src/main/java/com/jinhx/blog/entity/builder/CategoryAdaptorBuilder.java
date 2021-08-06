@@ -14,6 +14,11 @@ public class CategoryAdaptorBuilder<T> {
     private Boolean parentName;
     private T data;
 
+    public CategoryAdaptorBuilder<T> setData(T data) {
+        this.data = data;
+        return this;
+    }
+
     /**
      * 构造方法私有化
      *
@@ -34,6 +39,10 @@ public class CategoryAdaptorBuilder<T> {
          */
         public CategoryAdaptorBuilder<T> build(T data) {
             this.data = data;
+            return new CategoryAdaptorBuilder<>(this);
+        }
+
+        public CategoryAdaptorBuilder<T> build() {
             return new CategoryAdaptorBuilder<>(this);
         }
 

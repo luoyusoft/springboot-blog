@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
+import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.builder.TopAdaptorBuilder;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -16,6 +17,7 @@ import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.video.Video;
@@ -83,7 +85,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         BeanUtils.copyProperties(top, topVO);
 
         if(ModuleTypeConstants.ARTICLE.equals(topVO.getModule())){
-            ArticleVO articleVO = articleService.getArticleVO(topVO.getLinkId(), Article.PUBLISH_TRUE);
+            ArticleVO articleVO = articleService.getArticleVO(topVO.getLinkId(), Article.PUBLISH_TRUE, new ArticleAdaptorBuilder.Builder<Article>().setAll().build());
             if (ObjectUtils.isNotNull(articleVO)){
                 if (topAdaptorBuilder.getDescription()){
                     topVO.setDescription(articleVO.getDescription());
@@ -112,7 +114,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         }
 
         if(ModuleTypeConstants.VIDEO.equals(topVO.getModule())){
-            VideoVO videoVO = videoService.getVideoVO(topVO.getLinkId(), Video.PUBLISH_TRUE);
+            VideoVO videoVO = videoService.getVideoVO(topVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
             if (ObjectUtils.isNotNull(videoVO)){
                 if (topAdaptorBuilder.getWatchNum()){
                     topVO.setWatchNum(videoVO.getWatchNum());
