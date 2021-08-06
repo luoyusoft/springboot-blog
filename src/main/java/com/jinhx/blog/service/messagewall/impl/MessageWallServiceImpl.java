@@ -223,13 +223,14 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
             messageWallListVO.setMessageWallVOList(Lists.newArrayList());
             return messageWallListVO;
         }
+        List<Integer> replyIds = messageWalls.stream()
+                .map(MessageWall::getReplyId)
+                .distinct()
+                .filter(item -> !Objects.equals(item, MessageWall.REPLY_ID_LAYER_MASTER))
+                .collect(Collectors.toList());
 
         List<MessageWall> messageWallNames = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                .in(MessageWall::getId, messageWalls.stream()
-                        .map(MessageWall::getReplyId)
-                        .distinct()
-                        .filter(item -> !Objects.equals(item, MessageWall.REPLY_ID_LAYER_MASTER))
-                        .collect(Collectors.toList())));
+                .in(CollectionUtils.isNotEmpty(replyIds), MessageWall::getId, replyIds));
 
         if (CollectionUtils.isEmpty(messageWallNames)){
             messageWallListVO.setHaveMoreFloor(false);
