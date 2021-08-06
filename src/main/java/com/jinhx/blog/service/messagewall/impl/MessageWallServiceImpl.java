@@ -27,6 +27,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -224,7 +225,11 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         }
 
         List<MessageWall> messageWallNames = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                .in(MessageWall::getId, messageWalls.stream().map(MessageWall::getReplyId).distinct().collect(Collectors.toList())));
+                .in(MessageWall::getId, messageWalls.stream()
+                        .map(MessageWall::getReplyId)
+                        .distinct()
+                        .filter(item -> !Objects.equals(item, MessageWall.REPLY_ID_LAYER_MASTER))
+                        .collect(Collectors.toList())));
 
         if (CollectionUtils.isEmpty(messageWallNames)){
             messageWallListVO.setHaveMoreFloor(false);
@@ -234,6 +239,8 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
 
         // key：id，value：name
         Map<Integer, String> map = messageWallNames.stream().collect(Collectors.toMap(MessageWall::getId, MessageWall::getName));
+        // 设置站长名称
+        map.put(-1, messageWallDefaultManageName);
 
         List<MessageWallVO> messageWallVOs = Lists.newArrayList();
         messageWalls.forEach(item -> {
