@@ -23,8 +23,8 @@ public class LogFilter extends OncePerRequestFilter {
         try {
             String traceId = TraceIdUtils.getTraceId();
             MDC.put(TraceIdUtils.TRACE_ID, traceId);
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
             httpServletResponse.addHeader(TraceIdUtils.TRACE_ID, traceId);
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
         } finally {
             MDC.clear();
         }
