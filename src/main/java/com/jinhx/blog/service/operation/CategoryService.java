@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.entity.builder.CategoryAdaptorBuilder;
+import com.jinhx.blog.entity.operation.CategoryAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
 

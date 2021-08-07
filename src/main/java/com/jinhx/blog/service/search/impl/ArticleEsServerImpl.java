@@ -1,6 +1,6 @@
 package com.jinhx.blog.service.search.impl;
 
-import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;

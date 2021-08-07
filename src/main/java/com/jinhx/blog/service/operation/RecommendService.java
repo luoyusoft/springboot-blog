@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.entity.builder.RecommendAdaptorBuilder;
+import com.jinhx.blog.entity.operation.RecommendAdaptorBuilder;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;

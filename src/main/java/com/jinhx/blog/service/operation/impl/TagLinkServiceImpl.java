@@ -2,16 +2,15 @@ package com.jinhx.blog.service.operation.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.mapper.operation.TagLinkMapper;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.TagLinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -26,9 +25,6 @@ public class TagLinkServiceImpl extends ServiceImpl<TagLinkMapper, TagLink> impl
 
     @Autowired
     private CacheServer cacheServer;
-
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
 
     /**
      * 根据关联Id获取列表
@@ -65,7 +61,7 @@ public class TagLinkServiceImpl extends ServiceImpl<TagLinkMapper, TagLink> impl
      * @param module module
      */
     private void cleanTagsAllCache(Integer module){
-        taskExecutor.execute(() ->{
+        ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
             cacheServer.cleanTagsAllCache(module);
         });
     }

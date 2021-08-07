@@ -4,19 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
-import com.jinhx.blog.common.config.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.filter.params.ParamsHttpServletRequestWrapper;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.*;
+import com.jinhx.blog.engine.article.ArticleEngine;
+import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
+import com.jinhx.blog.engine.article.flow.ArticleVOsQueryFlow;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
@@ -36,7 +42,6 @@ import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,8 +92,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Resource
     private RabbitMQUtils rabbitmqUtils;
 
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    private ArticleEngine articleEngine;
 
     /**
      * 将Article按需转换为ArticleVO
@@ -98,7 +103,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public ArticleVO adaptorArticleToArticleVO(ArticleAdaptorBuilder<Article> articleAdaptorBuilder){
-        if(ObjectUtils.isNull(articleAdaptorBuilder) || ObjectUtils.isNull(articleAdaptorBuilder.getData())){
+        if(Objects.isNull(articleAdaptorBuilder) || Objects.isNull(articleAdaptorBuilder.getData())){
             return null;
         }
 
@@ -144,7 +149,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public Article adaptorArticleVOToArticle(ArticleAdaptorBuilder<ArticleVO> articleAdaptorBuilder){
-        if(ObjectUtils.isNull(articleAdaptorBuilder) || ObjectUtils.isNull(articleAdaptorBuilder.getData())){
+        if(Objects.isNull(articleAdaptorBuilder) || Objects.isNull(articleAdaptorBuilder.getData())){
             return null;
         }
 
@@ -161,12 +166,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public List<ArticleVO> adaptorArticlesToArticleVOs(ArticleAdaptorBuilder<List<Article>> articleAdaptorBuilder){
-        if(ObjectUtils.isNull(articleAdaptorBuilder) || CollectionUtils.isEmpty(articleAdaptorBuilder.getData())){
+        if(Objects.isNull(articleAdaptorBuilder) || CollectionUtils.isEmpty(articleAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
         List<ArticleVO> articleVOs = Lists.newArrayList();
         articleAdaptorBuilder.getData().forEach(article -> {
-            if (ObjectUtils.isNull(article)){
+            if (Objects.isNull(article)){
                 return;
             }
 
@@ -196,29 +201,30 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 分页查询文章列表
      *
-     * @param page 页码
-     * @param limit 页数
-     * @param title 标题
+     * @param articleVOsQueryDTO articleVOQueryDTO
      * @return 文章列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String title) {
-        IPage<Article> articleIPage = articleMapperService.queryPage(page, limit, title);
-
-        if (CollectionUtils.isEmpty(articleIPage.getRecords())){
-            return new PageUtils(articleIPage);
+    public PageUtils queryPage(ArticleVOsQueryDTO articleVOsQueryDTO) {
+        if (Objects.isNull(articleVOsQueryDTO) || Objects.isNull(articleVOsQueryDTO.getPage()) ||
+                Objects.isNull(articleVOsQueryDTO.getLimit()) || Objects.isNull(articleVOsQueryDTO.getArticleBuilder())){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleVOQueryDTO，page，limit不能为空");
         }
 
-        List<ArticleVO> articleVOs = adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
-                .setCategoryListStr()
-                .setTagList()
-                .setRecommend()
-                .setAuthor()
-                .build(articleIPage.getRecords()));
-        IPage<ArticleVO> articleVOIPage = new Page<>();
-        BeanUtils.copyProperties(articleIPage, articleVOIPage);
-        articleVOIPage.setRecords(articleVOs);
-        return new PageUtils(articleVOIPage);
+        if (StringUtils.isBlank(articleVOsQueryDTO.getLogStr())){
+            articleVOsQueryDTO.setLogStr("act=queryPageV2 params=" + articleVOsQueryDTO);
+        }else {
+            articleVOsQueryDTO.setLogStr(articleVOsQueryDTO.getLogStr() + " act=queryPageV2 params=" + articleVOsQueryDTO);
+        }
+
+        ArticleQueryContextInfo<ArticleVOsQueryDTO> context = ArticleQueryContextInfo.create(articleVOsQueryDTO);
+        context.setPage(articleVOsQueryDTO.getPage());
+        context.setLimit(articleVOsQueryDTO.getLimit());
+        context.setTitle(articleVOsQueryDTO.getTitle());
+        context.setArticleBuilder(articleVOsQueryDTO.getArticleBuilder());
+
+        articleEngine.execute(ArticleVOsQueryFlow.getArticleVOsQueryFlow(), context);
+        return new PageUtils(context.getArticleVOIPage());
     }
 
     /**
@@ -514,7 +520,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @param ids ids
      * */
     private void cleanArticlesCache(Integer[] ids){
-        taskExecutor.execute(() ->{
+        ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
             cacheServer.cleanArticlesCache(ids);
         });
     }

@@ -2,7 +2,7 @@ package com.jinhx.blog.service.video;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
+import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;

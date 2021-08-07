@@ -7,8 +7,14 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * SnowFlakeUtils
+ *
+ * @author jinhx
+ * @since 2019-08-06
+ */
 @Component
-public class SnowFlakeUtil {
+public class SnowFlakeUtils {
 
     private long workerId = 0L;
     private long datacenterId = 1L;

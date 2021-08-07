@@ -2,7 +2,8 @@ package com.jinhx.blog.common.aop.aspect;
 
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.api.IPApi;
-import com.jinhx.blog.common.config.params.ParamsHttpServletRequestWrapper;
+import com.jinhx.blog.common.filter.params.ParamsHttpServletRequestWrapper;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.*;
 import com.jinhx.blog.entity.sys.IPInfo;
 import com.jinhx.blog.mapper.log.LogViewMapper;
@@ -16,7 +17,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -25,10 +25,10 @@ import javax.annotation.Resource;
 import java.lang.reflect.Method;
 
 /**
- * ViewLog
- * @author luoyu
- * @date 2019/02/15 14:51
- * @description 日志
+ * LogViewAspect
+ *
+ * @author jinhx
+ * @since 2019-08-06
  */
 @Aspect
 @Component
@@ -55,9 +55,6 @@ public class LogViewAspect {
 
     @Resource
     private LogViewMapper logViewMapper;
-
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
 
     @Pointcut("@annotation(com.jinhx.blog.common.aop.annotation.LogView)")
     public void logViewPointCut() {
@@ -102,7 +99,7 @@ public class LogViewAspect {
 
             // 每隔1小时重新计算pv
             if (redisUtils.setIfAbsent(BLOG_LOG_VIEW_LOCK_KEY + id, "1", LOG_VIEW_LOCK_TIME)){
-                taskExecutor.execute(() ->{
+                ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
                     //保存日志
                     saveViewLog(viewLogEntity, proceedingJoinPoint, stopWatch.getTime());
                 });

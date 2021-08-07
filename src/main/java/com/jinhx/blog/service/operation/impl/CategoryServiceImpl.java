@@ -6,25 +6,26 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.entity.builder.CategoryAdaptorBuilder;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.CategoryRankEnum;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.entity.operation.Category;
+import com.jinhx.blog.entity.operation.CategoryAdaptorBuilder;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
 import com.jinhx.blog.mapper.operation.CategoryMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
-import com.jinhx.blog.service.operation.CategoryMapperService;
-import com.jinhx.blog.service.video.VideoMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
+import com.jinhx.blog.service.operation.CategoryMapperService;
 import com.jinhx.blog.service.operation.CategoryService;
+import com.jinhx.blog.service.video.VideoMapperService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,9 +56,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Autowired
     private CacheServer cacheServer;
 
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
-
     /**
      * 将Category转换为CategoryVO
      *
@@ -66,7 +64,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public CategoryVO adaptorCategoryToCategoryVO(CategoryAdaptorBuilder<Category> categoryAdaptorBuilder){
-        if(ObjectUtils.isNull(categoryAdaptorBuilder) || ObjectUtils.isNull(categoryAdaptorBuilder.getData())){
+        if(Objects.isNull(categoryAdaptorBuilder) || Objects.isNull(categoryAdaptorBuilder.getData())){
             return null;
         }
         Category category = categoryAdaptorBuilder.getData();
@@ -75,7 +73,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
         if (categoryAdaptorBuilder.getParentName()){
             Category parentCategory = categoryMapperService.getById(categoryVO.getParentId());
-            if (ObjectUtils.isNotNull(parentCategory)){
+            if (!Objects.isNull(parentCategory)){
                 categoryVO.setParentName(parentCategory.getName());
             }
         }
@@ -91,12 +89,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public List<CategoryVO> adaptorCategorysToCategoryVOs(CategoryAdaptorBuilder<List<Category>> categoryAdaptorBuilder){
-        if(ObjectUtils.isNull(categoryAdaptorBuilder) || CollectionUtils.isEmpty(categoryAdaptorBuilder.getData())){
+        if(Objects.isNull(categoryAdaptorBuilder) || CollectionUtils.isEmpty(categoryAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
         List<CategoryVO> categoryVOs = Lists.newArrayList();
         categoryAdaptorBuilder.getData().forEach(category -> {
-            if (ObjectUtils.isNull(category)){
+            if (Objects.isNull(category)){
                 return;
             }
 
@@ -305,7 +303,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * 清除缓存
      */
     private void cleanCategorysAllCache(){
-        taskExecutor.execute(() ->{
+        ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
             cacheServer.cleanCategorysAllCache();
         });
     }
@@ -322,7 +320,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<Category> listCategories(String module) {
         return baseMapper.selectList(new QueryWrapper<Category>().lambda()
-                .eq(ObjectUtils.isNotEmpty(module),Category::getModule,module));
+                .eq(StringUtils.isNotEmpty(module), Category::getModule,module));
     }
 
 }

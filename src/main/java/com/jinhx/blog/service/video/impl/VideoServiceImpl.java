@@ -4,23 +4,23 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.common.config.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.filter.params.ParamsHttpServletRequestWrapper;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.*;
-import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.TagLink;
+import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
@@ -33,7 +33,6 @@ import com.jinhx.blog.service.video.VideoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,9 +84,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Autowired
     private SysUserMapperService sysUserMapperService;
 
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
-
     /**
      * 将Video按需转换为VideoVO
      *
@@ -96,7 +92,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public VideoVO adaptorVideoToVideoVO(VideoAdaptorBuilder<Video> videoAdaptorBuilder){
-        if(ObjectUtils.isNull(videoAdaptorBuilder) || ObjectUtils.isNull(videoAdaptorBuilder.getData())){
+        if(Objects.isNull(videoAdaptorBuilder) || Objects.isNull(videoAdaptorBuilder.getData())){
             return null;
         }
 
@@ -107,7 +103,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         if (videoAdaptorBuilder.getCategoryListStr()){
             List<Category> categorys = categoryMapperService.list(new LambdaQueryWrapper<Category>().eq(Category::getModule, ModuleTypeConstants.VIDEO));
 
-            if(!org.apache.shiro.util.CollectionUtils.isEmpty(categorys)){
+            if(!CollectionUtils.isEmpty(categorys)){
                 videoVO.setCategoryListStr(categoryMapperService.renderCategoryArr(videoVO.getCategoryId(), categorys));
             }
         }
@@ -142,7 +138,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public Video adaptorVideoVOToVideo(VideoAdaptorBuilder<VideoVO> videoAdaptorBuilder){
-        if(ObjectUtils.isNull(videoAdaptorBuilder) || ObjectUtils.isNull(videoAdaptorBuilder.getData())){
+        if(Objects.isNull(videoAdaptorBuilder) || Objects.isNull(videoAdaptorBuilder.getData())){
             return null;
         }
 
@@ -159,12 +155,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Override
     public List<VideoVO> adaptorVideosToVideoVOs(VideoAdaptorBuilder<List<Video>> videoAdaptorBuilder){
-        if(ObjectUtils.isNull(videoAdaptorBuilder) || org.apache.shiro.util.CollectionUtils.isEmpty(videoAdaptorBuilder.getData())){
+        if(Objects.isNull(videoAdaptorBuilder) || CollectionUtils.isEmpty(videoAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
         List<VideoVO> videoVOs = Lists.newArrayList();
         videoAdaptorBuilder.getData().forEach(video -> {
-            if (ObjectUtils.isNull(video)){
+            if (Objects.isNull(video)){
                 return;
             }
 
@@ -447,7 +443,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @param ids ids
      */
     private void cleanVideosCache(Integer[] ids){
-        taskExecutor.execute(() ->{
+        ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
             cacheServer.cleanVideosCache(ids);
         });
     }

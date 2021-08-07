@@ -1,5 +1,6 @@
-package com.jinhx.blog.common.config.xss;
+package com.jinhx.blog.common.filter.xss;
 
+import com.jinhx.blog.common.filter.html.HTMLFilter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -17,9 +18,8 @@ import java.util.Map;
 /**
  * XSS过滤处理
  *
- * @author luoyu
- * @date 2018/10/07 16:39
- * @description XSS过滤处理
+ * @author jinhx
+ * @since 2018-08-06
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
@@ -27,12 +27,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      * 没被包装过的HttpServletRequest（特殊场景，需要自己过滤）
      */
     HttpServletRequest orgRequest;
-    //html过滤
+    // html过滤
     private final static HTMLFilter htmlFilter = new HTMLFilter();
 
-    public XssHttpServletRequestWrapper(HttpServletRequest request) {
-        super(request);
-        orgRequest = request;
+    public XssHttpServletRequestWrapper(HttpServletRequest httpServletRequest) {
+        super(httpServletRequest);
+        orgRequest = httpServletRequest;
     }
 
     @Override

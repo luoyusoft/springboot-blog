@@ -5,7 +5,7 @@ import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.util.MinioUtils;
 import com.jinhx.blog.common.api.IPApi;
 import com.jinhx.blog.common.util.ElasticSearchUtils;
-import com.jinhx.blog.common.util.SnowFlakeUtil;
+import com.jinhx.blog.common.util.SnowFlakeUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.sys.IPInfo;
 import com.jinhx.blog.service.log.LogViewService;
@@ -43,7 +43,7 @@ class BlogApplicationTests {
     private LogViewService logViewService;
 
     @Autowired
-    private SnowFlakeUtil snowFlakeUtil;
+    private SnowFlakeUtils snowFlakeUtils;
 
     @Autowired
     private MinioUtils minioUtils;
@@ -103,8 +103,8 @@ class BlogApplicationTests {
 
     @Test
     void testId() throws Exception {
-        long s = snowFlakeUtil.snowflakeId(1, 1);
-        long s1 = snowFlakeUtil.snowflakeId();
+        long s = snowFlakeUtils.snowflakeId(1, 1);
+        long s1 = snowFlakeUtils.snowflakeId();
         System.out.println(s);
         System.out.println(s1);
     }

@@ -1,4 +1,4 @@
-package com.jinhx.blog.common.config.xss;
+package com.jinhx.blog.common.filter.html;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

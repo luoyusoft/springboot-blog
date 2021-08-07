@@ -1,4 +1,4 @@
-package com.jinhx.blog.common.config.params;
+package com.jinhx.blog.common.filter.params;
 
 import com.jinhx.blog.common.util.RequestReadUtils;
 
@@ -11,13 +11,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * ParamsHttpServletRequestWrapper
+ *
+ * @author jinhx
+ * @since 2019-08-06
+ */
 public class ParamsHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private final String body;
 
-    public ParamsHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
-        super(request);
-        body = RequestReadUtils.read(request);
+    public ParamsHttpServletRequestWrapper(HttpServletRequest httpServletRequest) throws IOException {
+        super(httpServletRequest);
+        body = RequestReadUtils.read(httpServletRequest);
     }
 
     public String getBody() {

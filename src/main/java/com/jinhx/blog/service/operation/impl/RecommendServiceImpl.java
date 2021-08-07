@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
@@ -12,13 +11,14 @@ import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
-import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
-import com.jinhx.blog.entity.builder.RecommendAdaptorBuilder;
-import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Recommend;
+import com.jinhx.blog.entity.operation.RecommendAdaptorBuilder;
+import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.entity.operation.vo.RecommendVO;
 import com.jinhx.blog.entity.video.Video;
@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +42,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -73,9 +73,6 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
     @Autowired
     private CacheServer cacheServer;
 
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
-
     /**
      * 将Recommend转换为RecommendVO
      *
@@ -84,7 +81,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      */
     @Override
     public RecommendVO adaptorRecommendToRecommendVO(RecommendAdaptorBuilder<Recommend> recommendAdaptorBuilder){
-        if(ObjectUtils.isNull(recommendAdaptorBuilder) || ObjectUtils.isNull(recommendAdaptorBuilder.getData())){
+        if(Objects.isNull(recommendAdaptorBuilder) || Objects.isNull(recommendAdaptorBuilder.getData())){
             return null;
         }
 
@@ -94,7 +91,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
 
         if(ModuleTypeConstants.ARTICLE.equals(recommendVO.getModule())){
             ArticleVO articleVO = articleService.getArticleVO(recommendVO.getLinkId(), Article.PUBLISH_TRUE, new ArticleAdaptorBuilder.Builder<Article>().setAll().build());
-            if (ObjectUtils.isNotNull(articleVO)){
+            if (!Objects.isNull(articleVO)){
                 if (recommendAdaptorBuilder.getDescription()){
                     recommendVO.setDescription(articleVO.getDescription());
                 }
@@ -123,7 +120,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
 
         if(ModuleTypeConstants.VIDEO.equals(recommendVO.getModule())){
             VideoVO videoVO = videoService.getVideoVO(recommendVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
-            if (ObjectUtils.isNotNull(videoVO)){
+            if (!Objects.isNull(videoVO)){
                 if (recommendAdaptorBuilder.getWatchNum()){
                     recommendVO.setWatchNum(videoVO.getWatchNum());
                 }
@@ -157,12 +154,12 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      */
     @Override
     public List<RecommendVO> adaptorRecommendsToRecommendVOs(RecommendAdaptorBuilder<List<Recommend>> recommendAdaptorBuilder){
-        if(ObjectUtils.isNull(recommendAdaptorBuilder) || org.apache.shiro.util.CollectionUtils.isEmpty(recommendAdaptorBuilder.getData())){
+        if(Objects.isNull(recommendAdaptorBuilder) || CollectionUtils.isEmpty(recommendAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
         List<RecommendVO> recommendVOs = Lists.newArrayList();
         recommendAdaptorBuilder.getData().forEach(recommend -> {
-            if (ObjectUtils.isNull(recommend)){
+            if (Objects.isNull(recommend)){
                 return;
             }
 
@@ -286,13 +283,13 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         }
         if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
             Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(article)) {
+            if(Objects.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
             Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                     .eq(Recommend::getLinkId, recommend.getLinkId())
                     .eq(Recommend::getModule, recommend.getModule()));
-            if(ObjectUtils.isNull(oldRecommend)){
+            if(Objects.isNull(oldRecommend)){
                 baseMapper.insert(recommend);
             }else {
                 baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
@@ -304,13 +301,13 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
 
         if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
             Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(video)) {
+            if(Objects.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
             Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                     .eq(Recommend::getLinkId, recommend.getLinkId())
                     .eq(Recommend::getModule, recommend.getModule()));
-            if(ObjectUtils.isNull(oldRecommend)){
+            if(Objects.isNull(oldRecommend)){
                 baseMapper.insert(recommend);
             }else {
                 baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
@@ -331,18 +328,18 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
     public void updateRecommend(Recommend recommend) {
         Recommend existRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                 .eq(Recommend::getOrderNum, recommend.getOrderNum()));
-        if (ObjectUtils.isNotNull(existRecommend) && !existRecommend.getId().equals(recommend.getId())){
+        if (!Objects.isNull(existRecommend) && !existRecommend.getId().equals(recommend.getId())){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
             Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(article)) {
+            if(Objects.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
             Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                     .eq(Recommend::getLinkId, recommend.getLinkId())
                     .eq(Recommend::getModule, recommend.getModule()));
-            if(ObjectUtils.isNull(oldRecommend)){
+            if(Objects.isNull(oldRecommend)){
                 baseMapper.insert(recommend);
             }else {
                 baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
@@ -354,13 +351,13 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
 
         if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
             Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(video)) {
+            if(Objects.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
             Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                     .eq(Recommend::getLinkId, recommend.getLinkId())
                     .eq(Recommend::getModule, recommend.getModule()));
-            if(ObjectUtils.isNull(oldRecommend)){
+            if(Objects.isNull(oldRecommend)){
                 baseMapper.insert(recommend);
             }else {
                 baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
@@ -460,7 +457,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      * 清除缓存
      */
     private void cleanRecommendAllCache(){
-        taskExecutor.execute(() ->{
+        ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
             cacheServer.cleanRecommendAllCache();
         });
     }

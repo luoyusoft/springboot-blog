@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -20,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -84,13 +84,13 @@ public class RecommendMapperServiceImpl extends ServiceImpl<RecommendMapper, Rec
         }
         if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
 //            Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
-//            if(ObjectUtils.isNull(article)) {
+//            if(Objects.isNull(article)) {
 //                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
 //            }
             Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                     .eq(Recommend::getLinkId, recommend.getLinkId())
                     .eq(Recommend::getModule, recommend.getModule()));
-            if(ObjectUtils.isNull(oldRecommend)){
+            if(Objects.isNull(oldRecommend)){
                 baseMapper.insert(recommend);
             }else {
                 baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
@@ -102,13 +102,13 @@ public class RecommendMapperServiceImpl extends ServiceImpl<RecommendMapper, Rec
 
         if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
 //            Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
-//            if(ObjectUtils.isNull(video)) {
+//            if(Objects.isNull(video)) {
 //                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
 //            }
             Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                     .eq(Recommend::getLinkId, recommend.getLinkId())
                     .eq(Recommend::getModule, recommend.getModule()));
-            if(ObjectUtils.isNull(oldRecommend)){
+            if(Objects.isNull(oldRecommend)){
                 baseMapper.insert(recommend);
             }else {
                 baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()

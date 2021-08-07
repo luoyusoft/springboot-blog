@@ -29,6 +29,28 @@ debug：当此属性设置为true时，将打印出logback内部日志信息，�
         </encoder>
     </appender>
 
+    <springProfile name="dev">
+        <!-- 1.1 所有日志，时间滚动输出  -->
+        <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <!-- 正在记录的日志文档的路径及文档名 -->
+            <file>${LOG_HOME}/blog-all.log</file>
+            <!--日志文档输出格式-->
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <charset>UTF-8</charset> <!-- 此处设置字符集 -->
+            </encoder>
+            <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_HOME}/all/blog-all-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>100MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+                <!--日志文档保留天数-->
+                <maxHistory>15</maxHistory>
+            </rollingPolicy>
+        </appender>
+    </springProfile>
+
     <!--2. 输出到文档-->
     <springProfile name="prod">
         <!-- 2.1 所有日志，时间滚动输出  -->
@@ -37,7 +59,7 @@ debug：当此属性设置为true时，将打印出logback内部日志信息，�
             <file>${LOG_HOME}/blog-all.log</file>
             <!--日志文档输出格式-->
             <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
                 <charset>UTF-8</charset> <!-- 此处设置字符集 -->
             </encoder>
             <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -59,7 +81,7 @@ debug：当此属性设置为true时，将打印出logback内部日志信息，�
             <file>${LOG_HOME}/blog-info.log</file>
             <!--日志文档输出格式-->
             <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
                 <charset>UTF-8</charset>
             </encoder>
             <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -88,7 +110,7 @@ debug：当此属性设置为true时，将打印出logback内部日志信息，�
             <file>${LOG_HOME}/blog-warn.log</file>
             <!--日志文档输出格式-->
             <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
                 <charset>UTF-8</charset> <!-- 此处设置字符集 -->
             </encoder>
             <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -116,7 +138,7 @@ debug：当此属性设置为true时，将打印出logback内部日志信息，�
             <file>${LOG_HOME}/blog-error.log</file>
             <!--日志文档输出格式-->
             <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
                 <charset>UTF-8</charset> <!-- 此处设置字符集 -->
             </encoder>
             <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -169,6 +191,7 @@ debug：当此属性设置为true时，将打印出logback内部日志信息，�
     <!-- 3. 开发环境，打印控制台-->
     <springProfile name="dev">
         <root level="info">
+            <appender-ref ref="ALL_FILE" />
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>

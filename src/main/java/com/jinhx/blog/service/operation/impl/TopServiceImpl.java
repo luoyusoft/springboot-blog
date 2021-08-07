@@ -4,21 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
-import com.jinhx.blog.entity.builder.TopAdaptorBuilder;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
-import com.jinhx.blog.entity.builder.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Top;
+import com.jinhx.blog.entity.operation.TopAdaptorBuilder;
+import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.VideoVO;
@@ -32,13 +32,13 @@ import com.jinhx.blog.service.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TopServiceImpl
@@ -65,9 +65,6 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
     @Autowired
     private CacheServer cacheServer;
 
-    @Resource(name = "taskExecutor")
-    private ThreadPoolTaskExecutor taskExecutor;
-
     /**
      * 将Top转换为TopVO
      *
@@ -76,7 +73,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
      */
     @Override
     public TopVO adaptorTopToTopVO(TopAdaptorBuilder<Top> topAdaptorBuilder){
-        if(ObjectUtils.isNull(topAdaptorBuilder) || ObjectUtils.isNull(topAdaptorBuilder.getData())){
+        if(Objects.isNull(topAdaptorBuilder) || Objects.isNull(topAdaptorBuilder.getData())){
             return null;
         }
 
@@ -86,7 +83,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
 
         if(ModuleTypeConstants.ARTICLE.equals(topVO.getModule())){
             ArticleVO articleVO = articleService.getArticleVO(topVO.getLinkId(), Article.PUBLISH_TRUE, new ArticleAdaptorBuilder.Builder<Article>().setAll().build());
-            if (ObjectUtils.isNotNull(articleVO)){
+            if (!Objects.isNull(articleVO)){
                 if (topAdaptorBuilder.getDescription()){
                     topVO.setDescription(articleVO.getDescription());
                 }
@@ -115,7 +112,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
 
         if(ModuleTypeConstants.VIDEO.equals(topVO.getModule())){
             VideoVO videoVO = videoService.getVideoVO(topVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
-            if (ObjectUtils.isNotNull(videoVO)){
+            if (!Objects.isNull(videoVO)){
                 if (topAdaptorBuilder.getWatchNum()){
                     topVO.setWatchNum(videoVO.getWatchNum());
                 }
@@ -149,12 +146,12 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
      */
     @Override
     public List<TopVO> adaptorTopsToTopVOs(TopAdaptorBuilder<List<Top>> topAdaptorBuilder){
-        if(ObjectUtils.isNull(topAdaptorBuilder) || org.apache.shiro.util.CollectionUtils.isEmpty(topAdaptorBuilder.getData())){
+        if(Objects.isNull(topAdaptorBuilder) || CollectionUtils.isEmpty(topAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
         List<TopVO> topVOs = Lists.newArrayList();
         topAdaptorBuilder.getData().forEach(top -> {
-            if (ObjectUtils.isNull(top)){
+            if (Objects.isNull(top)){
                 return;
             }
 
@@ -252,13 +249,13 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         }
         if (ModuleTypeConstants.ARTICLE.equals(top.getModule())){
             Article article = articleMapperService.getArticle(top.getLinkId(), Article.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(article)) {
+            if(Objects.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
             Top oldTop = baseMapper.selectOne(new LambdaQueryWrapper<Top>()
                     .eq(Top::getLinkId, top.getLinkId())
                     .eq(Top::getModule, top.getModule()));
-            if(ObjectUtils.isNull(oldTop)){
+            if(Objects.isNull(oldTop)){
                 baseMapper.insert(top);
             }else {
                 baseMapper.update(top, new LambdaUpdateWrapper<Top>()
@@ -270,13 +267,13 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
 
         if (ModuleTypeConstants.VIDEO.equals(top.getModule())){
             Video video = videoMapperService.getVideo(top.getLinkId(), Video.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(video)) {
+            if(Objects.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
             Top oldTop = baseMapper.selectOne(new LambdaQueryWrapper<Top>()
                     .eq(Top::getLinkId, top.getLinkId())
                     .eq(Top::getModule, top.getModule()));
-            if(ObjectUtils.isNull(oldTop)){
+            if(Objects.isNull(oldTop)){
                 baseMapper.insert(top);
             }else {
                 baseMapper.update(top, new LambdaUpdateWrapper<Top>()
@@ -298,18 +295,18 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
     public void updateTop(Top top) {
         Top existTop = baseMapper.selectOne(new LambdaQueryWrapper<Top>()
                 .eq(Top::getOrderNum, top.getOrderNum()));
-        if (ObjectUtils.isNotNull(existTop) && !existTop.getId().equals(top.getId())){
+        if (!Objects.isNull(existTop) && !existTop.getId().equals(top.getId())){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(top.getModule())){
             Article article = articleMapperService.getArticle(top.getLinkId(), Article.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(article)) {
+            if(Objects.isNull(article)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
             Top oldTop = baseMapper.selectOne(new LambdaQueryWrapper<Top>()
                     .eq(Top::getLinkId, top.getLinkId())
                     .eq(Top::getModule, top.getModule()));
-            if(ObjectUtils.isNull(oldTop)){
+            if(Objects.isNull(oldTop)){
                 baseMapper.insert(top);
             }else {
                 baseMapper.update(top, new LambdaUpdateWrapper<Top>()
@@ -321,13 +318,13 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
 
         if (ModuleTypeConstants.VIDEO.equals(top.getModule())){
             Video video = videoMapperService.getVideo(top.getLinkId(), Video.PUBLISH_TRUE);
-            if(ObjectUtils.isNull(video)) {
+            if(Objects.isNull(video)) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
             Top oldTop = baseMapper.selectOne(new LambdaQueryWrapper<Top>()
                     .eq(Top::getLinkId, top.getLinkId())
                     .eq(Top::getModule, top.getModule()));
-            if(ObjectUtils.isNull(oldTop)){
+            if(Objects.isNull(oldTop)){
                 baseMapper.insert(top);
             }else {
                 baseMapper.update(top, new LambdaUpdateWrapper<Top>()
@@ -412,7 +409,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
      * 清除缓存
      */
     private void cleanListAllCache(){
-        taskExecutor.execute(() ->{
+        ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
             cacheServer.cleanListAllCache();
         });
     }

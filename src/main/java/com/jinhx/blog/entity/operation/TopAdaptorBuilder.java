@@ -1,15 +1,15 @@
-package com.jinhx.blog.entity.builder;
+package com.jinhx.blog.entity.operation;
 
 import lombok.Data;
 
 /**
- * RecommendAdaptorBuilder
+ * TopAdaptorBuilder
  *
  * @author jinhx
  * @since 2021-07-21
  */
 @Data
-public class RecommendAdaptorBuilder<T> {
+public class TopAdaptorBuilder<T> {
 
     private Boolean description;
     private Boolean readNum;
@@ -20,7 +20,7 @@ public class RecommendAdaptorBuilder<T> {
     private Boolean title;
     private T data;
 
-    public RecommendAdaptorBuilder<T> setData(T data) {
+    public TopAdaptorBuilder<T> setData(T data) {
         this.data = data;
         return this;
     }
@@ -30,7 +30,7 @@ public class RecommendAdaptorBuilder<T> {
      *
      * @param builder builder
      */
-    private RecommendAdaptorBuilder(Builder<T> builder) {
+    private TopAdaptorBuilder(Builder<T> builder) {
         this.description = builder.description;
         this.readNum = builder.readNum;
         this.watchNum = builder.watchNum;
@@ -55,13 +55,13 @@ public class RecommendAdaptorBuilder<T> {
         /**
          * 提供调用入口
          */
-        public RecommendAdaptorBuilder<T> build(T data) {
+        public TopAdaptorBuilder<T> build(T data) {
             this.data = data;
-            return new RecommendAdaptorBuilder<>(this);
+            return new TopAdaptorBuilder<>(this);
         }
 
-        public RecommendAdaptorBuilder<T> build() {
-            return new RecommendAdaptorBuilder<>(this);
+        public TopAdaptorBuilder<T> build() {
+            return new TopAdaptorBuilder<>(this);
         }
 
         public Builder() {

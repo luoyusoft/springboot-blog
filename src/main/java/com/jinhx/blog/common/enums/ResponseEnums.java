@@ -4,11 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * ErrorEnum
+ * ResponseEnums
  *
- * @author luoyu
- * @date 2018/10/07 14:19
- * @description error类型枚举类
+ * @author jinhx
+ * @since 2018-08-06
  */
 @Getter
 @AllArgsConstructor
@@ -24,21 +23,22 @@ public enum ResponseEnums {
     TOKEN_GENERATOR_ERROR(502,"token生成失败"),
     NO_UUID(503,"uuid为空"),
     SQL_ILLEGAL(504,"sql非法"),
+    TIMEOUT(505,"处理超时"),
 
-    //用户权限错误
+    // 用户权限错误
     INVALID_TOKEN(1001,"token不合法"),
 
-    //登录模块错误
+    // 登录模块错误
     LOGIN_FAIL(10001,"登录失败"),
     CAPTCHA_WRONG(10002,"验证码错误"),
     USERNAME_OR_PASSWORD_WRONG(10003,"用户名或密码错误"),
     ACCOUNT_LOCK(10004,"账号已被锁定，请联系管理员"),
 
-    //七牛OSS错误
+    // 七牛OSS错误
     OSS_CONFIG_ERROR(10050,"七牛配置信息错误"),
     OSS_UPLOAD_ERROR(10051,"七牛云OSS上传失败"),
 
-    //Minio错误
+    // Minio错误
     MINIO_UPLOAD_ERROR(10060,"Minio上传失败"),
     MINIO_DOWNLOAD_ERROR(10061,"Minio下载失败"),
     MINIO_GET_URL_ERROR(10062,"Minio获取下载地址失败"),
@@ -52,10 +52,10 @@ public enum ResponseEnums {
     MINIO_CREATE_URL_ERROR(10070,"Minio创建下载地址失败"),
     MINIO_COMPOSE_FILE_ERROR(10071,"Minio合并分片文件失败"),
 
-    //Zxing错误
+    // Zxing错误
     ZXING_CREATE_ERROR(10070,"生成二维码失败"),
 
-    //Chat错误
+    // Chat错误
     CHAT_USER_REPEAT(10080,"该用户已登录"),
     CHAT_NAME_REPEAT(10081,"该用户名已存在"),
     CHAT_USER_OFF_LINE(10082,"该用户未上线"),
@@ -65,7 +65,7 @@ public enum ResponseEnums {
     CHAT_USER_NOT_EXIST(10085,"该用户不存在"),
     CHAT_INITT_SUCCESS(10086,"初始化成功"),
 
-    //参数
+    // 参数
     PARAM_ERROR(20001,"参数错误"),
     SAVE_FAIL(20002,"保存数据失败"),
     UPDATE_FAILR(20003,"更新数据失败"),

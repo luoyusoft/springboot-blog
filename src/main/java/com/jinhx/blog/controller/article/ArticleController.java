@@ -6,14 +6,17 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.ArticleBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.base.Response;
-import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.service.article.ArticleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * ArticleController
@@ -49,7 +52,23 @@ public class ArticleController {
     @GetMapping("/manage/article/list")
     @RequiresPermissions("article:list")
     public Response listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
-        return Response.success(articleService.queryPage(page, limit, title));
+        if (Objects.isNull(page) || Objects.isNull(limit)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
+        }
+
+        ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
+        articleVOsQueryDTO.setPage(page);
+        articleVOsQueryDTO.setLimit(limit);
+        articleVOsQueryDTO.setTitle(title);
+        articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
+                .categoryListStr(true)
+                .tagList(true)
+                .recommend(true)
+                .top(true)
+                .author(true)
+                .build());
+
+        return Response.success(articleService.queryPage(articleVOsQueryDTO));
     }
 
     /**

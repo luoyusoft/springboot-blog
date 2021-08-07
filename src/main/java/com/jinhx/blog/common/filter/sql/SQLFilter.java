@@ -1,11 +1,14 @@
-package com.jinhx.blog.common.config.xss;
+package com.jinhx.blog.common.filter.sql;
 
-import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import org.springframework.util.StringUtils;
 
 /**
  * 防止SQL注入
+ *
+ * @author jinhx
+ * @since 2019-08-06
  */
 public class SQLFilter {
 

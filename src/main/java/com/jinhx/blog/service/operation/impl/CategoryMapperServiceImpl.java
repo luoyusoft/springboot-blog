@@ -12,6 +12,7 @@ import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.mapper.operation.CategoryMapper;
 import com.jinhx.blog.service.operation.CategoryMapperService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -192,7 +193,7 @@ public class CategoryMapperServiceImpl extends ServiceImpl<CategoryMapper, Categ
     @Override
     public List<Category> listCategories(String module) {
         return baseMapper.selectList(new QueryWrapper<Category>().lambda()
-                .eq(ObjectUtils.isNotEmpty(module),Category::getModule,module));
+                .eq(StringUtils.isNotEmpty(module), Category::getModule,module));
     }
 
 }

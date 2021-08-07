@@ -1,9 +1,10 @@
 package com.jinhx.blog.service.article;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.entity.builder.ArticleAdaptorBuilder;
 import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 
@@ -51,12 +52,10 @@ public interface ArticleService extends IService<Article> {
     /**
      * 分页查询文章列表
      *
-     * @param page 页码
-     * @param limit 页数
-     * @param title 标题
+     * @param articleVOsQueryDTO articleVOQueryDTO
      * @return 文章列表
      */
-    PageUtils queryPage(Integer page, Integer limit, String title);
+    PageUtils queryPage(ArticleVOsQueryDTO articleVOsQueryDTO);
 
     /**
      * 保存文章

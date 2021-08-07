@@ -1,4 +1,4 @@
-package com.jinhx.blog.entity.builder;
+package com.jinhx.blog.entity.operation;
 
 import lombok.Data;
 

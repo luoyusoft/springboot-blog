@@ -1,6 +1,5 @@
 package com.jinhx.blog.controller.operation;
 
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.PageUtils;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TopController
@@ -53,7 +53,7 @@ public class TopController {
     @GetMapping("/manage/operation/top/select")
     @RequiresPermissions("operation:top:list")
     public Response select(@RequestParam("module") Integer module, @RequestParam("title") String title) {
-        if(ObjectUtils.isNull(module)){
+        if(Objects.isNull(module)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "module不能为空");
         }
         List<TopVO> TopList = topService.select(module, title);
@@ -115,7 +115,7 @@ public class TopController {
     @PutMapping("/manage/operation/top/top/{id}")
     @RequiresPermissions("operation:top:update")
     public Response updateTop(@PathVariable("id") Integer id){
-        if(ObjectUtils.isNull(id)){
+        if(Objects.isNull(id)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
         }
         topService.updateTopTop(id);
