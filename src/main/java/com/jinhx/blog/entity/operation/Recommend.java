@@ -23,7 +23,7 @@ import java.io.Serializable;
 @TableName("recommend")
 public class Recommend extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5905726685443303544L;
 
     public static final Integer ORDER_NUM_TOP = 1;
 

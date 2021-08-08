@@ -24,7 +24,7 @@ import java.io.Serializable;
 @ApiModel(value="SysParam对象", description="系统参数")
 public class SysParam extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -662497005424960310L;
 
     @ApiModelProperty(value = "参数键")
     @NotNull(message = "参数键不能为空", groups = {AddGroup.class})

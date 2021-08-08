@@ -2,14 +2,15 @@ package com.jinhx.blog.common.exception;
 
 import com.jinhx.blog.common.enums.ResponseEnums;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * MyException
  *
- * @author luoyu
- * @date 2018/10/07 13:54
- * @description 自定义异常
+ * @author jinhx
+ * @since 2018-08-06
  */
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class MyException extends RuntimeException {
 

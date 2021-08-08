@@ -14,9 +14,8 @@ import java.util.stream.Collectors;
 /**
  * ValidatorUtils
  *
- * @author luoyu
- * @date 2018/10/25 22:45
- * @description
+ * @author jinhx
+ * @since 2018-08-06
  */
 public class ValidatorUtils {
 
@@ -27,16 +26,16 @@ public class ValidatorUtils {
     }
 
     /**
-     * 校验对象
+     * 校验对象，校验不通过，则报MyException异常
+     *
      * @param object        待校验对象
      * @param groups        待校验的组
-     * @throws MyException  校验不通过，则报MyException异常
      */
     public static void validateEntity(Object object, Class<?>... groups)
             throws MyException {
         Set<ConstraintViolation<Object>> constraintViolations = validator.validate(object, groups);
         if (!constraintViolations.isEmpty()) {
-            List<String> collect = constraintViolations.stream().map(constant -> constant.getMessage()).collect(Collectors.toList());
+            List<String> collect = constraintViolations.stream().map(ConstraintViolation::getMessage).collect(Collectors.toList());
             String msg = StringUtils.join(collect, ",");
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), msg);
         }

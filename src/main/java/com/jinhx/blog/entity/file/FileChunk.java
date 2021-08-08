@@ -21,7 +21,7 @@ import java.io.Serializable;
 @TableName("file_chunk")
 public class FileChunk extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -9032683187422485782L;
 
     public static final Integer UPLOAD_STATUS_0 = 0;
 

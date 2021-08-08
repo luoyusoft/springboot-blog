@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1958101545368445429L;
 
     // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 入参 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
     /**

@@ -14,6 +14,8 @@ import java.util.List;
 @Data
 public class MessageWallListVO implements Serializable {
 
+    private static final long serialVersionUID = 6370690845772673442L;
+
     /**
      * 总记录数
      */

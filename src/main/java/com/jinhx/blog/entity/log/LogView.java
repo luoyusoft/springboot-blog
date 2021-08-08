@@ -21,7 +21,7 @@ import java.io.Serializable;
 @TableName("log_view")
 public class LogView extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6163019509159971632L;
 
     public static final Integer CREATER_UPDATER_SYS_ID = -1;
 

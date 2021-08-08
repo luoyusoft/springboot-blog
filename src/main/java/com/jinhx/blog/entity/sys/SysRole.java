@@ -25,7 +25,7 @@ import java.util.List;
 @ApiModel(value="SysRole对象", description="角色")
 public class SysRole extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6539094636430203141L;
 
     @NotBlank(message = "角色名称不能为空", groups = {AddGroup.class})
     @ApiModelProperty(value = "角色名称")

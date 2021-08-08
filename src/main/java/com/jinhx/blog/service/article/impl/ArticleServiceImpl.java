@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
@@ -17,6 +16,8 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.filter.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.*;
+import com.jinhx.blog.common.validator.ValidatorUtils;
+import com.jinhx.blog.common.validator.group.QueryGroup;
 import com.jinhx.blog.engine.article.ArticleEngine;
 import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.engine.article.flow.ArticleVOsQueryFlow;
@@ -25,6 +26,8 @@ import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
+import com.jinhx.blog.entity.base.LogicExecutor;
+import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.Recommend;
@@ -37,6 +40,7 @@ import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.*;
 import com.jinhx.blog.service.sys.SysUserMapperService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -54,6 +58,7 @@ import java.util.*;
  * @author jinhx
  * @since 2018-11-21
  */
+@Slf4j
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
@@ -144,17 +149,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 将ArticleVO转换为Article
      *
-     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @param articleVO articleVO
      * @return Article
      */
-    @Override
-    public Article adaptorArticleVOToArticle(ArticleAdaptorBuilder<ArticleVO> articleAdaptorBuilder){
-        if(Objects.isNull(articleAdaptorBuilder) || Objects.isNull(articleAdaptorBuilder.getData())){
+    private Article adaptorArticleVOToArticle(ArticleVO articleVO) {
+        if (Objects.isNull(articleVO)) {
             return null;
         }
 
         Article article = new Article();
-        BeanUtils.copyProperties(articleAdaptorBuilder.getData(), article);
+        BeanUtils.copyProperties(articleVO, article);
         return article;
     }
 
@@ -205,26 +209,44 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @return 文章列表
      */
     @Override
-    public PageUtils queryPage(ArticleVOsQueryDTO articleVOsQueryDTO) {
-        if (Objects.isNull(articleVOsQueryDTO) || Objects.isNull(articleVOsQueryDTO.getPage()) ||
-                Objects.isNull(articleVOsQueryDTO.getLimit()) || Objects.isNull(articleVOsQueryDTO.getArticleBuilder())){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleVOQueryDTO，page，limit不能为空");
-        }
+    public Response<PageUtils> queryPage(ArticleVOsQueryDTO articleVOsQueryDTO) {
+        return new LogicExecutor<PageUtils>() {
 
-        if (StringUtils.isBlank(articleVOsQueryDTO.getLogStr())){
-            articleVOsQueryDTO.setLogStr("act=queryPageV2 params=" + articleVOsQueryDTO);
-        }else {
-            articleVOsQueryDTO.setLogStr(articleVOsQueryDTO.getLogStr() + " act=queryPageV2 params=" + articleVOsQueryDTO);
-        }
+            ArticleQueryContextInfo<ArticleVOsQueryDTO> context;
 
-        ArticleQueryContextInfo<ArticleVOsQueryDTO> context = ArticleQueryContextInfo.create(articleVOsQueryDTO);
-        context.setPage(articleVOsQueryDTO.getPage());
-        context.setLimit(articleVOsQueryDTO.getLimit());
-        context.setTitle(articleVOsQueryDTO.getTitle());
-        context.setArticleBuilder(articleVOsQueryDTO.getArticleBuilder());
+            @Override
+            protected void checkParams() {
+                ValidatorUtils.validateEntity(articleVOsQueryDTO, QueryGroup.class);
 
-        articleEngine.execute(ArticleVOsQueryFlow.getArticleVOsQueryFlow(), context);
-        return new PageUtils(context.getArticleVOIPage());
+                articleVOsQueryDTO.setLogStr("act=queryPage");
+                context = ArticleQueryContextInfo.create(articleVOsQueryDTO);
+            }
+
+            @Override
+            protected PageUtils process() {
+                context.setPage(articleVOsQueryDTO.getPage());
+                context.setLimit(articleVOsQueryDTO.getLimit());
+                context.setTitle(articleVOsQueryDTO.getTitle());
+                context.setArticleBuilder(articleVOsQueryDTO.getArticleBuilder());
+
+                articleEngine.execute(ArticleVOsQueryFlow.getArticleVOsQueryFlow(), context);
+                return new PageUtils(context.getArticleVOIPage());
+            }
+
+            @Override
+            protected String getParams() {
+                if (Objects.isNull(articleVOsQueryDTO)){
+                    return null;
+                }
+                return articleVOsQueryDTO.toString();
+            }
+
+            @Override
+            protected String getProcessorName() {
+                return "queryPage";
+            }
+
+        }.execute();
     }
 
     /**
@@ -235,8 +257,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveArticle(ArticleVO articleVO) {
-        Article article = adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
-                .build(articleVO));
+        Article article = adaptorArticleVOToArticle(articleVO);
         articleMapperService.saveArticle(article);
 
         articleVO.getTagList().forEach(item -> {
@@ -321,7 +342,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         });
 
         // 更新
-        articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>().build(articleVO)));
+        articleMapperService.updateArticleById(adaptorArticleVOToArticle(articleVO));
 
         if (!Objects.isNull(articleVO.getRecommend())){
             if (articleVO.getRecommend()){
@@ -378,7 +399,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         if (!Objects.isNull(articleVO.getPublish())){
             // 更新发布，公开状态
-            articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>().build(articleVO)));
+            articleMapperService.updateArticleById(adaptorArticleVOToArticle(articleVO));
 
             if (article.getPublish() && articleVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
@@ -392,8 +413,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
         }else if (articleVO.getOpen() != null){
             // 更新公开状态
-            articleMapperService.updateArticleById(adaptorArticleVOToArticle(new ArticleAdaptorBuilder.Builder<ArticleVO>()
-                    .build(articleVO)));
+            articleMapperService.updateArticleById(adaptorArticleVOToArticle(articleVO));
             if (article.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
                         JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));

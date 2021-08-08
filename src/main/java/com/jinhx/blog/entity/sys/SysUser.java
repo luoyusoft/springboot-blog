@@ -28,6 +28,8 @@ import java.io.Serializable;
 @ApiModel(value="SysUser对象", description="用户管理")
 public class SysUser extends BaseEntity implements Serializable {
 
+    private static final long serialVersionUID = 3285754866443165412L;
+
     // 用户默认头像地址
     public static String sysUserDefaultProfile;
 
@@ -35,8 +37,6 @@ public class SysUser extends BaseEntity implements Serializable {
     public void setSysUserDefaultProfile(String sysUserDefaultProfile) {
         SysUser.sysUserDefaultProfile = sysUserDefaultProfile;
     }
-
-    private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "用户名不能为空" , groups = {AddGroup.class, UpdateGroup.class})
     @Length(min = 4, max = 20, message = "用户名长度必须位于4到20之间", groups = {AddGroup.class, UpdateGroup.class})

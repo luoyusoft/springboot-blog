@@ -23,7 +23,7 @@ import java.io.Serializable;
 @ApiModel(value="SysUserRole对象", description="用户与角色对应关系")
 public class SysUserRole extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -5210668198016777422L;
 
     @ApiModelProperty(value = "用户id")
     @NotNull(message = "用户id不能为空", groups = {AddGroup.class})

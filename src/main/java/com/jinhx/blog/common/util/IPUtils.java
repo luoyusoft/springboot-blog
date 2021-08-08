@@ -1,15 +1,16 @@
 package com.jinhx.blog.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
  * IPUtils
+ *
  * @author jinhx
- * @date 2018/10/20 13:26
- * @description IPUtils
+ * @since 2019-08-06
  */
 @Slf4j
 public class IPUtils {
@@ -40,7 +41,7 @@ public class IPUtils {
                 ip = request.getRemoteAddr();
             }
         } catch (Exception e) {
-        	log.error("IPUtils ERROR ", e);
+        	log.error("IPUtils error msg={}", ExceptionUtils.getStackTrace(e));
         }
 
         //使用代理，则获取第一个IP地址

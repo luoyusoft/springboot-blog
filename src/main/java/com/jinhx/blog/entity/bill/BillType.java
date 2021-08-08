@@ -23,7 +23,7 @@ import java.io.Serializable;
 @TableName("bill_type")
 public class BillType extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3365395418752261475L;
 
     @NotNull(message = "标题不能为空", groups = {AddGroup.class})
     @ApiModelProperty(value = "标题")

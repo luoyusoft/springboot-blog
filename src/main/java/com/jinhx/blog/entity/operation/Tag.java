@@ -24,7 +24,7 @@ import java.io.Serializable;
 @TableName("tag")
 public class Tag extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1465693932599154429L;
 
     @ApiModelProperty(value = "标签名称")
     @NotBlank(message="标签名称不能为空", groups = {AddGroup.class})

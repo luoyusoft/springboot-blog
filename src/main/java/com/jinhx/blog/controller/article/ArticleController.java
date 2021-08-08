@@ -3,6 +3,7 @@ package com.jinhx.blog.controller.article;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.article.Article;
@@ -51,7 +52,7 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/list")
     @RequiresPermissions("article:list")
-    public Response listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
+    public Response<PageUtils> listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
         if (Objects.isNull(page) || Objects.isNull(limit)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
         }
@@ -68,7 +69,7 @@ public class ArticleController {
                 .author(true)
                 .build());
 
-        return Response.success(articleService.queryPage(articleVOsQueryDTO));
+        return articleService.queryPage(articleVOsQueryDTO);
     }
 
     /**

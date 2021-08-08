@@ -15,7 +15,7 @@ import java.io.Serializable;
 @ApiModel(value="SysUserToken对象", description="系统用户Token")
 public class SysUserToken implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5186217260146502444L;
 
     private Integer userId;
 

@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * DateUtils
+ * IPApi
  *
- * @author luoyu
- * @date 2018/10/20 13:26
- * @description IP工具类
+ * @author jinhx
+ * @since 2020-08-06
  */
 @Slf4j
 @Component
@@ -31,10 +30,10 @@ public class IPApi {
      */
     @Cacheable(value = RedisKeyConstants.IP, key = "#ip")
     public IPInfo getIpInfo(String ip) {
-        log.info("请求查询ip信息接口，请求参数：{}", ip);
+        log.info("请求查询ip信息接口，请求参数={}", ip);
         //构建返回参数
         ResponseEntity<String> responseEntity = restTemplate.getForEntity(IP_URL + ip + "?lang=zh-CN", String.class);
-        log.info("请求查询ip信息接口，响应参数：{}", responseEntity);
+        log.info("请求查询ip信息接口，响应参数={}", responseEntity);
         
         if (responseEntity.getStatusCodeValue() != 200){
             return null;

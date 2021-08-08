@@ -10,15 +10,14 @@ import java.io.Serializable;
 /**
  * QrCodeConfig
  *
- * @author luoyu
- * @date 2018/10/19 18:47
- * @description 云存储配置类
+ * @author jinhx
+ * @since 2020-10-17
  */
 @Data
 @Configuration
 public class QrCodeConfig implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 762539015116863339L;
 
     @Value("${qr.code.charset}")
     private String configCharset;

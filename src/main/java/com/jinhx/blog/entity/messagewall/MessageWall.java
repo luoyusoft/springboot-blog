@@ -23,7 +23,7 @@ import java.io.Serializable;
 @TableName("message_wall")
 public class MessageWall extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4369479038696400174L;
 
     public static final Integer REPLY_ID_LAYER_MASTER = -1;
 

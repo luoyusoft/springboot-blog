@@ -16,6 +16,8 @@ import java.util.Set;
 @Data
 public class SysMenuVO implements Serializable {
 
+    private static final long serialVersionUID = 4714713612225824068L;
+
     List<SysMenu> menuList;
 
     Set<String> permissions;

@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 public class SearchListVO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7627448363473287783L;
 
     private List<VideoVO> videoList;
 

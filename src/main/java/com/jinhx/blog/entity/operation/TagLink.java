@@ -23,7 +23,7 @@ import java.io.Serializable;
 @TableName("tag_link")
 public class TagLink extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1347335185884378936L;
 
     @ApiModelProperty(value = "标签链接id")
     @NotNull(message="标签链接id不能为空", groups = {AddGroup.class})

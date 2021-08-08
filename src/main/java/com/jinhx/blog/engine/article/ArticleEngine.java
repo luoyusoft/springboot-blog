@@ -1,6 +1,5 @@
 package com.jinhx.blog.engine.article;
 
-
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
@@ -52,7 +51,7 @@ public class ArticleEngine {
                         // 超时处理
                         future.get(5000, TimeUnit.MILLISECONDS);
                     } catch (Exception e) {
-                        log.error("article engine execute error throw exception={}", ExceptionUtils.getStackTrace(e));
+                        log.error("article engine execute error msg={}", ExceptionUtils.getStackTrace(e));
                         myException = new MyException(ResponseEnums.TIMEOUT);
                     }
                 }

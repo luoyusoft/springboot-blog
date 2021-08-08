@@ -1,6 +1,7 @@
 package com.jinhx.blog.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -10,9 +11,8 @@ import java.util.Map;
 /**
  * MapUtils
  *
- * @author luoyu
- * @date 2018/10/22 19:38
- * @description Map工具类
+ * @author jinhx
+ * @since 2019-08-06
  */
 @Slf4j
 public class MapUtils extends HashMap<String, Object> {
@@ -39,7 +39,7 @@ public class MapUtils extends HashMap<String, Object> {
             }
             return map;
         } catch (Exception e) {
-            log.error("object转换成map失败：", e);
+            log.error("object转换成map失败 msg={}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
@@ -64,7 +64,7 @@ public class MapUtils extends HashMap<String, Object> {
             }
             return obj;
         } catch (Exception e) {
-            log.error("map转换成object失败：", e);
+            log.error("map转换成object失败 msg={}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }

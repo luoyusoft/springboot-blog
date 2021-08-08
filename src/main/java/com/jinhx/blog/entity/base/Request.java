@@ -13,6 +13,8 @@ import java.io.Serializable;
 @Data
 public class Request implements Serializable {
 
+    private static final long serialVersionUID = -384864790718140960L;
+
     private String channel;
 
     private Object data;

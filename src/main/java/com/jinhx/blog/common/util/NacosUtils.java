@@ -21,9 +21,9 @@ public class NacosUtils {
      *
      * @return true：打开，false：关闭
      */
-    public static boolean getMdcLogSwitch() {
+    public static boolean getMDCLogSwitch() {
         try {
-            return nacosConfigService.getMdcLogSwitch();
+            return nacosConfigService.getMDCLogSwitch();
         } catch (Exception e) {
             return true;
         }

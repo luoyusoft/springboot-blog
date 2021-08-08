@@ -7,17 +7,16 @@ import org.springframework.context.annotation.Configuration;
 import java.io.Serializable;
 
 /**
- * CloudStorageConfig
+ * 七牛云云存储配置类
  *
- * @author luoyu
- * @date 2018/10/19 18:47
- * @description 云存储配置类
+ * @author jinhx
+ * @since 2018-12-17
  */
 @Data
 @Configuration
 public class CloudStorageProperties implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1397713143362376338L;
 
     @Value("${oss.qiniu.domain}")
     private String qiniuDomain;

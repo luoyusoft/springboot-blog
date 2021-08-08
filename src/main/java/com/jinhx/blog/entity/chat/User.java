@@ -16,6 +16,8 @@ import java.io.Serializable;
 @ApiModel(description = "websocket用户")
 public class User implements Serializable {
 
+    private static final long serialVersionUID = 3871388185877902553L;
+
     @ApiModelProperty(value = "id")
     private String id;
 

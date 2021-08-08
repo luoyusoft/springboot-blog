@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Data
 public class IPInfo implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1472299244657497721L;
 
     private String country;
     private String countryCode;

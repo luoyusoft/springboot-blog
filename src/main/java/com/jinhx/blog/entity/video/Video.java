@@ -27,7 +27,7 @@ import java.time.LocalDate;
 @TableName("video")
 public class Video extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -840045152275397777L;
 
     /**
      * 发布状态

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
@@ -14,11 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * JsonUtils
+ * Json工具类，依赖jackson
  *
- * @author luoyu
- * @date 2018/10/08 19:13
- * @description Json工具类，依赖jackson
+ * @author jinhx
+ * @since 2019-08-06
  */
 @Slf4j
 public class JsonUtils {
@@ -43,7 +43,7 @@ public class JsonUtils {
         try {
             return obj instanceof String ? (String) obj : objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            log.error("object转换成json失败：", e);
+            log.error("object转换成json失败 msg={}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
@@ -58,7 +58,7 @@ public class JsonUtils {
         try {
             return clazz.equals(String.class) ? (T) src : objectMapper.readValue(src, clazz);
         } catch (Exception e) {
-            log.error("json转换成object失败：", e);
+            log.error("json转换成object失败 msg={}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
@@ -73,7 +73,7 @@ public class JsonUtils {
         try {
             return objectMapper.readValue(src, Map.class);
         } catch (Exception e) {
-            log.error("json转换成map失败：", e);
+            log.error("json转换成map失败 msg={}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
@@ -86,7 +86,7 @@ public class JsonUtils {
             JavaType javaType = objectMapper.getTypeFactory().constructParametricType(ArrayList.class, clazz);
             return objectMapper.readValue(jsonArrayStr, javaType);
         }catch (Exception e) {
-            log.error("json转换成list失败：", e);
+            log.error("json转换成list失败 msg={}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }

@@ -26,7 +26,7 @@ import java.util.List;
 @TableName("sys_menu")
 public class SysMenu extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -8415084251160104448L;
 
     @ApiModelProperty(value = "父菜单id，一级菜单为0")
     @NotNull(message="父菜单id不能为空", groups = {AddGroup.class})

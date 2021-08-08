@@ -23,7 +23,7 @@ import java.io.Serializable;
 @ApiModel(value="SysRoleMenu对象", description="角色与菜单对应关系")
 public class SysRoleMenu extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 8947211881660774714L;
 
     @ApiModelProperty(value = "角色id")
     @NotNull(message = "角色id不能为空", groups = {AddGroup.class})

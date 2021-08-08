@@ -12,46 +12,70 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 /**
  * MyExceptionHandler
  *
- * @author luoyu
- * @date 2018/10/07 14:33
- * @description 统一异常处理器
+ * @author jinhx
+ * @since 2018-08-06
  */
 @RestControllerAdvice
 @Slf4j
 public class MyExceptionHandler {
 
     /**
-     * 处理自定义异常
-     * @param e
-     * @return
+     * 处理异常
+     *
+     * @param e e
+     * @return Response
      */
     @ExceptionHandler(MyException.class)
-    public Response handleMyException(MyException e){
+    public <T> Response<T> handleMyException(MyException e){
         log.error(e.getMessage(), e);
         return Response.fail(e.getCode(), e.getMsg());
     }
 
+    /**
+     * 处理异常
+     *
+     * @param e e
+     * @return Response
+     */
     @ExceptionHandler(NoHandlerFoundException.class)
-    public Response handlerNoFoundException(Exception e){
-        log.error(e.getMessage(),e);
+    public <T> Response<T> handlerNoFoundException(Exception e){
+        log.error(e.getMessage(), e);
         return Response.fail(ResponseEnums.PATH_NOT_FOUND);
     }
 
+    /**
+     * 处理异常
+     *
+     * @param e e
+     * @return Response
+     */
     @ExceptionHandler(DuplicateKeyException.class)
-    public Response handleDuplicateKeyException(DuplicateKeyException e){
-        log.error(e.getMessage(),e);
+    public <T> Response<T> handleDuplicateKeyException(DuplicateKeyException e){
+        log.error(e.getMessage(), e);
         return Response.fail(ResponseEnums.DUPLICATE_KEY);
     }
 
+    /**
+     * 处理异常
+     *
+     * @param e e
+     * @return Response
+     */
     @ExceptionHandler(AuthorizationException.class)
-    public Response handleAuthorizationException(AuthorizationException e){
-        log.error(e.getMessage(),e);
+    public <T> Response<T> handleAuthorizationException(AuthorizationException e){
+        log.error(e.getMessage(), e);
         return Response.fail(ResponseEnums.NO_AUTH);
     }
 
+    /**
+     * 处理异常
+     *
+     * @param e e
+     * @return Response
+     */
     @ExceptionHandler(Exception.class)
-    public Response handleException(Exception e){
-        log.error(e.getMessage(),e);
+    public <T> Response<T> handleException(Exception e){
+        log.error(e.getMessage(), e);
         return Response.fail();
     }
 

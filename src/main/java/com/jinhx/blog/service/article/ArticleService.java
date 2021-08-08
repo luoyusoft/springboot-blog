@@ -7,6 +7,7 @@ import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
+import com.jinhx.blog.entity.base.Response;
 
 import java.util.List;
 
@@ -25,14 +26,6 @@ public interface ArticleService extends IService<Article> {
      * @return ArticleVO
      */
     ArticleVO adaptorArticleToArticleVO(ArticleAdaptorBuilder<Article> articleAdaptorBuilder);
-
-    /**
-     * 将ArticleVO转换为Article
-     *
-     * @param articleAdaptorBuilder articleAdaptorBuilder
-     * @return Article
-     */
-    Article adaptorArticleVOToArticle(ArticleAdaptorBuilder<ArticleVO> articleAdaptorBuilder);
 
     /**
      * 将Article列表按需转换为ArticleVO列表
@@ -55,7 +48,7 @@ public interface ArticleService extends IService<Article> {
      * @param articleVOsQueryDTO articleVOQueryDTO
      * @return 文章列表
      */
-    PageUtils queryPage(ArticleVOsQueryDTO articleVOsQueryDTO);
+    Response<PageUtils> queryPage(ArticleVOsQueryDTO articleVOsQueryDTO);
 
     /**
      * 保存文章

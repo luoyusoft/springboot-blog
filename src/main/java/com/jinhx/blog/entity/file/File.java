@@ -21,7 +21,7 @@ import java.io.Serializable;
 @TableName("file")
 public class File extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4614708271763079532L;
 
     public static final String BUCKET_NAME_IMG = "img";
 

@@ -23,7 +23,7 @@ import java.io.Serializable;
 @TableName("top")
 public class Top extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 8763175028860773480L;
 
     public static final Integer ORDER_NUM_TOP = 1;
 

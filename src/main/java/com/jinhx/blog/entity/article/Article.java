@@ -21,7 +21,7 @@ import java.io.Serializable;
 @TableName("article")
 public class Article extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1891100871116824211L;
 
     /**
      * 发布状态

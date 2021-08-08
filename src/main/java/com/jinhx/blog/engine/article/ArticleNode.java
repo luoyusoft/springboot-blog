@@ -4,7 +4,6 @@ import com.jinhx.blog.common.util.NacosUtils;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.StopWatch;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.Arrays;
@@ -19,7 +18,7 @@ import java.util.List;
 @Slf4j
 public abstract class ArticleNode<T extends BaseRequestDTO> {
 
-    private final String LOG_END  = "end exec name=";
+    private final String LOG_END  = " execute success name=";
     private final String LOG_SKIP  = " skip=";
     private final String LOG_TIME  = " time=";
     private final String TRUE  = "true";
@@ -31,7 +30,7 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
      *
      * @param context context
      */
-    public abstract void process(ArticleQueryContextInfo<T> context);
+    protected abstract void process(ArticleQueryContextInfo<T> context);
 
     /**
      * 通用执行方法
@@ -39,11 +38,10 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
      * @param context context
      */
     public void execute(ArticleQueryContextInfo<T> context) {
-        String logStr = StringUtils.EMPTY;
+        String logStr = context.getQueryDTO().getLogStr();
         try {
             // 日志
-            logStr = context.getQueryDTO().getLogStr();
-            StringBuilder logInfo = new StringBuilder(16);
+            StringBuilder logInfo = new StringBuilder(logStr);
             String processorName = getProcessorName();
 
             buildLogInfo(logInfo, Arrays.asList(LOG_END, processorName));
@@ -64,11 +62,9 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
 
             buildLogInfo(logInfo, Arrays.asList(LOG_TIME, time, LOG_STR_ENTER));
 
-            if(NacosUtils.getMdcLogSwitch()){
-                log.info(logInfo.toString());
-            }
+            log.info(logInfo.toString());
         } catch (Exception e) {
-            log.error(logStr + " execute error name={}，msg={}", getProcessorName(), ExceptionUtils.getStackTrace(e));
+            log.error(logStr + " execute fail name={} msg={}", getProcessorName(), ExceptionUtils.getStackTrace(e));
             throw e;
         }
     }
@@ -80,10 +76,9 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
      * @param logInfos logInfos
      */
     private void buildLogInfo(StringBuilder logInfo, List<Object> logInfos) {
-        if(!NacosUtils.getMdcLogSwitch()){
-            return;
+        if(NacosUtils.getMDCLogSwitch()){
+            logInfos.forEach(logInfo::append);
         }
-        logInfos.forEach(logInfo::append);
     }
 
     /**
@@ -91,14 +86,14 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
      *
      * @return 当前执行节点名称
      */
-    public abstract String getProcessorName();
+    protected abstract String getProcessorName();
 
     /**
      * 是否跳过当前执行方法，默认不跳过
      *
      * @return 是否跳过当前执行方法
      */
-    public boolean isSkip(ArticleQueryContextInfo<T> context) {
+    protected boolean isSkip(ArticleQueryContextInfo<T> context) {
         return false;
     }
 

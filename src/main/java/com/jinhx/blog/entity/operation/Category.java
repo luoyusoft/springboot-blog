@@ -25,7 +25,7 @@ import java.io.Serializable;
 @TableName("category")
 public class Category extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -8525248598661244699L;
 
     @ApiModelProperty(value = "名称")
     @NotBlank(message = "名称不能为空", groups = {AddGroup.class})

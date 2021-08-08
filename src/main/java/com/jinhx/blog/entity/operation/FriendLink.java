@@ -23,7 +23,7 @@ import java.io.Serializable;
 @TableName("friend_link")
 public class FriendLink extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -5450078578713186942L;
 
     @ApiModelProperty(value = "链接名称")
     @NotBlank(message = "链接名称不能为空", groups = {AddGroup.class})

@@ -18,7 +18,7 @@ public class NacosConfigService {
      * 日志输出控制开关
      * true：打开，false：关闭
      */
-    @Value("${mdcLog.switch:true}")
-    private Boolean mdcLogSwitch;
+    @Value("${MDCLog.switch:true}")
+    private Boolean mDCLogSwitch;
 
 }

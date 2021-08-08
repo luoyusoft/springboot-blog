@@ -1,11 +1,11 @@
 package com.jinhx.blog.common.validator.group;
 
 /**
- * 更新校验组
+ * 查询校验组
  *
  * @author jinhx
- * @since 2020-08-06
+ * @since 2021-08-06
  */
-public interface UpdateGroup {
+public interface QueryGroup {
 
 }

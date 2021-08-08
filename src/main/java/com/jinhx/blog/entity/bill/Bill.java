@@ -32,7 +32,7 @@ import java.time.LocalDate;
 @TableName("bill")
 public class Bill extends BaseEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1370579136074196212L;
 
     @NotNull(message = "账单类型不能为空", groups = {AddGroup.class})
     @ApiModelProperty(value = "账单类型id")

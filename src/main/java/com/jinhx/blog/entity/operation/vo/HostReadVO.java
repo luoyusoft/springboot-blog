@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Data
 public class HostReadVO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -7051057878383055830L;
 
     private Integer id;
 

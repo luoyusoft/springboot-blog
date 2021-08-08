@@ -9,6 +9,7 @@ import com.jinhx.blog.entity.sys.IPInfo;
 import com.jinhx.blog.mapper.log.LogViewMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -134,7 +135,7 @@ public class LogViewAspect {
                     viewLogEntity.setCity(ipInfo.getCity());
                 }
             }catch (Exception e){
-                log.error("请求查询ip信息接口失败：{}", e.getMessage());
+                log.error("请求查询ip信息接口失败 msg={}", ExceptionUtils.getStackTrace(e));
             }
         }
 

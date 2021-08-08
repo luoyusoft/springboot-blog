@@ -23,6 +23,7 @@ public interface ShiroService {
 
     /**
      * 根据token查询token用户信息
+     *
      * @param token token
      * @return token用户信息
      */
@@ -30,6 +31,7 @@ public interface ShiroService {
 
     /**
      * 根据用户id获取SysUserDTO
+     *
      * @param userId 用户id
      * @return SysUserDTO
      */
@@ -37,6 +39,7 @@ public interface ShiroService {
 
     /**
      * 续期token
+     *
      * @param userId 用户id
      * @param accessToken 新token
      */
