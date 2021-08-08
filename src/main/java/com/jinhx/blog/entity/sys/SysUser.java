@@ -24,7 +24,7 @@ import java.io.Serializable;
 @Data
 @Component
 @TableName("sys_user")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value="SysUser对象", description="用户管理")
 public class SysUser extends BaseEntity implements Serializable {
 

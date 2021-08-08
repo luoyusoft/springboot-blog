@@ -19,7 +19,7 @@ import java.io.Serializable;
  * @since 2018-12-28
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("sys_param")
 @ApiModel(value="SysParam对象", description="系统参数")
 public class SysParam extends BaseEntity implements Serializable {

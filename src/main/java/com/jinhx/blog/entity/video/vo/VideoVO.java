@@ -13,10 +13,11 @@ import java.util.List;
  * @author jinhx
  * @since 2019-02-22
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class VideoVO extends Video {
 
+    private static final long serialVersionUID = -5246155005529260907L;
     /**
      * 所属分类，以逗号分隔
      */

@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="BillType对象", description="账单类型")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("bill_type")
 public class BillType extends BaseEntity implements Serializable {
 

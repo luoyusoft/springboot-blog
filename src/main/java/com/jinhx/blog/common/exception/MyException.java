@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  * @author jinhx
  * @since 2018-08-06
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class MyException extends RuntimeException {
 

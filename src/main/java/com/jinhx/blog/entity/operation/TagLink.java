@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="TagLink对象", description="标签多对多维护表")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("tag_link")
 public class TagLink extends BaseEntity implements Serializable {
 

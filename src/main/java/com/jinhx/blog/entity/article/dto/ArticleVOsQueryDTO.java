@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * @author jinhx
  * @since 2021-08-06
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ArticleVOsQueryDTO extends BaseRequestDTO {
 

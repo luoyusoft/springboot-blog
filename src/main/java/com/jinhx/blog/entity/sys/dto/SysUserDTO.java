@@ -14,9 +14,11 @@ import java.util.List;
  * @since 2018-10-08
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value="SysUserDTO对象", description="用户管理")
 public class SysUserDTO extends SysUser {
+
+    private static final long serialVersionUID = 4353527185674315785L;
 
     private List<Integer> roleIdList;
 

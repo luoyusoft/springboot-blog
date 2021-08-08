@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="FileChunk对象", description="云存储分片表")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("file_chunk")
 public class FileChunk extends BaseEntity implements Serializable {
 

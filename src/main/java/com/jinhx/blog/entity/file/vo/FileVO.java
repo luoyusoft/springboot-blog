@@ -13,10 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
  * @author jinhx
  * @since 2018-11-30
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel(value="FileVO对象", description="文件表")
 public class FileVO extends File {
+
+    private static final long serialVersionUID = 1142796723126086354L;
 
     @ApiModelProperty(value = "文件")
     private MultipartFile file;

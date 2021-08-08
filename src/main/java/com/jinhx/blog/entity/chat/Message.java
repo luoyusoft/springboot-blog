@@ -16,6 +16,8 @@ import java.io.Serializable;
 @ApiModel(description = "websocket消息")
 public class Message implements Serializable {
 
+    private static final long serialVersionUID = 5433450723947675097L;
+
     /**
      * 消息推送者
      */

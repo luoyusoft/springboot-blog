@@ -2,6 +2,7 @@ package com.jinhx.blog.common.util;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.LinkedHashMap;
 
@@ -11,8 +12,11 @@ import java.util.LinkedHashMap;
  * @author jinhx
  * @since 2018-10-21
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class Query<T> extends LinkedHashMap<String, Object> {
+
+    private static final long serialVersionUID = -6559075988397185459L;
 
     /**
      * mybatis-plus分页参数

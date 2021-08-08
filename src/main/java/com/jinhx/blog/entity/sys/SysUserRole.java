@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @TableName("sys_user_role")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value="SysUserRole对象", description="用户与角色对应关系")
 public class SysUserRole extends BaseEntity implements Serializable {
 

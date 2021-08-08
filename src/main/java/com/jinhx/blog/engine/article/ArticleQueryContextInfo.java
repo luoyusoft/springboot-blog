@@ -11,7 +11,6 @@ import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.entity.operation.Tag;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -24,7 +23,6 @@ import java.util.Map;
  * @author jinhx
  * @since 2021-08-06
  */
-@EqualsAndHashCode(callSuper = false)
 @Data
 @Slf4j
 public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serializable {

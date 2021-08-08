@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="ViewLog对象", description="浏览日志")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("log_view")
 public class LogView extends BaseEntity implements Serializable {
 

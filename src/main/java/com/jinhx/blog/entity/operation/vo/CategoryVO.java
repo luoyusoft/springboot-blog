@@ -11,9 +11,11 @@ import lombok.EqualsAndHashCode;
  * @author jinhx
  * @since 2018-12-17
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class CategoryVO extends Category {
+
+    private static final long serialVersionUID = 215115213455726607L;
 
     @ApiModelProperty(value = "父主键名称")
     private String parentName;

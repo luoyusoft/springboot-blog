@@ -14,9 +14,11 @@ import java.util.List;
  * @author jinhx
  * @since 2019-02-17
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class RecommendVO extends Recommend {
+
+    private static final long serialVersionUID = -6237215344132247716L;
 
     private String description;
 

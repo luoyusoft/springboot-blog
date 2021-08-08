@@ -10,9 +10,11 @@ import lombok.EqualsAndHashCode;
  * @author jinhx
  * @since 2019-02-17
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class TagVO extends Tag {
+
+    private static final long serialVersionUID = -8122783307268537407L;
 
     private String linkNum;
 

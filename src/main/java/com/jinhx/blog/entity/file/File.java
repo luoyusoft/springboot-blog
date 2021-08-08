@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="File对象", description="文件表")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("file")
 public class File extends BaseEntity implements Serializable {
 

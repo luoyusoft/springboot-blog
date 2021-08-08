@@ -20,7 +20,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="Tag对象", description="标签")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("tag")
 public class Tag extends BaseEntity implements Serializable {
 

@@ -23,7 +23,7 @@ import java.time.LocalDate;
  */
 @Data
 @ApiModel(value="Video对象", description="视频表")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("video")
 public class Video extends BaseEntity implements Serializable {
 

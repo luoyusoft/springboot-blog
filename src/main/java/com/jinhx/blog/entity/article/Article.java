@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="Article对象", description="文章")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("article")
 public class Article extends BaseEntity implements Serializable {
 

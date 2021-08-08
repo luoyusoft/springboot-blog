@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="Recommend对象", description="推荐")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("recommend")
 public class Recommend extends BaseEntity implements Serializable {
 

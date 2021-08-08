@@ -28,7 +28,7 @@ import java.time.LocalDate;
  */
 @Data
 @ApiModel(value="Bill对象", description="收入支出账单")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("bill")
 public class Bill extends BaseEntity implements Serializable {
 

@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Data
 @TableName("sys_role")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value="SysRole对象", description="角色")
 public class SysRole extends BaseEntity implements Serializable {
 

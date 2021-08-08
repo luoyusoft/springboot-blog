@@ -14,9 +14,11 @@ import java.util.List;
  * @author jinhx
  * @since 2019-02-17
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class TopVO extends Top {
+
+    private static final long serialVersionUID = 5210408134898228381L;
 
     private String description;
 

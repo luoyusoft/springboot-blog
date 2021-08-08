@@ -13,9 +13,11 @@ import java.util.List;
  * @author jinhx
  * @since 2018-11-07
  */
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ArticleVO extends Article {
+
+    private static final long serialVersionUID = 5722313456412798232L;
 
     /**
      * 所属分类，以逗号分隔

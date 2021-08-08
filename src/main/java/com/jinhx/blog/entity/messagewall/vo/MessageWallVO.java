@@ -14,6 +14,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class MessageWallVO extends MessageWall {
 
+    private static final long serialVersionUID = -4196004574806931431L;
+
     /**
      * 回复name
      */

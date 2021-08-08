@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @TableName("sys_role_menu")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value="SysRoleMenu对象", description="角色与菜单对应关系")
 public class SysRoleMenu extends BaseEntity implements Serializable {
 

@@ -21,7 +21,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="Category对象", description="类别")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("category")
 public class Category extends BaseEntity implements Serializable {
 

@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @since 2019-02-14
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value="FriendLink对象", description="友链")
 @TableName("friend_link")
 public class FriendLink extends BaseEntity implements Serializable {

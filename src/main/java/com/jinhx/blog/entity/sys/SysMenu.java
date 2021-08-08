@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Data
 @ApiModel(value="SysMenu对象", description="菜单管理")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("sys_menu")
 public class SysMenu extends BaseEntity implements Serializable {
 

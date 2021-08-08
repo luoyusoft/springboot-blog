@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(value="MessageWall对象", description="留言墙")
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @TableName("message_wall")
 public class MessageWall extends BaseEntity implements Serializable {
 
