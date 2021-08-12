@@ -2,7 +2,7 @@ package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.operation.RecommendAdaptorBuilder;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.entity.operation.vo.RecommendVO;
@@ -47,7 +47,7 @@ public interface RecommendService extends IService<Recommend> {
      * @param limit 每页数量
      * @return 推荐列表
      */
-     PageUtils queryPage(Integer page, Integer limit);
+     PageData queryPage(Integer page, Integer limit);
 
     /**
      * 获取推荐列表

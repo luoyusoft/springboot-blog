@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.operation.FriendLink;
 import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
 import com.jinhx.blog.mapper.operation.FriendLinkMapper;
@@ -50,10 +50,10 @@ public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendL
      * @return PageUtils
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String title) {
-        IPage<FriendLink> friendLinkIPage = baseMapper.selectPage(new Query<FriendLink>(page, limit).getPage(),
+    public PageData queryPage(Integer page, Integer limit, String title) {
+        IPage<FriendLink> friendLinkIPage = baseMapper.selectPage(new QueryPage<FriendLink>(page, limit).getPage(),
                 new LambdaQueryWrapper<FriendLink>().like(StringUtils.isNotEmpty(title), FriendLink::getTitle,title));
-        return new PageUtils(friendLinkIPage);
+        return new PageData(friendLinkIPage);
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.file;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.file.File;
 import com.jinhx.blog.entity.file.vo.FileVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +55,7 @@ public interface FileService extends IService<File> {
      * @param url url
      * @return PageUtils
      */
-    PageUtils queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url);
+    PageData queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url);
 
     /**
      * 分片上传文件，获取各个分片上传地址

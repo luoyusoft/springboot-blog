@@ -2,7 +2,7 @@ package com.jinhx.blog.controller.file;
 
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.service.file.CloudStorageService;
@@ -106,7 +106,7 @@ public class FileController {
     @RequiresPermissions("file:list")
     public Response listTimeline(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("module") Integer module,
                                  @RequestParam("fileName") String fileName, @RequestParam("fileMd5") String fileMd5, @RequestParam("url") String url) {
-        PageUtils logViewPage = fileService.queryPage(page, limit, module, fileName, fileMd5, url);
+        PageData logViewPage = fileService.queryPage(page, limit, module, fileName, fileMd5, url);
         return Response.success(logViewPage);
     }
 

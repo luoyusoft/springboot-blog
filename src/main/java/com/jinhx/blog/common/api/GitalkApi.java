@@ -1,5 +1,6 @@
 package com.jinhx.blog.common.api;
 
+import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
@@ -56,9 +57,9 @@ public class GitalkApi {
         post.setHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36");
         post.setHeader("Authorization", "token " + TOKEN);
         post.setEntity(entity);
-        log.info("请求Github进行Gitalk初始化接口，请求参数：{}", post.getEntity().toString());
+        log.info("请求Github进行Gitalk初始化接口，请求参数：{}", JsonUtils.objectToJson(post.getEntity()));
         HttpResponse response = client.execute(post);
-        log.info("请求Github进行Gitalk初始化接口，响应参数：{}", response.getEntity().toString());
+        log.info("请求Github进行Gitalk初始化接口，响应参数：{}", JsonUtils.objectToJson(response.getEntity()));
 
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.set("accept", "*/*");

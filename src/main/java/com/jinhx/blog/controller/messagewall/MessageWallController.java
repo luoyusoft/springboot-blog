@@ -4,7 +4,7 @@ import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.FormatUtils;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -75,7 +75,7 @@ public class MessageWallController {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能小于1");
         }
 
-        PageUtils messageWallPage = messageWallService.manageGetMessageWalls(page, limit, name, floorNum);
+        PageData messageWallPage = messageWallService.manageGetMessageWalls(page, limit, name, floorNum);
         return Response.success(messageWallPage);
     }
 

@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.FriendLink;
 import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
 
@@ -30,7 +30,7 @@ public interface FriendLinkService extends IService<FriendLink> {
      * @param title title
      * @return PageUtils
      */
-     PageUtils queryPage(Integer page, Integer limit, String title);
+     PageData queryPage(Integer page, Integer limit, String title);
 
     /**
      * 判断上传文件下是否有友链

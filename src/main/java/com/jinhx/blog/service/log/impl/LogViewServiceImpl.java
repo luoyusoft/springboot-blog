@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.api.IPApi;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.log.LogView;
 import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 import com.jinhx.blog.entity.sys.IPInfo;
@@ -73,13 +73,13 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
      * @return PageUtils
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, Integer module) {
-        IPage<LogView> logViewIPage = baseMapper.selectPage(new Query<LogView>(page, limit).getPage(),
+    public PageData queryPage(Integer page, Integer limit, Integer module) {
+        IPage<LogView> logViewIPage = baseMapper.selectPage(new QueryPage<LogView>(page, limit).getPage(),
                 new LambdaQueryWrapper<LogView>()
                 .eq(ObjectUtil.isNotNull(module), LogView::getModule, module)
                 .orderByDesc(LogView::getCreateTime)
         );
-        return new PageUtils(logViewIPage);
+        return new PageData(logViewIPage);
     }
 
     /**

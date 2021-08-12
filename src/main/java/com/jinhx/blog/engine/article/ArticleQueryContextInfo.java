@@ -2,7 +2,6 @@ package com.jinhx.blog.engine.article;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.article.Article;
@@ -30,6 +29,7 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     private static final long serialVersionUID = -1958101545368445429L;
 
     // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 入参 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
     /**
      * 基础入参
      */
@@ -39,11 +39,6 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
      * 配置需要查询的参数
      */
     private ArticleBuilder articleBuilder;
-
-    /**
-     * 文章id
-     */
-    private Integer articleId;
 
     /**
      * 文章标题
@@ -61,9 +56,34 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     private Integer limit;
 
     /**
+     * 文章id列表
+     */
+    private List<Integer> articleIds;
+
+    /**
      * 发布状态
      */
     private Boolean publish;
+
+    /**
+     * 分类
+     */
+    private Integer categoryId;
+
+    /**
+     * 时间排序
+     */
+    private Boolean latest;
+
+    /**
+     * 点赞量排序
+     */
+    private Boolean like;
+
+    /**
+     * 阅读量排序
+     */
+    private Boolean read;
 
     // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 入参 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
@@ -105,6 +125,11 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
      */
     private Map<Integer, String> articleAuthorMap;
 
+    /**
+     * 文章部分信息
+     */
+    private List<Article> articles;
+
     // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 中间数据 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 
@@ -113,7 +138,12 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     /**
      * 文章完整信息
      */
-    private IPage<ArticleVO> articleVOIPage = new Page<>();
+    private IPage<ArticleVO> articleVOIPage;
+
+    /**
+     * 文章完整信息
+     */
+    private List<ArticleVO> articleVOs;
 
     // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 结果 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 

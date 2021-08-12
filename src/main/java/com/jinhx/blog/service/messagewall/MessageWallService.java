@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.messagewall;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.messagewall.MessageWall;
 import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
 import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
@@ -37,7 +37,7 @@ public interface MessageWallService extends IService<MessageWall> {
      * @param floorNum 楼层数
      * @return 留言列表
      */
-    PageUtils manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum);
+    PageData manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum);
 
     /**
      * 后台批量删除

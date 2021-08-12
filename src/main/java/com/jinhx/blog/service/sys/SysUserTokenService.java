@@ -4,14 +4,15 @@ import com.jinhx.blog.entity.sys.SysUserToken;
 
 /**
  * SysUserTokenService
+ *
  * @author jinhx
- * @date 2018/10/20 15:17
- * @description
+ * @since 2018-10-22
  */
 public interface SysUserTokenService {
 
     /**
      * 生成token
+     *
      * @param userId 用户id
      * @return token
      */
@@ -19,6 +20,7 @@ public interface SysUserTokenService {
 
     /**
      * 根据token查询token用户信息
+     *
      * @param token token
      * @return token用户信息
      */
@@ -26,12 +28,14 @@ public interface SysUserTokenService {
 
     /**
      * 退出登录
+     *
      * @param userId 用户id
      */
     void logout(Integer userId);
 
     /**
      * 续期token
+     *
      * @param userId 用户id
      * @param accessToken 新token
      */

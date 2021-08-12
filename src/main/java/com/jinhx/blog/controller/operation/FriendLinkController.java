@@ -1,9 +1,10 @@
 package com.jinhx.blog.controller.operation;
 
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -16,7 +17,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -54,7 +54,7 @@ public class FriendLinkController {
     @GetMapping("/manage/operation/friendlink/list")
     @RequiresPermissions("operation:friendlink:list")
     public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title){
-        PageUtils linkPage = friendLinkService.queryPage(page, limit, title);
+        PageData linkPage = friendLinkService.queryPage(page, limit, title);
         return Response.success(linkPage);
     }
 
@@ -116,7 +116,7 @@ public class FriendLinkController {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
         }
 
-        friendLinkService.removeByIds(Arrays.asList(ids));
+        friendLinkService.removeByIds(Lists.newArrayList(ids));
         return Response.success();
     }
 

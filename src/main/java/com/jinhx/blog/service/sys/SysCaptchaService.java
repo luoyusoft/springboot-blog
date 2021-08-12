@@ -6,14 +6,14 @@ import java.awt.image.BufferedImage;
 /**
  * SysCaptchaService
  *
- * @author luoyu
- * @date 2018/10/19 18:52
- * @description 验证码类
+ * @author jinhx
+ * @since 2018-10-08
  */
 public interface SysCaptchaService {
 
     /**
      * 获取验证码
+     *
      * @param uuid uuid
      * @return 验证码
      */
@@ -21,6 +21,7 @@ public interface SysCaptchaService {
 
     /**
      * 验证验证码
+     *
      * @param uuid uuid
      * @param code 验证码
      * @return 校验结果

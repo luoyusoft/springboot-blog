@@ -20,14 +20,15 @@ import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.QueryGroup;
 import com.jinhx.blog.engine.article.ArticleEngine;
 import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
-import com.jinhx.blog.engine.article.flow.ArticleVOsQueryFlow;
+import com.jinhx.blog.engine.article.flow.ArticleQueryFlow;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 import com.jinhx.blog.entity.base.LogicExecutor;
-import com.jinhx.blog.entity.base.Response;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.Recommend;
@@ -191,7 +192,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         return articleVOs;
     }
 
-
     /**
      * 获取首页信息
      *
@@ -205,40 +205,40 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 分页查询文章列表
      *
-     * @param articleVOsQueryDTO articleVOQueryDTO
+     * @param articleVOIPageQueryDTO articleVOQueryDTO
      * @return 文章列表
      */
     @Override
-    public Response<PageUtils> queryPage(ArticleVOsQueryDTO articleVOsQueryDTO) {
-        return new LogicExecutor<PageUtils>() {
+    public PageData queryPage(ArticleVOIPageQueryDTO articleVOIPageQueryDTO) {
+        return new LogicExecutor<PageData>() {
 
-            ArticleQueryContextInfo<ArticleVOsQueryDTO> context;
+            ArticleQueryContextInfo<ArticleVOIPageQueryDTO> context;
 
             @Override
             protected void checkParams() {
-                ValidatorUtils.validateEntity(articleVOsQueryDTO, QueryGroup.class);
+                ValidatorUtils.validateEntity(articleVOIPageQueryDTO, QueryGroup.class);
 
-                articleVOsQueryDTO.setLogStr("act=queryPage");
-                context = ArticleQueryContextInfo.create(articleVOsQueryDTO);
+                articleVOIPageQueryDTO.setLogStr("act=queryPage");
+                context = ArticleQueryContextInfo.create(articleVOIPageQueryDTO);
             }
 
             @Override
-            protected PageUtils process() {
-                context.setPage(articleVOsQueryDTO.getPage());
-                context.setLimit(articleVOsQueryDTO.getLimit());
-                context.setTitle(articleVOsQueryDTO.getTitle());
-                context.setArticleBuilder(articleVOsQueryDTO.getArticleBuilder());
+            protected PageData process() {
+                context.setPage(articleVOIPageQueryDTO.getPage());
+                context.setLimit(articleVOIPageQueryDTO.getLimit());
+                context.setTitle(articleVOIPageQueryDTO.getTitle());
+                context.setArticleBuilder(articleVOIPageQueryDTO.getArticleBuilder());
 
-                articleEngine.execute(ArticleVOsQueryFlow.getArticleVOsQueryFlow(), context);
-                return new PageUtils(context.getArticleVOIPage());
+                articleEngine.execute(ArticleQueryFlow.getArticlevoIpageQueryFlow(), context);
+                return new PageData(context.getArticleVOIPage());
             }
 
             @Override
             protected String getParams() {
-                if (Objects.isNull(articleVOsQueryDTO)){
+                if (Objects.isNull(articleVOIPageQueryDTO)){
                     return null;
                 }
-                return articleVOsQueryDTO.toString();
+                return JsonUtils.objectToJson(articleVOIPageQueryDTO);
             }
 
             @Override
@@ -302,9 +302,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
             //先删除博文标签多对多关联
             tagLinkMapperService.deleteTagLink(articleId, ModuleTypeConstants.ARTICLE);
-            articleMapperService.deleteArticles(Arrays.asList(articleId));
+            articleMapperService.deleteArticles(Lists.newArrayList(articleId));
 
-            recommendMapperService.deleteRecommendsByLinkIdsAndType(Arrays.asList(articleId), ModuleTypeConstants.ARTICLE);
+            recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(articleId), ModuleTypeConstants.ARTICLE);
         });
 
         // 发送rabbitmq消息同步到es
@@ -356,7 +356,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 }
             }else {
                 if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null){
-                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Arrays.asList(articleVO.getId()), ModuleTypeConstants.ARTICLE);
+                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(articleVO.getId()), ModuleTypeConstants.ARTICLE);
                 }
             }
         }
@@ -433,7 +433,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 }
             }else {
                 if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null){
-                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Arrays.asList(articleVO.getId()), ModuleTypeConstants.ARTICLE);
+                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(articleVO.getId()), ModuleTypeConstants.ARTICLE);
                 }
             }
         }
@@ -444,23 +444,51 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 根据文章id获取文章信息
      *
-     * @param articleId 文章id
-     * @param articleAdaptorBuilder articleAdaptorBuilder
-     * @param publish publish
+     * @param articleVOsQueryDTO articleVOsQueryDTO
      * @return 文章信息
      */
     @Override
-    public ArticleVO getArticleVO(Integer articleId, Boolean publish, ArticleAdaptorBuilder<Article> articleAdaptorBuilder) {
-        Article article = articleMapperService.getArticle(articleId, publish);
-        if (Objects.isNull(article)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
-        }
+    public List<ArticleVO> getArticleVOs(ArticleVOsQueryDTO articleVOsQueryDTO) {
+        return new LogicExecutor<List<ArticleVO>>() {
 
-        if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "后台查看未公开的文章只能由创建者查看");
-        }
+            ArticleQueryContextInfo<ArticleVOsQueryDTO> context;
 
-        return adaptorArticleToArticleVO(articleAdaptorBuilder.setData(article));
+            @Override
+            protected void checkParams() {
+                ValidatorUtils.validateEntity(articleVOsQueryDTO, QueryGroup.class);
+
+                articleVOsQueryDTO.setLogStr("act=getArticleVO");
+                context = ArticleQueryContextInfo.create(articleVOsQueryDTO);
+            }
+
+            @Override
+            protected List<ArticleVO> process() {
+                context.setPublish(articleVOsQueryDTO.getPublish());
+                context.setArticleIds(articleVOsQueryDTO.getArticleIds());
+                context.setArticleBuilder(articleVOsQueryDTO.getArticleBuilder());
+
+                articleEngine.execute(ArticleQueryFlow.getArticleVOsQueryFlow(), context);
+
+                if (CollectionUtils.isEmpty(context.getArticles())){
+                    return Lists.newArrayList();
+                }
+                return context.getArticleVOs();
+            }
+
+            @Override
+            protected String getParams() {
+                if (Objects.isNull(articleVOsQueryDTO)){
+                    return null;
+                }
+                return JsonUtils.objectToJson(articleVOsQueryDTO);
+            }
+
+            @Override
+            protected String getProcessorName() {
+                return "getArticleVOs";
+            }
+
+        }.execute();
     }
 
     /**
@@ -560,11 +588,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Cacheable(value = RedisKeyConstants.ARTICLES)
     @Override
-    public PageUtils listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read) {
+    public PageData listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read) {
         IPage<Article> articleIPage = articleMapperService.listArticles(page, limit, latest, categoryId, like, read);
 
         if (CollectionUtils.isEmpty(articleIPage.getRecords())){
-            return new PageUtils(articleIPage);
+            return new PageData(articleIPage);
         }
 
         List<ArticleVO> articleVOs = adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
@@ -574,7 +602,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         IPage<ArticleVO> articleVOIPage = new Page<>();
         BeanUtils.copyProperties(articleIPage, articleVOIPage);
         articleVOIPage.setRecords(articleVOs);
-        return new PageUtils(articleVOIPage);
+        return new PageData(articleVOIPage);
     }
 
     /**
@@ -586,13 +614,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Cacheable(value = RedisKeyConstants.ARTICLES)
     @Override
-    public PageUtils listHomeArticles(Integer page, Integer limit) {
+    public PageData listHomeArticles(Integer page, Integer limit) {
         List<Integer> linkIds = recommendMapperService.selectLinkIdsByModule(ModuleTypeConstants.ARTICLE);
 
         IPage<Article> articleIPage = articleMapperService.listHomeArticles(page, limit, linkIds);
 
         if (CollectionUtils.isEmpty(articleIPage.getRecords())){
-            return new PageUtils(articleIPage);
+            return new PageData(articleIPage);
         }
 
         List<Top> tops = topMapperService.listTops(ModuleTypeConstants.ARTICLE);
@@ -630,8 +658,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         IPage<ArticleVO> articleVOIPage = new Page<>();
         BeanUtils.copyProperties(articleIPage, articleVOIPage);
-        articleVOIPage.setRecords(Arrays.asList(articleVOs));
-        return new PageUtils(articleVOIPage);
+        articleVOIPage.setRecords(Lists.newArrayList(articleVOs));
+        return new PageData(articleVOIPage);
     }
 
     /**

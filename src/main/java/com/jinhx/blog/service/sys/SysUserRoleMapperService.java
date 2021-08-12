@@ -1,56 +1,106 @@
 package com.jinhx.blog.service.sys;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.sys.SysUserRole;
+import com.jinhx.blog.mapper.sys.SysUserRoleMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * SysUserRoleServiceImpl
+ * SysUserRoleMapperService
+ *
  * @author jinhx
- * @date 2018/10/26 00:01
- * @description
+ * @since 2018-10-22
  */
-public interface SysUserRoleMapperService extends IService<SysUserRole> {
+@Service
+public class SysUserRoleMapperService extends ServiceImpl<SysUserRoleMapper, SysUserRole> {
 
     /**
      * 批量删除roleId
-     * @param roleIds
+     *
+     * @param roleIds roleIds
      */
-    void deleteBatchByRoleId(Integer[] roleIds);
+    public void deleteBatchByRoleId(Integer[] roleIds) {
+        Arrays.stream(roleIds).forEach(roleId -> {
+            baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
+                    .eq(roleId!=null, SysUserRole::getRoleId,roleId));
+        });
+    }
 
     /**
      * 批量删除userId
-     * @param userIds
+     *
+     * @param userIds userIds
      */
-    void deleteBatchByUserId(Integer[] userIds);
+    public void deleteBatchByUserId(Integer[] userIds) {
+        Arrays.stream(userIds).forEach(userId -> {
+            baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
+                    .eq(userId!=null, SysUserRole::getUserId,userId));
+        });
+    }
 
     /**
      * 更新或保存用户角色
-     * @param userId
-     * @param roleIdList
+     *
+     * @param userId userId
+     * @param roleIdList roleIdList
      */
-    void saveOrUpdate(Integer userId, List<Integer> roleIdList);
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdate(Integer userId, List<Integer> roleIdList) {
+        // 先删除用户与角色关系
+        baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
+                .eq(userId!=null, SysUserRole::getUserId,userId));
+
+        if(roleIdList.size() == 0){
+            return ;
+        }
+
+        // 保存用户与角色关系
+        List<SysUserRole> list = new ArrayList<>(roleIdList.size());
+        for(Integer roleId : roleIdList){
+            SysUserRole SysUserRole = new SysUserRole();
+            SysUserRole.setUserId(userId);
+            SysUserRole.setRoleId(roleId);
+
+            list.add(SysUserRole);
+        }
+        this.saveBatch(list);
+    }
 
     /**
      * 根据用户id查询角色id列表
+     *
      * @param userId 用户id
      * @return 角色id列表
      */
-    List<Integer> getRoleIdListByUserId(Integer userId);
+    public List<Integer> getRoleIdListByUserId(Integer userId) {
+        return baseMapper.getRoleIdListByUserId(userId);
+    }
 
     /**
      * 根据userId查询roleName
-     * @param userId
-     * @return
+     *
+     * @param userId userId
+     * @return List<String>
      */
-    List<String> queryRoleNameList(Integer userId);
+    public List<String> queryRoleNameList(Integer userId) {
+        return baseMapper.queryRoleNameList(userId);
+    }
 
     /**
      * 是否包含超级管理员
+     *
      * @param userIds 用户id列表
      * @return 是否包含超级管理员
      */
-    boolean isHaveSuperAdmin(Integer[] userIds);
+    public boolean isHaveSuperAdmin(Integer[] userIds) {
+        return baseMapper.countSysUserRoleByRoleIdAndUserIds(userIds, SysAdminUtils.sysSuperAdminRoleId) > 0;
+    }
 
 }

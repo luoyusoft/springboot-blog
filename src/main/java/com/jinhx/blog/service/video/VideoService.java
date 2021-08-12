@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.video;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
@@ -56,7 +56,7 @@ public interface VideoService extends IService<Video> {
      * @param title 标题
      * @return 视频列表
      */
-    PageUtils queryPage(Integer page, Integer limit, String title);
+    PageData queryPage(Integer page, Integer limit, String title);
 
     /**
      * 保存视频
@@ -140,7 +140,7 @@ public interface VideoService extends IService<Video> {
      * @param watch 观看量排序
      * @return 视频列表
      */
-    PageUtils listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch);
+    PageData listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch);
 
     /**
      * 获取VideoVO

@@ -1,17 +1,23 @@
 package com.jinhx.blog.service.file;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.entity.file.FileChunk;
+import com.jinhx.blog.mapper.file.FileChunkMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * FileChunkService
+ * FileChunkMapperService
  *
  * @author jinhx
  * @since 2018-11-07
  */
-public interface FileChunkMapperService extends IService<FileChunk> {
+@Service
+public class FileChunkMapperService extends ServiceImpl<FileChunkMapper, FileChunk> {
 
     /**
      * 检查是否上传完所有分片
@@ -19,7 +25,11 @@ public interface FileChunkMapperService extends IService<FileChunk> {
      * @param fileMd5 fileMd5
      * @return 是否上传完所有分片
      */
-    Boolean checkIsUploadAllChunkByFileMd5(String fileMd5);
+    public Boolean checkIsUploadAllChunkByFileMd5(String fileMd5) {
+        return baseMapper.selectCount(new LambdaQueryWrapper<FileChunk>()
+                .eq(ObjectUtil.isNotNull(fileMd5), FileChunk::getFileMd5, fileMd5)
+                .eq(FileChunk::getFileMd5, FileChunk.UPLOAD_STATUS_0)) < 1;
+    }
 
     /**
      * 根据文件md5查询分片信息
@@ -27,7 +37,11 @@ public interface FileChunkMapperService extends IService<FileChunk> {
      * @param fileMd5 fileMd5
      * @return 分片信息列表
      */
-    List<FileChunk> selectFileChunksByFileMd5(String fileMd5);
+    public List<FileChunk> selectFileChunksByFileMd5(String fileMd5) {
+        return baseMapper.selectList(new LambdaQueryWrapper<FileChunk>()
+                .eq(ObjectUtil.isNotNull(fileMd5), FileChunk::getFileMd5, fileMd5)
+                .orderByAsc(FileChunk::getChunkNumber));
+    }
 
     /**
      * 根据文件md5和分片序号更新状态
@@ -35,7 +49,11 @@ public interface FileChunkMapperService extends IService<FileChunk> {
      * @param fileChunk fileResource
      * @return 更新结果
      */
-    Boolean updateFileChunkByFileMd5AndChunkNumber(FileChunk fileChunk);
+    public Boolean updateFileChunkByFileMd5AndChunkNumber(FileChunk fileChunk) {
+        return baseMapper.update(fileChunk, new LambdaUpdateWrapper<FileChunk>()
+                .eq(ObjectUtil.isNotNull(fileChunk.getFileMd5()), FileChunk::getFileMd5, fileChunk.getFileMd5())
+                .eq(ObjectUtil.isNotNull(fileChunk.getChunkNumber()), FileChunk::getChunkNumber, fileChunk.getChunkNumber())) > 0;
+    }
 
     /**
      * 新增分片
@@ -43,6 +61,8 @@ public interface FileChunkMapperService extends IService<FileChunk> {
      * @param fileChunk fileResource
      * @return 新增结果
      */
-    Boolean insertFileChunk(FileChunk fileChunk);
+    public Boolean insertFileChunk(FileChunk fileChunk) {
+        return baseMapper.insert(fileChunk) > 0;
+    }
 
 }

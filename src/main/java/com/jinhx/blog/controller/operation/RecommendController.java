@@ -1,8 +1,9 @@
 package com.jinhx.blog.controller.operation;
 
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -14,7 +15,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,7 +50,7 @@ public class RecommendController {
     @GetMapping("/manage/operation/recommend/list")
     @RequiresPermissions("operation:recommend:list")
     public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit){
-        PageUtils recommendPage = recommendService.queryPage(page, limit);
+        PageData recommendPage = recommendService.queryPage(page, limit);
         return Response.success(recommendPage);
     }
 
@@ -150,7 +150,7 @@ public class RecommendController {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
         }
 
-        recommendService.deleteRecommendsByIds(Arrays.asList(ids));
+        recommendService.deleteRecommendsByIds(Lists.newArrayList(ids));
         return Response.success();
     }
 

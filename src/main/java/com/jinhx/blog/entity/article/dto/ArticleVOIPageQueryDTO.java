@@ -7,17 +7,16 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
- * ArticleVOsQueryDTO
+ * ArticleVOIPageQueryDTO
  *
  * @author jinhx
  * @since 2021-08-06
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ArticleVOsQueryDTO extends BaseRequestDTO {
+public class ArticleVOIPageQueryDTO extends BaseRequestDTO {
 
     private static final long serialVersionUID = 2477511590101964323L;
 
@@ -28,15 +27,20 @@ public class ArticleVOsQueryDTO extends BaseRequestDTO {
     private ArticleBuilder articleBuilder;
 
     /**
-     * 文章id列表
+     * 页码
      */
-    @NotNull(message = "文章id列表不能为空", groups = {QueryGroup.class})
-    private List<Integer> articleIds;
+    @NotNull(message = "page不能为空", groups = {QueryGroup.class})
+    private Integer page;
 
     /**
-     * 发布状态
+     * 页数
      */
-    @NotNull(message = "发布状态不能为空", groups = {QueryGroup.class})
-    private Boolean publish;
+    @NotNull(message = "limit不能为空", groups = {QueryGroup.class})
+    private Integer limit;
+
+    /**
+     * 文章标题
+     */
+    private String title;
 
 }

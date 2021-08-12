@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.sys;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.sys.SysRole;
 
 import java.util.List;
@@ -9,9 +9,8 @@ import java.util.List;
 /**
  * SysRoleService
  *
- * @author luoyu
- * @date 2018/10/25 15:36
- * @description
+ * @author jinhx
+ * @since 2018-10-22
  */
 public interface SysRoleService extends IService<SysRole> {
 
@@ -23,7 +22,7 @@ public interface SysRoleService extends IService<SysRole> {
      * @param roleName 角色名
      * @return 角色列表
      */
-    PageUtils queryPage(Integer page, Integer limit, String roleName);
+    PageData queryPage(Integer page, Integer limit, String roleName);
 
     /**
      * 根据角色id列表批量删除角色

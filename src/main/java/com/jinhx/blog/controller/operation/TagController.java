@@ -1,10 +1,11 @@
 package com.jinhx.blog.controller.operation;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -18,7 +19,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,7 +48,7 @@ public class TagController {
     @GetMapping("/manage/operation/tag/list")
     @RequiresPermissions("operation:tag:list")
     public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("name") String name, @RequestParam("module") Integer module){
-        PageUtils tagPage = tagService.queryPage(page, limit, name, module);
+        PageData tagPage = tagService.queryPage(page, limit, name, module);
         return Response.success(tagPage);
     }
 
@@ -131,7 +131,7 @@ public class TagController {
                 }
             }
         }
-        tagService.removeByIds(Arrays.asList(ids));
+        tagService.removeByIds(Lists.newArrayList(ids));
 
         return Response.success();
     }

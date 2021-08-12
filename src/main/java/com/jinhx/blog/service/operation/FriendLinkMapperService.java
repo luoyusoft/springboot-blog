@@ -1,26 +1,43 @@
 package com.jinhx.blog.service.operation;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jinhx.blog.common.constants.RedisKeyConstants;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.operation.FriendLink;
 import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
+import com.jinhx.blog.mapper.operation.FriendLinkMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * FriendLinkService
+ * FriendLinkMapperService
  *
  * @author jinhx
  * @since 2019-02-14
  */
-public interface FriendLinkMapperService extends IService<FriendLink> {
+@CacheConfig(cacheNames = RedisKeyConstants.FRIENDLINKS)
+@Service
+@Slf4j
+public class FriendLinkMapperService extends ServiceImpl<FriendLinkMapper, FriendLink> {
 
     /**
      * 获取首页信息
      *
      * @return 首页信息
      */
-    HomeFriendLinkInfoVO getHommeFriendLinkInfoVO();
+    public HomeFriendLinkInfoVO getHommeFriendLinkInfoVO() {
+        HomeFriendLinkInfoVO homeFriendLinkInfoVO = new HomeFriendLinkInfoVO();
+        homeFriendLinkInfoVO.setCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
+        return homeFriendLinkInfoVO;
+    }
 
     /**
      * 分页查询
@@ -30,7 +47,11 @@ public interface FriendLinkMapperService extends IService<FriendLink> {
      * @param title title
      * @return PageUtils
      */
-     PageUtils queryPage(Integer page, Integer limit, String title);
+    public PageData queryPage(Integer page, Integer limit, String title) {
+        IPage<FriendLink> friendLinkIPage = baseMapper.selectPage(new QueryPage<FriendLink>(page, limit).getPage(),
+                new LambdaQueryWrapper<FriendLink>().like(StringUtils.isNotEmpty(title), FriendLink::getTitle,title));
+        return new PageData(friendLinkIPage);
+    }
 
     /**
      * 判断上传文件下是否有友链
@@ -38,7 +59,10 @@ public interface FriendLinkMapperService extends IService<FriendLink> {
      * @param url url
      * @return 是否有友链
      */
-    Boolean checkByFile(String url);
+    public Boolean checkByFile(String url) {
+        return baseMapper.selectCount(new LambdaQueryWrapper<FriendLink>()
+                .eq(FriendLink::getAvatar, url)) > 0;
+    }
 
     /********************** portal ********************************/
 
@@ -47,6 +71,9 @@ public interface FriendLinkMapperService extends IService<FriendLink> {
      *
      * @return 友链列表
      */
-    List<FriendLink> listFriendLinks();
+    @Cacheable
+    public List<FriendLink> listFriendLinks() {
+        return baseMapper.selectList(new LambdaQueryWrapper<>());
+    }
 
 }

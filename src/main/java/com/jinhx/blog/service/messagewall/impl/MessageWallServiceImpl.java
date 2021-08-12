@@ -8,8 +8,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.messagewall.MessageWall;
 import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
 import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -111,14 +110,14 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
      * @return 留言列表
      */
     @Override
-    public PageUtils manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum) {
-        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new Query<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
+    public PageData manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum) {
+        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new QueryPage<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
                 .like(ObjectUtil.isNotEmpty(name), MessageWall::getName, name)
                 .eq(floorNum != null, MessageWall::getFloorNum, floorNum)
                 .orderByDesc(MessageWall::getId));
 
         if (CollectionUtils.isEmpty(messageWallIPage.getRecords())){
-            return new PageUtils(messageWallIPage);
+            return new PageData(messageWallIPage);
         }
 
         List<MessageWall> messageWalls = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
@@ -126,7 +125,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
 
         if (CollectionUtils.isEmpty(messageWalls)){
             messageWallIPage.setRecords(Lists.newArrayList());
-            return new PageUtils(messageWallIPage);
+            return new PageData(messageWallIPage);
         }
 
         // key：id，value：name
@@ -144,7 +143,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
         BeanUtils.copyProperties(messageWallIPage, messageWallVOIPage);
         messageWallVOIPage.setRecords(messageWallVOs);
 
-        return new PageUtils(messageWallVOIPage);
+        return new PageData(messageWallVOIPage);
     }
 
     /**
@@ -154,7 +153,7 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
      */
     @Override
     public void manageDeleteMessageWalls(Integer[] ids) {
-        baseMapper.deleteBatchIds(Arrays.asList(ids));
+        baseMapper.deleteBatchIds(Lists.newArrayList(ids));
     }
 
     /********************** portal ********************************/

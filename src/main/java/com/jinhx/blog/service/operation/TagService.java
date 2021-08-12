@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.operation.vo.TagVO;
 
@@ -24,7 +24,7 @@ public interface TagService extends IService<Tag> {
      * @param module module
      * @return PageUtils
      */
-    PageUtils queryPage(Integer page, Integer limit, String name, Integer module);
+    PageData queryPage(Integer page, Integer limit, String name, Integer module);
 
     /**
      * 根据关联Id获取列表

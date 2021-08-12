@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.bill;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.bill.Bill;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public interface BillService extends IService<Bill> {
      * @param incomeExpenditureType incomeExpenditureType
      * @return 账单列表
      */
-    PageUtils queryPage(Integer page, Integer limit, Boolean incomeExpenditureType);
+    PageData queryPage(Integer page, Integer limit, Boolean incomeExpenditureType);
 
 
     /**

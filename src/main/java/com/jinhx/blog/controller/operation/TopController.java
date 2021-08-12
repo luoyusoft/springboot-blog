@@ -1,8 +1,9 @@
 package com.jinhx.blog.controller.operation;
 
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -13,7 +14,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,7 +39,7 @@ public class TopController {
     @GetMapping("/manage/operation/top/list")
     @RequiresPermissions("operation:top:list")
     public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit){
-        PageUtils TopPage = topService.queryPage(page, limit);
+        PageData TopPage = topService.queryPage(page, limit);
         return Response.success(TopPage);
     }
 
@@ -139,7 +139,7 @@ public class TopController {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
         }
 
-        topService.deleteTopsByIds(Arrays.asList(ids));
+        topService.deleteTopsByIds(Lists.newArrayList(ids));
         return Response.success();
     }
 

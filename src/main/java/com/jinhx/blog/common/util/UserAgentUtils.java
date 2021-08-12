@@ -1,23 +1,25 @@
 package com.jinhx.blog.common.util;
 
-import javax.servlet.http.HttpServletRequest;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import eu.bitwalker.useragentutils.Browser;
 import eu.bitwalker.useragentutils.OperatingSystem;
 import eu.bitwalker.useragentutils.UserAgent;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
+ * UserAgentUtils
+ *
  * @author jinhx
- * @version 1.0
+ * @since 2021-08-06
  */
 @Slf4j
 public class UserAgentUtils {
     
     /**
      * 根据http获取userAgent信息
+     *
      * @param request request
      * @return userAgent信息
      */
@@ -27,6 +29,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统版本
+     *
      * @param request request
      * @return 操作系统版本
      */
@@ -41,6 +44,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统版本
+     *
      * @param userAgent userAgent
      * @return 操作系统版本
      */
@@ -64,6 +68,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统对象
+     *
      * @param request request
      * @return 操作系统对象
      */
@@ -78,6 +83,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统对象
+     *
      * @param userAgent userAgent
      * @return 操作系统对象
      */
@@ -87,6 +93,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统：Windows/ios/Android
+     *
      * @param request request
      * @return 操作系统
      */
@@ -101,6 +108,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统：Windows/ios/Android
+     *
      * @param userAgent userAgent
      * @return 操作系统
      */
@@ -115,6 +123,7 @@ public class UserAgentUtils {
 
     /**
      * 获取设备类型
+     *
      * @param request request
      * @return 设备类型
      */
@@ -129,6 +138,7 @@ public class UserAgentUtils {
 
     /**
      * 获取设备类型
+     *
      * @param userAgent userAgent
      * @return 设备类型
      */
@@ -147,6 +157,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统名称
+     *
      * @param request request
      * @return 操作系统名称
      */
@@ -161,6 +172,7 @@ public class UserAgentUtils {
 
     /**
      * 获取操作系统名称
+     *
      * @param userAgent userAgent
      * @return 操作系统名称
      */
@@ -175,6 +187,7 @@ public class UserAgentUtils {
 
     /**
      * 获取设备生产厂家
+     *
      * @param request request
      * @return 设备生产厂家
      */
@@ -189,6 +202,7 @@ public class UserAgentUtils {
 
     /**
      * 获取设备生产厂家
+     *
      * @param userAgent userAgent
      * @return 设备生产厂家
      */
@@ -207,6 +221,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器对象
+     *
      * @param agent agent
      * @return 浏览器对象
      */
@@ -216,6 +231,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器名称
+     *
      * @param request request
      * @return 浏览器名称
      */
@@ -230,6 +246,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器名称
+     *
      * @param userAgent userAgent
      * @return 浏览器名称
      */
@@ -244,6 +261,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器类型
+     *
      * @param request request
      * @return 浏览器类型
      */
@@ -258,6 +276,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器类型
+     *
      * @param userAgent userAgent
      * @return 浏览器类型
      */
@@ -272,6 +291,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器组：CHROME/IE
+     *
      * @param request request
      * @return 浏览器组
      */
@@ -286,6 +306,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器组：CHROME/IE
+     *
      * @param userAgent userAgent
      * @return 浏览器组
      */
@@ -300,6 +321,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器生产厂商
+     *
      * @param request request
      * @return 浏览器生产厂商
      */
@@ -314,6 +336,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器生产厂商
+     *
      * @param userAgent userAgent
      * @return 浏览器生产厂商
      */
@@ -328,6 +351,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器使用的渲染引擎
+     *
      * @param request request
      * @return 浏览器使用的渲染引擎
      */
@@ -342,6 +366,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器使用的渲染引擎
+     *
      * @param userAgent userAgent
      * @return 浏览器使用的渲染引擎
      */
@@ -356,6 +381,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器版本
+     *
      * @param request request
      * @return 浏览器版本
      */
@@ -370,6 +396,7 @@ public class UserAgentUtils {
 
     /**
      * 获取浏览器版本
+     *
      * @param userAgent userAgent
      * @return 浏览器版本
      */
@@ -385,7 +412,6 @@ public class UserAgentUtils {
 
         return null;
     }
-
 
     public static void main(String[] args) {
 		String androidUserAgent = "Mozilla/5.0 (Linux; Android 8.0; LON-AL00 Build/HUAWEILON-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.132 MQQBrowser/6.2 TBS/044204 Mobile Safari/537.36 V1_AND_SQ_7.7.8_908_YYB_D QQ/7.7.8.3705 NetType/WIFI WebP/0.3.0 Pixel/1440";

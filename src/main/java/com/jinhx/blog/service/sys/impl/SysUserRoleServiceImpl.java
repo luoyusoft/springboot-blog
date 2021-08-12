@@ -15,16 +15,17 @@ import java.util.List;
 
 /**
  * SysUserRoleServiceImpl
+ *
  * @author jinhx
- * @date 2018/10/26 00:01
- * @description
+ * @since 2018-10-22
  */
 @Service
 public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUserRole> implements SysUserRoleService {
 
     /**
      * 批量删除roleId
-     * @param roleIds
+     *
+     * @param roleIds roleIds
      */
     @Override
     public void deleteBatchByRoleId(Integer[] roleIds) {
@@ -36,7 +37,8 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
 
     /**
      * 批量删除userId
-     * @param userIds
+     *
+     * @param userIds userIds
      */
     @Override
     public void deleteBatchByUserId(Integer[] userIds) {
@@ -48,13 +50,14 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
 
     /**
      * 更新或保存用户角色
-     * @param userId
-     * @param roleIdList
+     *
+     * @param userId userId
+     * @param roleIdList roleIdList
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveOrUpdate(Integer userId, List<Integer> roleIdList) {
-        //先删除用户与角色关系
+        // 先删除用户与角色关系
         baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
                 .eq(userId!=null, SysUserRole::getUserId,userId));
 
@@ -62,7 +65,7 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
             return ;
         }
 
-        //保存用户与角色关系
+        // 保存用户与角色关系
         List<SysUserRole> list = new ArrayList<>(roleIdList.size());
         for(Integer roleId : roleIdList){
             SysUserRole SysUserRole = new SysUserRole();
@@ -76,6 +79,7 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
 
     /**
      * 根据用户id查询角色id列表
+     *
      * @param userId 用户id
      * @return 角色id列表
      */
@@ -86,8 +90,9 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
 
     /**
      * 根据userId查询roleName
-     * @param userId
-     * @return
+     *
+     * @param userId userId
+     * @return List<String>
      */
     @Override
     public List<String> queryRoleNameList(Integer userId) {
@@ -96,6 +101,7 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
 
     /**
      * 是否包含超级管理员
+     *
      * @param userIds 用户id列表
      * @return 是否包含超级管理员
      */

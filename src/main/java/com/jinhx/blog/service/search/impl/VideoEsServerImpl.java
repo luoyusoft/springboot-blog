@@ -1,6 +1,7 @@
 package com.jinhx.blog.service.search.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
@@ -28,7 +29,6 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -179,7 +179,7 @@ public class VideoEsServerImpl implements VideoEsServer {
      */
     @Override
     public List<VideoVO> searchVideoList(String keyword) throws Exception {
-        List<String> highlightBuilderList = Arrays.asList("title", "alternateName");
+        List<String> highlightBuilderList = Lists.newArrayList("title", "alternateName");
         List<Map<String, Object>> searchRequests = elasticSearchUtils.searchRequest(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, keyword, highlightBuilderList, highlightBuilderList);
         List<VideoVO> videoVOList = new ArrayList<>();
         for(Map<String, Object> x : searchRequests){

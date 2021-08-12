@@ -11,14 +11,16 @@ import org.springframework.util.StringUtils;
 
 /**
  * SysUserTokenServiceImpl
+ *
  * @author jinhx
- * @date 2018/10/20 15:18
- * @description
+ * @since 2018-10-22
  */
 @Service
 public class SysUserTokenServiceImpl implements SysUserTokenService {
 
-    // 12小时后过期
+    /**
+     * 12小时后过期
+     */
     private final static int EXPIRE = 12 * 60 * 60 * 1000;
 
     @Autowired
@@ -26,6 +28,7 @@ public class SysUserTokenServiceImpl implements SysUserTokenService {
 
     /**
      * 生成token
+     *
      * @param userId 用户id
      * @return token
      */
@@ -37,7 +40,7 @@ public class SysUserTokenServiceImpl implements SysUserTokenService {
         String tokenKey= RedisKeyConstants.MANAGE_SYS_USER_TOKEN+token;
         String userIdKey= RedisKeyConstants.MANAGE_SYS_USER_TOKEN+userId;
 
-        //判断是否生成过token
+        // 判断是否生成过token
         String tokenInRedis = redisUtils.get(userIdKey);
         if(!StringUtils.isEmpty(tokenInRedis)){
             // 将原来的token删除
@@ -52,6 +55,7 @@ public class SysUserTokenServiceImpl implements SysUserTokenService {
 
     /**
      * 根据token查询token用户信息
+     *
      * @param token token
      * @return token用户信息
      */
@@ -69,6 +73,7 @@ public class SysUserTokenServiceImpl implements SysUserTokenService {
 
     /**
      * 退出登录
+     *
      * @param userId 用户id
      */
     @Override
@@ -82,6 +87,7 @@ public class SysUserTokenServiceImpl implements SysUserTokenService {
 
     /**
      * 续期token
+     *
      * @param userId 用户id
      * @param accessToken 新token
      */

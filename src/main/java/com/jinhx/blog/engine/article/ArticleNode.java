@@ -1,12 +1,12 @@
 package com.jinhx.blog.engine.article;
 
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.util.NacosUtils;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -44,23 +44,23 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
             StringBuilder logInfo = new StringBuilder(logStr);
             String processorName = getProcessorName();
 
-            buildLogInfo(logInfo, Arrays.asList(LOG_END, processorName));
+            buildLogInfo(logInfo, Lists.newArrayList(LOG_END, processorName));
 
             // 耗时计算
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
 
             if (isSkip(context)) {
-                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE));
+                buildLogInfo(logInfo, Lists.newArrayList(LOG_SKIP, TRUE));
             } else {
-                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE));
+                buildLogInfo(logInfo, Lists.newArrayList(LOG_SKIP, FALSE));
                 process(context);
             }
 
             stopWatch.stop();
             long time = stopWatch.getTime();
 
-            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, time, LOG_STR_ENTER));
+            buildLogInfo(logInfo, Lists.newArrayList(LOG_TIME, time, LOG_STR_ENTER));
 
             log.info(logInfo.toString());
         } catch (Exception e) {

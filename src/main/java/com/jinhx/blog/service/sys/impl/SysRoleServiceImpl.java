@@ -3,10 +3,11 @@ package com.jinhx.blog.service.sys.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.sys.SysRole;
 import com.jinhx.blog.service.sys.SysRoleMenuMapperService;
@@ -18,14 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * SysRoleServiceImpl
+ *
  * @author jinhx
- * @date 2018/10/25 15:36
- * @description
+ * @since 2018-10-22
  */
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements SysRoleService {
@@ -45,13 +45,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
      * @return 角色列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String roleName) {
-        IPage<SysRole> roleIPage = baseMapper.selectPage(new Query<SysRole>(page, limit).getPage(),
+    public PageData queryPage(Integer page, Integer limit, String roleName) {
+        IPage<SysRole> roleIPage = baseMapper.selectPage(new QueryPage<SysRole>(page, limit).getPage(),
                 new LambdaQueryWrapper<SysRole>()
                 .like(StringUtils.isNotBlank(roleName), SysRole::getRoleName,roleName)
         );
 
-        return new PageUtils(roleIPage);
+        return new PageData(roleIPage);
     }
 
     /**
@@ -62,16 +62,16 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteBatch(Integer[] roleIds) {
-        if (SysAdminUtils.isHaveSuperAdmin(Arrays.asList(roleIds))){
+        if (SysAdminUtils.isHaveSuperAdmin(Lists.newArrayList(roleIds))){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "超级管理员角色不可以删除");
         }
-        //删除角色
-        this.removeByIds(Arrays.asList(roleIds));
+        // 删除角色
+        this.removeByIds(Lists.newArrayList(roleIds));
 
-        //删除角色与菜单关联
+        // 删除角色与菜单关联
         sysRoleMenuMapperService.deleteBatchByRoleId(roleIds);
 
-        //删除角色与用户关联
+        // 删除角色与用户关联
         sysUserRoleMapperService.deleteBatchByRoleId(roleIds);
     }
 
@@ -97,7 +97,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     public boolean insertSysRole(SysRole sysRole) {
         baseMapper.insert(sysRole);
 
-        //保存角色与菜单关系
+        // 保存角色与菜单关系
         sysRoleMenuMapperService.saveOrUpdate(sysRole.getId(), sysRole.getMenuIdList());
         return true;
     }

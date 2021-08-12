@@ -13,14 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author luoyu
- * @since 2018-10-08
+ * SysRoleMenuServiceImpl
+ *
+ * @author jinhx
+ * @since 2018-10-22
  */
 @Service
 public class SysRoleMenuServiceImpl extends ServiceImpl<SysRoleMenuMapper, SysRoleMenu> implements SysRoleMenuService {
 
     /**
      * 保存角色与菜单关系
+     *
      * @param roleId 角色id
      * @param menuIdList 菜单列表
      */
@@ -49,6 +52,7 @@ public class SysRoleMenuServiceImpl extends ServiceImpl<SysRoleMenuMapper, SysRo
 
     /**
      * 获取角色菜单列表
+     *
      * @param roleId 角色id
      * @return 角色菜单列表
      */
@@ -59,6 +63,7 @@ public class SysRoleMenuServiceImpl extends ServiceImpl<SysRoleMenuMapper, SysRo
 
     /**
      * 删除角色与菜单关联
+     *
      * @param roleIds 角色id列表
      */
     @Override

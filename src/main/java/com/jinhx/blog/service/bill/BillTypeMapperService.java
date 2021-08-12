@@ -1,18 +1,26 @@
 package com.jinhx.blog.service.bill;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.bill.BillType;
+import com.jinhx.blog.mapper.bill.BillTypeMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 /**
- * BillTypeService
+ * BillTypeMapperService
  *
  * @author jinhx
  * @since 2021-07-28
  */
-public interface BillTypeMapperService extends IService<BillType> {
+@Service
+public class BillTypeMapperService extends ServiceImpl<BillTypeMapper, BillType> {
 
     /**
      * 查询单个账单类型信息
@@ -20,7 +28,9 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param billTypeId billTypeId
      * @return 单个账单类型信息
      */
-    BillType getBillType(Integer billTypeId);
+    public BillType getBillType(Integer billTypeId) {
+        return baseMapper.selectById(billTypeId);
+    }
 
     /**
      * 查询账单类型列表
@@ -30,8 +40,12 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param incomeExpenditureType incomeExpenditureType
      * @return 账单类型列表
      */
-    IPage<BillType> queryPage(Integer page, Integer limit, Boolean incomeExpenditureType);
-
+    public IPage<BillType> queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
+        return baseMapper.selectPage(new QueryPage<BillType>(page, limit).getPage(),
+                new LambdaQueryWrapper<BillType>()
+                        .eq(ObjectUtil.isNotNull(incomeExpenditureType), BillType::getIncomeExpenditureType, incomeExpenditureType)
+                        .orderByDesc(BillType::getCreateTime));
+    }
 
     /**
      * 新增单个账单类型
@@ -39,7 +53,9 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param billType billType
      * @return 新增结果
      */
-    Boolean insertBillType(BillType billType);
+    public Boolean insertBillType(BillType billType) {
+        return baseMapper.insert(billType) > 0;
+    }
 
     /**
      * 批量新增账单类型
@@ -47,7 +63,9 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param billTypes billTypes
      * @return 新增结果
      */
-    Boolean insertBillTypes(List<BillType> billTypes);
+    public Boolean insertBillTypes(List<BillType> billTypes) {
+        return billTypes.stream().mapToInt(item -> baseMapper.insert(item)).sum() == billTypes.size();
+    }
 
     /**
      * 更新单个账单类型
@@ -55,7 +73,9 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param billType billType
      * @return 更新结果
      */
-    Boolean updateBillType(BillType billType);
+    public Boolean updateBillType(BillType billType) {
+        return baseMapper.updateById(billType) > 0;
+    }
 
     /**
      * 批量更新账单类型
@@ -63,7 +83,9 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param billTypes billTypes
      * @return 更新结果
      */
-    Boolean updateBillTypes(List<BillType> billTypes);
+    public Boolean updateBillTypes(List<BillType> billTypes) {
+        return billTypes.stream().mapToInt(item -> baseMapper.updateById(item)).sum() == billTypes.size();
+    }
 
     /**
      * 批量删除账单类型
@@ -71,6 +93,9 @@ public interface BillTypeMapperService extends IService<BillType> {
      * @param billTypeIds billTypeIds
      * @return 删除结果
      */
-    Boolean deleteBillTypes(Integer[] billTypeIds);
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteBillTypes(Integer[] billTypeIds) {
+        return baseMapper.deleteBatchIds(Lists.newArrayList(billTypeIds)) == billTypeIds.length;
+    }
 
 }

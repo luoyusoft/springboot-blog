@@ -11,11 +11,12 @@ import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
 import com.jinhx.blog.entity.article.Article;
-import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.ArticleBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.TopAdaptorBuilder;
 import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
@@ -82,8 +83,22 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         BeanUtils.copyProperties(top, topVO);
 
         if(ModuleTypeConstants.ARTICLE.equals(topVO.getModule())){
-            ArticleVO articleVO = articleService.getArticleVO(topVO.getLinkId(), Article.PUBLISH_TRUE, new ArticleAdaptorBuilder.Builder<Article>().setAll().build());
-            if (!Objects.isNull(articleVO)){
+            ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
+            articleVOsQueryDTO.setLogStr("con=info");
+            articleVOsQueryDTO.setPublish(Article.PUBLISH_TRUE);
+            articleVOsQueryDTO.setArticleIds(Lists.newArrayList(topVO.getLinkId()));
+            articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
+                    .categoryListStr(true)
+                    .tagList(true)
+                    .recommend(true)
+                    .top(true)
+                    .author(true)
+                    .build());
+
+            List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
+
+            if (CollectionUtils.isNotEmpty(articleVOs) && !Objects.isNull(articleVOs.get(0))){
+                ArticleVO articleVO = articleVOs.get(0);
                 if (topAdaptorBuilder.getDescription()){
                     topVO.setDescription(articleVO.getDescription());
                 }
@@ -177,12 +192,12 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
      * @return PageUtils
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit) {
-        IPage<Top> topIPage = baseMapper.selectPage(new Query<Top>(page, limit).getPage(),
+    public PageData queryPage(Integer page, Integer limit) {
+        IPage<Top> topIPage = baseMapper.selectPage(new QueryPage<Top>(page, limit).getPage(),
                 new LambdaQueryWrapper<Top>().orderByAsc(Top::getOrderNum));
 
         if (CollectionUtils.isEmpty(topIPage.getRecords())){
-            return new PageUtils(topIPage);
+            return new PageData(topIPage);
         }
 
         List<TopVO> topVOs = adaptorTopsToTopVOs(new TopAdaptorBuilder.Builder<List<Top>>()
@@ -193,7 +208,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
         BeanUtils.copyProperties(topIPage, topVOIPage);
         topVOIPage.setRecords(topVOs);
 
-        return new PageUtils(topVOIPage);
+        return new PageData(topVOIPage);
     }
 
     /**

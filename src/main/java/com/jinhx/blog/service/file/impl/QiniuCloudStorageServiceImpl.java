@@ -4,6 +4,7 @@ import com.jinhx.blog.common.config.CloudStorageProperties;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.DateUtils;
+import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.entity.file.File;
 import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.service.file.FileMapperService;
@@ -102,9 +103,9 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
      * @return 返回上传路径
      */
     private String getPath(String prefix, String suffix) {
-        //生成uuid
+        // 生成uuid
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        //文件路径
+        // 文件路径
         String path = DateUtils.format(new Date(), "yyyyMMdd") + "/" + uuid;
         if(StringUtils.isNotBlank(prefix)){
             path = prefix + "/" + path;
@@ -126,7 +127,7 @@ public class QiniuCloudStorageServiceImpl extends CloudStorageService {
             token = auth.uploadToken(config.getQiniuBucketName());
             Response res = uploadManager.put(data, path, token);
             if (!res.isOK()) {
-                throw new RuntimeException("上传七牛出错：" + res.toString());
+                throw new RuntimeException("上传七牛出错：" + JsonUtils.objectToJson(res));
             }
         } catch (Exception e) {
             log.error(e.getMessage());

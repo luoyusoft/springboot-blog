@@ -1,22 +1,25 @@
 package com.jinhx.blog.controller.article;
 
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.article.Article;
-import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.ArticleBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.service.article.ArticleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -52,16 +55,17 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/list")
     @RequiresPermissions("article:list")
-    public Response<PageUtils> listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
+    public Response<PageData> listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
         if (Objects.isNull(page) || Objects.isNull(limit)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
         }
 
-        ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
-        articleVOsQueryDTO.setPage(page);
-        articleVOsQueryDTO.setLimit(limit);
-        articleVOsQueryDTO.setTitle(title);
-        articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
+        ArticleVOIPageQueryDTO articleVOIPageQueryDTO = new ArticleVOIPageQueryDTO();
+        articleVOIPageQueryDTO.setLogStr("con=listArticle");
+        articleVOIPageQueryDTO.setPage(page);
+        articleVOIPageQueryDTO.setLimit(limit);
+        articleVOIPageQueryDTO.setTitle(title);
+        articleVOIPageQueryDTO.setArticleBuilder(ArticleBuilder.builder()
                 .categoryListStr(true)
                 .tagList(true)
                 .recommend(true)
@@ -69,7 +73,7 @@ public class ArticleController {
                 .author(true)
                 .build());
 
-        return articleService.queryPage(articleVOsQueryDTO);
+        return Response.success(articleService.queryPage(articleVOIPageQueryDTO));
     }
 
     /**
@@ -80,8 +84,29 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/info/{articleId}")
     @RequiresPermissions("article:list")
-    public Response info(@PathVariable("articleId") Integer articleId) {
-        return Response.success(articleService.getArticleVO(articleId, null, new ArticleAdaptorBuilder.Builder<Article>().setAll().build()));
+    public Response<ArticleVO> info(@PathVariable("articleId") Integer articleId) {
+        if (Objects.isNull(articleId)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleId不能为空");
+        }
+
+        ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
+        articleVOsQueryDTO.setLogStr("con=info");
+        articleVOsQueryDTO.setPublish(Article.PUBLISH_TRUE);
+        articleVOsQueryDTO.setArticleIds(Lists.newArrayList(articleId));
+        articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
+                .categoryListStr(true)
+                .tagList(true)
+                .recommend(true)
+                .top(true)
+                .author(true)
+                .build());
+
+        List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
+        if (CollectionUtils.isEmpty(articleVOs)){
+            return Response.success();
+        }
+
+        return Response.success(articleVOs.get(0));
     }
 
     /**

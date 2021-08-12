@@ -12,10 +12,11 @@ import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
-import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
-import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.ArticleBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.RecommendAdaptorBuilder;
 import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
@@ -90,8 +91,22 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         BeanUtils.copyProperties(recommend, recommendVO);
 
         if(ModuleTypeConstants.ARTICLE.equals(recommendVO.getModule())){
-            ArticleVO articleVO = articleService.getArticleVO(recommendVO.getLinkId(), Article.PUBLISH_TRUE, new ArticleAdaptorBuilder.Builder<Article>().setAll().build());
-            if (!Objects.isNull(articleVO)){
+            ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
+            articleVOsQueryDTO.setLogStr("con=info");
+            articleVOsQueryDTO.setPublish(Article.PUBLISH_TRUE);
+            articleVOsQueryDTO.setArticleIds(Lists.newArrayList(recommendVO.getLinkId()));
+            articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
+                    .categoryListStr(true)
+                    .tagList(true)
+                    .recommend(true)
+                    .top(true)
+                    .author(true)
+                    .build());
+
+            List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
+
+            if (CollectionUtils.isNotEmpty(articleVOs) && !Objects.isNull(articleVOs.get(0))){
+                ArticleVO articleVO = articleVOs.get(0);
                 if (recommendAdaptorBuilder.getDescription()){
                     recommendVO.setDescription(articleVO.getDescription());
                 }
@@ -197,11 +212,11 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      * @return 推荐列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit) {
+    public PageData queryPage(Integer page, Integer limit) {
         IPage<Recommend> recommendIPage = recommendMapperService.queryPage(page, limit);
 
         if (CollectionUtils.isEmpty(recommendIPage.getRecords())){
-            return new PageUtils(recommendIPage);
+            return new PageData(recommendIPage);
         }
 
         List<RecommendVO> recommendVOs = adaptorRecommendsToRecommendVOs(new RecommendAdaptorBuilder.Builder<List<Recommend>>()
@@ -212,7 +227,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         BeanUtils.copyProperties(recommendIPage, recommendVOIPage);
         recommendVOIPage.setRecords(recommendVOs);
 
-        return new PageUtils(recommendVOIPage);
+        return new PageData(recommendVOIPage);
     }
 
     /**

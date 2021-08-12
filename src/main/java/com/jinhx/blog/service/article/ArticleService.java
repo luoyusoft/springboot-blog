@@ -1,13 +1,13 @@
 package com.jinhx.blog.service.article;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
-import com.jinhx.blog.entity.base.Response;
+import com.jinhx.blog.entity.base.PageData;
 
 import java.util.List;
 
@@ -45,10 +45,10 @@ public interface ArticleService extends IService<Article> {
     /**
      * 分页查询文章列表
      *
-     * @param articleVOsQueryDTO articleVOQueryDTO
+     * @param articleVOIPageQueryDTO articleVOQueryDTO
      * @return 文章列表
      */
-    Response<PageUtils> queryPage(ArticleVOsQueryDTO articleVOsQueryDTO);
+    PageData queryPage(ArticleVOIPageQueryDTO articleVOIPageQueryDTO);
 
     /**
      * 保存文章
@@ -81,12 +81,10 @@ public interface ArticleService extends IService<Article> {
     /**
      * 根据文章id获取文章信息
      *
-     * @param articleId 文章id
-     * @param articleAdaptorBuilder articleAdaptorBuilder
-     * @param publish publish
+     * @param articleVOsQueryDTO articleVOsQueryDTO
      * @return 文章信息
      */
-    ArticleVO getArticleVO(Integer articleId, Boolean publish, ArticleAdaptorBuilder<Article> articleAdaptorBuilder);
+    List<ArticleVO> getArticleVOs(ArticleVOsQueryDTO articleVOsQueryDTO);
 
     /**
      * 查看未公开文章时检测密码是否正确
@@ -139,7 +137,7 @@ public interface ArticleService extends IService<Article> {
      * @param read 阅读量排序
      * @return 文章列表
      */
-    PageUtils listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read);
+    PageData listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read);
 
     /**
      * 分页获取首页文章列表
@@ -148,7 +146,7 @@ public interface ArticleService extends IService<Article> {
      * @param limit 每页数量
      * @return 首页文章列表
      */
-    PageUtils listHomeArticles(Integer page, Integer limit);
+    PageData listHomeArticles(Integer page, Integer limit);
 
     /**
      * 获取ArticleVO对象

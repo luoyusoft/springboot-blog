@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.sys;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.dto.SysUserDTO;
 
@@ -9,8 +9,9 @@ import java.util.List;
 
 /**
  * SysUserService
+ *
  * @author jinhx
- * @since 2018-10-08
+ * @since 2018-10-22
  */
 public interface SysUserService extends IService<SysUser> {
 
@@ -31,7 +32,7 @@ public interface SysUserService extends IService<SysUser> {
      * @param id 用户id
      * @return 用户信息列表
      */
-    PageUtils queryPage(Integer page, Integer limit, String username, Integer id);
+    PageData queryPage(Integer page, Integer limit, String username, Integer id);
 
     /**
      * 更新密码
@@ -72,6 +73,7 @@ public interface SysUserService extends IService<SysUser> {
      * 根据用户id列表批量删除用户
      *
      * @param userIds 用户id列表
+     * @return 删除结果
      */
     boolean deleteBatch(Integer[] userIds);
 

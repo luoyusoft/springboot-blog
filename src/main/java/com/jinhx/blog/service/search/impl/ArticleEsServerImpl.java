@@ -1,6 +1,6 @@
 package com.jinhx.blog.service.search.impl;
 
-import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RabbitMQConstants;
@@ -8,6 +8,7 @@ import com.jinhx.blog.common.util.ElasticSearchUtils;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
 import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.service.article.ArticleMapperService;
@@ -28,7 +29,6 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -176,7 +176,7 @@ public class ArticleEsServerImpl implements ArticleEsServer {
      */
     @Override
     public List<ArticleVO> searchArticleList(String keyword) throws Exception {
-        List<String> highlightBuilderList = Arrays.asList("title", "description");
+        List<String> highlightBuilderList = Lists.newArrayList("title", "description");
         List<Map<String, Object>> searchRequests = elasticSearchUtils.searchRequest(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX, keyword, highlightBuilderList, highlightBuilderList);
         List<ArticleVO> articleVOList = new ArrayList<>();
         for(Map<String, Object> x : searchRequests){

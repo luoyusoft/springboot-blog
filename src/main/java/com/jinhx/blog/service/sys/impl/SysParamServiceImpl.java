@@ -1,28 +1,28 @@
 package com.jinhx.blog.service.sys.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.sys.SysParam;
-import com.jinhx.blog.mapper.sys.SysParamMapper;
+import com.jinhx.blog.service.sys.SysParamMapperService;
 import com.jinhx.blog.service.sys.SysParamService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
- * <p>
- * 系统参数 服务实现类
- * </p>
+ * SysParamServiceImpl
  *
- * @author luoyu
- * @since 2018-12-28
+ * @author jinhx
+ * @since 2018-10-22
  */
 @Service
 @Slf4j
-public class SysParamServiceImpl extends ServiceImpl<SysParamMapper, SysParam> implements SysParamService {
+public class SysParamServiceImpl implements SysParamService {
+
+    @Autowired
+    private SysParamMapperService sysParamMapperService;
 
     /**
      * 分页查询
@@ -31,15 +31,62 @@ public class SysParamServiceImpl extends ServiceImpl<SysParamMapper, SysParam> i
      * @param limit limit
      * @param menuUrl menuUrl
      * @param type type
-     * @return PageUtils
+     * @return PageData
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String menuUrl, String type) {
-        IPage<SysParam> paramIPage = baseMapper.selectPage(new Query<SysParam>(page, limit).getPage(),
-                new LambdaQueryWrapper<SysParam>()
-                        .eq(StringUtils.isNotBlank(menuUrl), SysParam::getMenuUrl,menuUrl)
-                        .like(StringUtils.isNotBlank(String.valueOf(type)), SysParam::getType,type));
-        return new PageUtils(paramIPage);
+    public PageData queryPage(Integer page, Integer limit, String menuUrl, String type) {
+        return sysParamMapperService.queryPage(page, limit, menuUrl, type);
+    }
+
+    /**
+     * 获取所有参数列表
+     *
+     * @return 所有参数列表
+     */
+    @Override
+    public List<SysParam> list() {
+        return sysParamMapperService.list();
+    }
+
+    /**
+     * 根据角色id列表批量删除角色
+     *
+     * @param roleIds 角色id列表
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteBatch(List<Integer> roleIds) {
+        sysParamMapperService.removeByIds(roleIds);
+    }
+
+    /**
+     * 修改
+     *
+     * @param sysParam sysParam
+     */
+    @Override
+    public void updateById(SysParam sysParam) {
+        sysParamMapperService.updateById(sysParam);
+    }
+
+    /**
+     * 保存
+     *
+     * @param sysParam sysParam
+     */
+    @Override
+    public void save(SysParam sysParam) {
+        sysParamMapperService.save(sysParam);
+    }
+
+    /**
+     * 信息
+     *
+     * @param id id
+     * @return 信息
+     */
+    @Override
+    public SysParam getById(Integer id) {
+        return sysParamMapperService.getById(id);
     }
 
 }

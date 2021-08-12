@@ -7,18 +7,17 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * <p>
- *  服务类
- * </p>
+ * SysRoleMenuService
  *
- * @author luoyu
- * @since 2018-10-08
+ * @author jinhx
+ * @since 2018-10-22
  */
 @Service
 public interface SysRoleMenuService extends IService<SysRoleMenu> {
 
     /**
      * 保存角色与菜单关系
+     *
      * @param roleId 角色id
      * @param menuIdList 菜单列表
      */
@@ -26,6 +25,7 @@ public interface SysRoleMenuService extends IService<SysRoleMenu> {
 
     /**
      * 获取角色菜单列表
+     *
      * @param roleId 角色id
      * @return 角色菜单列表
      */
@@ -33,6 +33,7 @@ public interface SysRoleMenuService extends IService<SysRoleMenu> {
 
     /**
      * 删除角色与菜单关联
+     *
      * @param roleIds 角色id列表
      */
     void deleteBatchByRoleId(Integer[] roleIds);

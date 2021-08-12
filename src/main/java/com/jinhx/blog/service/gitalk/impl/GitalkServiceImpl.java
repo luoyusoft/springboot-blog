@@ -111,13 +111,13 @@ public class GitalkServiceImpl implements GitalkService {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             if (gitalkApi.initArticle(initGitalkRequest)){
                 //手动确认消息已经被消费
-                log.info("新增或更新标题，进行Gitalk初始化：" + message.toString() + "成功！");
+                log.info("新增或更新标题，进行Gitalk初始化：" + JsonUtils.objectToJson(message) + "成功！");
             }else {
-                log.info("新增或更新标题，进行Gitalk初始化：" + message.toString() + "失败！");
+                log.info("新增或更新标题，进行Gitalk初始化：" + JsonUtils.objectToJson(message) + "失败！");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            log.info("新增或更新标题，进行Gitalk初始化：" + message.toString() + "失败！");
+            log.info("新增或更新标题，进行Gitalk初始化：" + JsonUtils.objectToJson(message) + "失败！");
             log.info("手动确认Gitalk初始化消息已经被消费失败！");
         }
     }

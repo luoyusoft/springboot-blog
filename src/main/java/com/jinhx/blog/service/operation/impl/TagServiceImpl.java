@@ -7,8 +7,8 @@ import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.entity.operation.vo.TagVO;
@@ -55,13 +55,13 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
      * @return PageUtils
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String name, Integer module) {
-        IPage<Tag> tagIPage = baseMapper.selectPage(new Query<Tag>(page, limit).getPage(),
+    public PageData queryPage(Integer page, Integer limit, String name, Integer module) {
+        IPage<Tag> tagIPage = baseMapper.selectPage(new QueryPage<Tag>(page, limit).getPage(),
                 new LambdaQueryWrapper<Tag>()
                         .like(StringUtils.isNotEmpty(name), Tag::getName, name)
                         .eq(module != null, Tag::getModule, module));
 
-        return new PageUtils(tagIPage);
+        return new PageData(tagIPage);
     }
 
     /**

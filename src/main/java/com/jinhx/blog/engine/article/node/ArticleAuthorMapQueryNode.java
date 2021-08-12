@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * ArticleAuthorMapQueryNode
@@ -28,13 +27,13 @@ public class ArticleAuthorMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return !context.getArticleBuilder().getAuthor() || Objects.isNull(context.getArticleIPage()) || CollectionUtils.isEmpty(context.getArticleIPage().getRecords());
+        return !context.getArticleBuilder().getAuthor() || CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         Map<Integer, String> map = Maps.newHashMap();
-        context.getArticleIPage().getRecords().forEach(item -> {
+        context.getArticles().forEach(item -> {
             map.put(item.getId(), sysUserMapperService.getNicknameByUserId(item.getCreaterId()));
         });
         context.setArticleAuthorMap(map);

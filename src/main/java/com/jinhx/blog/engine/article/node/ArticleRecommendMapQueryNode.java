@@ -29,13 +29,13 @@ public class ArticleRecommendMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return !context.getArticleBuilder().getRecommend() || Objects.isNull(context.getArticleIPage()) || CollectionUtils.isEmpty(context.getArticleIPage().getRecords());
+        return !context.getArticleBuilder().getRecommend() || CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         Map<Integer, Boolean> map = Maps.newHashMap();
-        context.getArticleIPage().getRecords().forEach(item -> {
+        context.getArticles().forEach(item -> {
             map.put(item.getId(), !Objects.isNull(recommendMapperService.selectRecommendByLinkIdAndType(item.getId(), ModuleTypeConstants.ARTICLE)));
         });
         context.setArticleRecommendMap(map);

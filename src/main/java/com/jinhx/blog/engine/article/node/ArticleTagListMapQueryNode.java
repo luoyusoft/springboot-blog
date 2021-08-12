@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * ArticleTagListMapQueryNode
@@ -36,13 +35,13 @@ public class ArticleTagListMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return !context.getArticleBuilder().getTagList() || Objects.isNull(context.getArticleIPage()) || CollectionUtils.isEmpty(context.getArticleIPage().getRecords());
+        return !context.getArticleBuilder().getTagList() || CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         Map<Integer, List<Tag>> map = Maps.newHashMap();
-        context.getArticleIPage().getRecords().forEach(item -> {
+        context.getArticles().forEach(item -> {
             List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(item.getId(), ModuleTypeConstants.ARTICLE);
             if (CollectionUtils.isNotEmpty(tagLinks)){
                 map.put(item.getId(), tagMapperService.listByLinkId(tagLinks));

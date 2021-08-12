@@ -1,4 +1,4 @@
-package com.jinhx.blog.common.util;
+package com.jinhx.blog.entity.base;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Data;
@@ -7,14 +7,14 @@ import lombok.EqualsAndHashCode;
 import java.util.LinkedHashMap;
 
 /**
- * Query
+ * QueryPage
  *
  * @author jinhx
  * @since 2018-10-21
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Query<T> extends LinkedHashMap<String, Object> {
+public class QueryPage<T> extends LinkedHashMap<String, Object> {
 
     private static final long serialVersionUID = -6559075988397185459L;
 
@@ -33,7 +33,7 @@ public class Query<T> extends LinkedHashMap<String, Object> {
      */
     private int limit = 10;
 
-    public Query(Integer initialPage, Integer initialLimit){
+    public QueryPage(Integer initialPage, Integer initialLimit){
         this.put("page", initialPage);
         this.put("limit", initialLimit);
 
@@ -41,6 +41,7 @@ public class Query<T> extends LinkedHashMap<String, Object> {
         if(initialPage != null){
             currPage = initialPage;
         }
+
         if(initialLimit != null){
             limit = initialLimit;
         }

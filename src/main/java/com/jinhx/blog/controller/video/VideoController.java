@@ -3,7 +3,7 @@ package com.jinhx.blog.controller.video;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -52,7 +52,7 @@ public class VideoController {
     @GetMapping("/manage/video/list")
     @RequiresPermissions("video:list")
     public Response listVideo(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
-        PageUtils videoPage = videoService.queryPage(page, limit, title);
+        PageData videoPage = videoService.queryPage(page, limit, title);
         return Response.success(videoPage);
     }
 
@@ -144,7 +144,7 @@ public class VideoController {
     public Response listVideos(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
                                @RequestParam("like") Boolean like, @RequestParam("watch") Boolean watch) {
-        PageUtils queryPageCondition = videoService.listVideos(page, limit, latest, categoryId, like, watch);
+        PageData queryPageCondition = videoService.listVideos(page, limit, latest, categoryId, like, watch);
         return Response.success(queryPageCondition);
     }
 

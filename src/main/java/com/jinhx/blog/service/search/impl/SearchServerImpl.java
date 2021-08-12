@@ -1,5 +1,6 @@
 package com.jinhx.blog.service.search.impl;
 
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
@@ -77,7 +78,7 @@ public class SearchServerImpl implements SearchServer {
                     articleVOTopArray[i] = articleVONoTopQueue.poll();
                 }
             }
-            articleVOResultList.addAll(Arrays.asList(articleVOTopArray));
+            articleVOResultList.addAll(Lists.newArrayList(articleVOTopArray));
         }else {
             articleVOResultList.addAll(articleVOList);
         }
@@ -114,7 +115,7 @@ public class SearchServerImpl implements SearchServer {
 //                    videoVOTopArray[i] = videoVONoTopQueue.poll();
 //                }
 //            }
-//            videoVOResultList.addAll(Arrays.asList(videoVOTopArray));
+//            videoVOResultList.addAll(Lists.newArrayList(videoVOTopArray));
 //        }else {
 //            videoVOResultList.addAll(videoVOList);
 //        }

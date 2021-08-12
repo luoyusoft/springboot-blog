@@ -1,7 +1,7 @@
 package com.jinhx.blog.service.log;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.log.LogView;
 import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 
@@ -28,7 +28,7 @@ public interface LogViewService extends IService<LogView> {
      * @param module module
      * @return PageUtils
      */
-    PageUtils queryPage(Integer page, Integer limit, Integer module);
+    PageData queryPage(Integer page, Integer limit, Integer module);
 
     /**
      * 清洗城市信息

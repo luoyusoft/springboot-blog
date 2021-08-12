@@ -2,7 +2,7 @@ package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.operation.TopAdaptorBuilder;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 
@@ -39,7 +39,7 @@ public interface TopService extends IService<Top> {
      * @param limit limit
      * @return PageUtils
      */
-     PageUtils queryPage(Integer page, Integer limit);
+     PageData queryPage(Integer page, Integer limit);
 
     /**
      * 获取置顶列表

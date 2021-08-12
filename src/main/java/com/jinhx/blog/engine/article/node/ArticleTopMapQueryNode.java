@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * ArticleTopMapQueryNode
@@ -29,13 +28,13 @@ public class ArticleTopMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return !context.getArticleBuilder().getTop() || Objects.isNull(context.getArticleIPage()) || CollectionUtils.isEmpty(context.getArticleIPage().getRecords());
+        return !context.getArticleBuilder().getTop() || CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         Map<Integer, Boolean> map = Maps.newHashMap();
-        context.getArticleIPage().getRecords().forEach(item -> {
+        context.getArticles().forEach(item -> {
             map.put(item.getId(), topMapperService.isTopByModuleAndLinkId(ModuleTypeConstants.ARTICLE, item.getId()));
         });
         context.setArticleTopMap(map);

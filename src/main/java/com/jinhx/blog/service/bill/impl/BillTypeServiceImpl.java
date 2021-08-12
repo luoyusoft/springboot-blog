@@ -2,7 +2,7 @@ package com.jinhx.blog.service.bill.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.bill.BillType;
 import com.jinhx.blog.mapper.bill.BillTypeMapper;
 import com.jinhx.blog.service.bill.BillTypeMapperService;
@@ -44,10 +44,10 @@ public class BillTypeServiceImpl extends ServiceImpl<BillTypeMapper, BillType> i
      * @return 账单类型列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
+    public PageData queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
         IPage<BillType> billIPage = billTypeMapperService.queryPage(page, limit, incomeExpenditureType);
 
-        return new PageUtils(billIPage);
+        return new PageData(billIPage);
     }
 
     /**

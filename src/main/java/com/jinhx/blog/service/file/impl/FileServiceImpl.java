@@ -9,8 +9,8 @@ import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.DateUtils;
 import com.jinhx.blog.common.util.MinioUtils;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.file.File;
 import com.jinhx.blog.entity.file.FileChunk;
 import com.jinhx.blog.entity.file.vo.FileVO;
@@ -176,12 +176,12 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
      * @return PageUtils
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url) {
+    public PageData queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url) {
         Map<String, Object> params = new HashMap<>();
         params.put("page", String.valueOf(page));
         params.put("limit", String.valueOf(limit));
 
-        IPage<File> fileResourceIPage = baseMapper.selectPage(new Query<File>(page, limit).getPage(),
+        IPage<File> fileResourceIPage = baseMapper.selectPage(new QueryPage<File>(page, limit).getPage(),
                 new LambdaQueryWrapper<File>()
                         .eq(module != null, File::getModule, module)
                         .like(!StringUtils.isEmpty(fileName), File::getFileName, fileName)
@@ -189,7 +189,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
                         .like(!StringUtils.isEmpty(url), File::getUrl, url)
                         .orderByDesc(File::getCreateTime)
         );
-        return new PageUtils(fileResourceIPage);
+        return new PageData(fileResourceIPage);
     }
 
     /**
@@ -440,7 +440,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         }
 
         if (!CollectionUtils.isEmpty(failList)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "部分文件已有关联，删除失败，列表：" + failList.toString());
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "部分文件已有关联，删除失败，列表：" + failList);
         }
     }
 

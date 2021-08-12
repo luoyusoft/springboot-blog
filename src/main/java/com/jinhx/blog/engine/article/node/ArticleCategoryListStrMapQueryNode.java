@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * ArticleCategoryListStrMapQueryNode
@@ -32,7 +31,7 @@ public class ArticleCategoryListStrMapQueryNode extends ArticleNode<BaseRequestD
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return !context.getArticleBuilder().getCategoryListStr() || Objects.isNull(context.getArticleIPage()) || CollectionUtils.isEmpty(context.getArticleIPage().getRecords());
+        return !context.getArticleBuilder().getCategoryListStr() || CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
@@ -41,7 +40,7 @@ public class ArticleCategoryListStrMapQueryNode extends ArticleNode<BaseRequestD
 
         Map<Integer, String> map = Maps.newHashMap();
         if(CollectionUtils.isNotEmpty(categorys)){
-            context.getArticleIPage().getRecords().forEach(item -> {
+            context.getArticles().forEach(item -> {
                 map.put(item.getId(), categoryMapperService.renderCategoryArr(item.getCategoryId(), categorys));
             });
         }

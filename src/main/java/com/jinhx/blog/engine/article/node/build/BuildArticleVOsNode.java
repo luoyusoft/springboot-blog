@@ -1,12 +1,9 @@
-package com.jinhx.blog.engine.article.node;
+package com.jinhx.blog.engine.article.node.build;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.engine.article.ArticleNode;
 import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
-import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
@@ -15,33 +12,28 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
- * BuildArticleVOIPageNode
+ * BuildArticleVOsNode
  *
  * @author jinhx
  * @since 2021-08-06
  */
 @Slf4j
 @Component
-public class BuildArticleVOIPageNode extends ArticleNode<BaseRequestDTO> {
+public class BuildArticleVOsNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return Objects.isNull(context.getArticleIPage()) || CollectionUtils.isEmpty(context.getArticleIPage().getRecords());
+        return CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         ArticleBuilder articleBuilder = context.getArticleBuilder();
-        IPage<Article> articleIPage = context.getArticleIPage();
-
-        IPage<ArticleVO> articleVOIPage = new Page<>();
-        BeanUtils.copyProperties(articleIPage, articleVOIPage);
 
         List<ArticleVO> articleVOs = Lists.newArrayList();
-        articleIPage.getRecords().forEach(item -> {
+        context.getArticles().forEach(item -> {
             ArticleVO articleVO = new ArticleVO();
             BeanUtils.copyProperties(item, articleVO);
 
@@ -68,13 +60,12 @@ public class BuildArticleVOIPageNode extends ArticleNode<BaseRequestDTO> {
             articleVOs.add(articleVO);
         });
 
-        articleVOIPage.setRecords(articleVOs);
-        context.setArticleVOIPage(articleVOIPage.setRecords(articleVOs));
+        context.setArticleVOs(articleVOs);
     }
 
     @Override
     public String getProcessorName() {
-        return "BuildArticleVOIPageNode";
+        return "BuildArticleVOsNode";
     }
 
 }

@@ -1,6 +1,6 @@
 package com.jinhx.blog.controller.log;
 
-import com.jinhx.blog.common.util.PageUtils;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 import com.jinhx.blog.service.log.LogViewService;
@@ -45,7 +45,7 @@ public class LogViewController {
     @GetMapping("/manage/log/list")
     @RequiresPermissions("log:list")
     public Response listTimeline(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("module") Integer module) {
-        PageUtils logViewPage = logViewService.queryPage(page, limit, module);
+        PageData logViewPage = logViewService.queryPage(page, limit, module);
         return Response.success(logViewPage);
     }
 

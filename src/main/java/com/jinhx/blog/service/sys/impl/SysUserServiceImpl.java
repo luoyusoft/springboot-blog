@@ -5,10 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.PageUtils;
-import com.jinhx.blog.common.util.Query;
+import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.dto.SysUserDTO;
@@ -25,20 +26,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * SysUserServiceImpl
+ *
  * @author jinhx
- * @since 2018-10-08
+ * @since 2018-10-22
  */
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
 
     @Autowired
     private SysUserRoleMapperService sysUserRoleMapperService;
-
 
     /**
      * 查询用户菜单列表
@@ -61,8 +61,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      * @return 用户信息列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String username, Integer id) {
-        IPage<SysUser> sysUserIPage = baseMapper.selectPage(new Query<SysUser>(page, limit).getPage(),
+    public PageData queryPage(Integer page, Integer limit, String username, Integer id) {
+        IPage<SysUser> sysUserIPage = baseMapper.selectPage(new QueryPage<SysUser>(page, limit).getPage(),
                 new LambdaQueryWrapper<SysUser>()
                         .eq(id != null, SysUser::getId, id)
                         .like(StringUtils.isNotBlank(username), SysUser::getUsername, username));
@@ -83,7 +83,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         BeanUtils.copyProperties(sysUserIPage, sysUserDTOPage);
         sysUserDTOPage.setRecords(sysUserDTOList);
 
-        return new PageUtils(sysUserDTOPage);
+        return new PageData(sysUserDTOPage);
     }
 
     /**
@@ -155,13 +155,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该用户名已存在");
         }
 
-        //sha256加密
+        // sha256加密
         String salt = RandomStringUtils.randomAlphanumeric(20);
         sysUserDTO.setPassword(new Sha256Hash(sysUserDTO.getPassword(), salt).toHex());
         sysUserDTO.setSalt(salt);
         baseMapper.insert(sysUserDTO);
 
-        //保存用户与角色关系
+        // 保存用户与角色关系
         sysUserRoleMapperService.saveOrUpdate(sysUserDTO.getId(), sysUserDTO.getRoleIdList());
         return true;
     }
@@ -195,7 +195,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         baseMapper.updateById(sysUserDTO);
 
-        //保存用户与角色关系
+        // 保存用户与角色关系
         sysUserRoleMapperService.saveOrUpdate(sysUserDTO.getId(), sysUserDTO.getRoleIdList());
         return true;
     }
@@ -204,6 +204,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      * 根据用户id列表批量删除用户
      *
      * @param userIds 用户id列表
+     * @return 删除结果
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -213,8 +214,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             SysAdminUtils.checkSuperAdmin();
         }
 
-        removeByIds(Arrays.asList(userIds));
-        //删除用户与角色关联
+        removeByIds(Lists.newArrayList(userIds));
+        // 删除用户与角色关联
         sysUserRoleMapperService.deleteBatchByUserId(userIds);
 
         return true;

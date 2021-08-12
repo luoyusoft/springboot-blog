@@ -1,5 +1,6 @@
 package com.jinhx.blog.entity.base;
 
+import com.jinhx.blog.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -33,11 +34,11 @@ public abstract class LogicExecutor<T> {
     protected void onFail() {
     }
 
-    public Response<T> execute() {
+    public T execute() {
         return this.doExecute();
     }
 
-    private Response<T> doExecute() {
+    private T doExecute() {
         try {
             log.info("checkParams start act={} params={}", getProcessorName(), getParams());
             this.checkParams();
@@ -54,9 +55,9 @@ public abstract class LogicExecutor<T> {
             T result = this.process();
 
             stopWatch.stop();
-            log.info("process success act={} time={} response={}", getProcessorName(), stopWatch.getTime(), result.toString());
+            log.info("process success act={} time={} response={}", getProcessorName(), stopWatch.getTime(), JsonUtils.objectToJson(result));
             this.onSuccess();
-            return Response.success(result);
+            return result;
         }catch (Throwable e) {
             this.onFail();
             log.error("process fail act={} msg={}", getProcessorName(), ExceptionUtils.getStackTrace(e));

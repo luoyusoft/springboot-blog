@@ -16,6 +16,7 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.filter.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.*;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.Recommend;
@@ -195,11 +196,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return 视频列表
      */
     @Override
-    public PageUtils queryPage(Integer page, Integer limit, String title) {
+    public PageData queryPage(Integer page, Integer limit, String title) {
         IPage<Video> videoIPage = videoMapperService.queryPage(page, limit, title);
 
         if (CollectionUtils.isEmpty(videoIPage.getRecords())){
-            return new PageUtils(videoIPage);
+            return new PageData(videoIPage);
         }
 
         List<VideoVO> videoVOs = adaptorVideosToVideoVOs(new VideoAdaptorBuilder.Builder<List<Video>>()
@@ -211,7 +212,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         IPage<VideoVO> videoVOIPage = new Page<>();
         BeanUtils.copyProperties(videoIPage, videoVOIPage);
         videoVOIPage.setRecords(videoVOs);
-        return new PageUtils(videoVOIPage);
+        return new PageData(videoVOIPage);
     }
 
     /**
@@ -284,7 +285,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 }
             }else {
                 if (recommendMapperService.selectRecommendByLinkIdAndType(videoVO.getId(), ModuleTypeConstants.VIDEO) != null){
-                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Arrays.asList(videoVO.getId()), ModuleTypeConstants.VIDEO);
+                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(videoVO.getId()), ModuleTypeConstants.VIDEO);
                 }
             }
         }
@@ -340,7 +341,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 }
             }else {
                 if (recommendMapperService.selectRecommendByLinkIdAndType(videoVO.getId(), ModuleTypeConstants.VIDEO) != null){
-                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Arrays.asList(videoVO.getId()), ModuleTypeConstants.VIDEO);
+                    recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(videoVO.getId()), ModuleTypeConstants.VIDEO);
                 }
             }
         }
@@ -405,9 +406,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             //先删除视频标签多对多关联
             tagLinkMapperService.deleteTagLink(videoId, ModuleTypeConstants.VIDEO);
 
-            videoMapperService.deleteVideos(Arrays.asList(videoId));
+            videoMapperService.deleteVideos(Lists.newArrayList(videoId));
 
-            recommendMapperService.deleteRecommendsByLinkIdsAndType(Arrays.asList(videoId), ModuleTypeConstants.VIDEO);
+            recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(videoId), ModuleTypeConstants.VIDEO);
         });
 
         // 发送rabbitmq消息同步到es
@@ -463,11 +464,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Cacheable(value = RedisKeyConstants.VIDEOS)
     @Override
-    public PageUtils listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch) {
+    public PageData listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch) {
         IPage<Video> videoIPage = videoMapperService.listVideos(page, limit, latest, categoryId, like, watch);
 
         if (CollectionUtils.isEmpty(videoIPage.getRecords())){
-            return new PageUtils(videoIPage);
+            return new PageData(videoIPage);
         }
 
         List<VideoVO> videoVOs = adaptorVideosToVideoVOs(new VideoAdaptorBuilder.Builder<List<Video>>()
@@ -477,7 +478,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         IPage<VideoVO> videoVOIPage = new Page<>();
         BeanUtils.copyProperties(videoIPage, videoVOIPage);
         videoVOIPage.setRecords(videoVOs);
-        return new PageUtils(videoVOIPage);
+        return new PageData(videoVOIPage);
     }
 
     /**
