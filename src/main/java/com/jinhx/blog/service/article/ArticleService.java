@@ -3,10 +3,13 @@ package com.jinhx.blog.service.article;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
+import com.jinhx.blog.entity.article.dto.PortalArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
+import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.entity.base.PageData;
 
 import java.util.List;
@@ -26,14 +29,6 @@ public interface ArticleService extends IService<Article> {
      * @return ArticleVO
      */
     ArticleVO adaptorArticleToArticleVO(ArticleAdaptorBuilder<Article> articleAdaptorBuilder);
-
-    /**
-     * 将Article列表按需转换为ArticleVO列表
-     *
-     * @param articleAdaptorBuilder articleAdaptorBuilder
-     * @return ArticleVO列表
-     */
-    List<ArticleVO> adaptorArticlesToArticleVOs(ArticleAdaptorBuilder<List<Article>> articleAdaptorBuilder);
 
     /**
      * 获取首页信息
@@ -129,15 +124,10 @@ public interface ArticleService extends IService<Article> {
     /**
      * 分页获取文章列表
      *
-     * @param page 页码
-     * @param limit 每页数量
-     * @param categoryId 分类
-     * @param latest 时间排序
-     * @param like 点赞量排序
-     * @param read 阅读量排序
+     * @param portalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO
      * @return 文章列表
      */
-    PageData listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read);
+    PageData listArticleVOs(PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO);
 
     /**
      * 分页获取首页文章列表
@@ -160,9 +150,11 @@ public interface ArticleService extends IService<Article> {
     /**
      * 获取热读榜
      *
+     * @param baseRequestDTO baseRequestDTO
+     * @param articleBuilder articleBuilder
      * @return 热读文章列表
      */
-    List<ArticleVO> listHotReadArticles();
+    List<ArticleVO> listHotReadArticles(BaseRequestDTO baseRequestDTO, ArticleBuilder articleBuilder);
 
     /**
      * 文章点赞

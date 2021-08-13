@@ -155,7 +155,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      * @param read 阅读量排序
      * @return 文章列表
      */
-    public IPage<Article> listArticles(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read) {
+    public IPage<Article> listArticles(Integer page, Integer limit, Integer categoryId, Boolean latest, Boolean like, Boolean read) {
         return baseMapper.selectPage(new QueryPage<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
                 .eq(Article::getPublish, Article.PUBLISH_TRUE)
                 .like(categoryId != null, Article::getCategoryId, categoryId)

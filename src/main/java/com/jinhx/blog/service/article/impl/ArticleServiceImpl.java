@@ -23,10 +23,13 @@ import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.engine.article.flow.ArticleQueryFlow;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
+import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
+import com.jinhx.blog.entity.article.dto.PortalArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
+import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.entity.base.LogicExecutor;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.gitalk.InitGitalkRequest;
@@ -161,35 +164,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Article article = new Article();
         BeanUtils.copyProperties(articleVO, article);
         return article;
-    }
-
-    /**
-     * 将Article列表按需转换为ArticleVO列表
-     *
-     * @param articleAdaptorBuilder articleAdaptorBuilder
-     * @return ArticleVO列表
-     */
-    @Override
-    public List<ArticleVO> adaptorArticlesToArticleVOs(ArticleAdaptorBuilder<List<Article>> articleAdaptorBuilder){
-        if(Objects.isNull(articleAdaptorBuilder) || CollectionUtils.isEmpty(articleAdaptorBuilder.getData())){
-            return Collections.emptyList();
-        }
-        List<ArticleVO> articleVOs = Lists.newArrayList();
-        articleAdaptorBuilder.getData().forEach(article -> {
-            if (Objects.isNull(article)){
-                return;
-            }
-
-            articleVOs.add(adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
-                    .setCategoryListStr(articleAdaptorBuilder.getCategoryListStr())
-                    .setTagList(articleAdaptorBuilder.getTagList())
-                    .setRecommend(articleAdaptorBuilder.getRecommend())
-                    .setTop(articleAdaptorBuilder.getTop())
-                    .setAuthor(articleAdaptorBuilder.getAuthor())
-                    .build(article)));
-        });
-
-        return articleVOs;
     }
 
     /**
@@ -578,31 +552,52 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 分页获取文章列表
      *
-     * @param page 页码
-     * @param limit 每页数量
-     * @param categoryId 分类
-     * @param latest 时间排序
-     * @param like 点赞量排序
-     * @param read 阅读量排序
+     * @param portalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO
      * @return 文章列表
      */
     @Cacheable(value = RedisKeyConstants.ARTICLES)
     @Override
-    public PageData listArticleVOs(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean read) {
-        IPage<Article> articleIPage = articleMapperService.listArticles(page, limit, latest, categoryId, like, read);
+    public PageData listArticleVOs(PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO) {
+        return new LogicExecutor<PageData>() {
 
-        if (CollectionUtils.isEmpty(articleIPage.getRecords())){
-            return new PageData(articleIPage);
-        }
+            ArticleQueryContextInfo<PortalArticleVOIPageQueryDTO> context;
 
-        List<ArticleVO> articleVOs = adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
-                .setTagList()
-                .setAuthor()
-                .build(articleIPage.getRecords()));
-        IPage<ArticleVO> articleVOIPage = new Page<>();
-        BeanUtils.copyProperties(articleIPage, articleVOIPage);
-        articleVOIPage.setRecords(articleVOs);
-        return new PageData(articleVOIPage);
+            @Override
+            protected void checkParams() {
+                ValidatorUtils.validateEntity(portalArticleVOIPageQueryDTO, QueryGroup.class);
+
+                portalArticleVOIPageQueryDTO.setLogStr("act=listArticleVOs");
+                context = ArticleQueryContextInfo.create(portalArticleVOIPageQueryDTO);
+            }
+
+            @Override
+            protected PageData process() {
+                context.setPage(portalArticleVOIPageQueryDTO.getPage());
+                context.setLimit(portalArticleVOIPageQueryDTO.getLimit());
+                context.setCategoryId(portalArticleVOIPageQueryDTO.getCategoryId());
+                context.setLatest(portalArticleVOIPageQueryDTO.getLatest());
+                context.setLike(portalArticleVOIPageQueryDTO.getLike());
+                context.setRead(portalArticleVOIPageQueryDTO.getRead());
+                context.setArticleBuilder(portalArticleVOIPageQueryDTO.getArticleBuilder());
+
+                articleEngine.execute(ArticleQueryFlow.getPortalArticlevoIpageQueryFlow(), context);
+                return new PageData(context.getArticleVOIPage());
+            }
+
+            @Override
+            protected String getParams() {
+                if (Objects.isNull(portalArticleVOIPageQueryDTO)){
+                    return null;
+                }
+                return JsonUtils.objectToJson(portalArticleVOIPageQueryDTO);
+            }
+
+            @Override
+            protected String getProcessorName() {
+                return "listArticleVOs";
+            }
+
+        }.execute();
     }
 
     /**
@@ -705,15 +700,49 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 获取热读榜
      *
+     * @param baseRequestDTO baseRequestDTO
+     * @param articleBuilder articleBuilder
      * @return 热读文章列表
      */
     @Cacheable(value = RedisKeyConstants.ARTICLES, key = "'hostread'")
     @Override
-    public List<ArticleVO> listHotReadArticles() {
-        List<Article> articles = articleMapperService.listHotReadArticles();
+    public List<ArticleVO> listHotReadArticles(BaseRequestDTO baseRequestDTO, ArticleBuilder articleBuilder) {
+        return new LogicExecutor<List<ArticleVO>>() {
 
-        return adaptorArticlesToArticleVOs(new ArticleAdaptorBuilder.Builder<List<Article>>()
-                .build(articles));
+            ArticleQueryContextInfo<BaseRequestDTO> context;
+
+            @Override
+            protected void checkParams() {
+                if (Objects.isNull(baseRequestDTO) || Objects.isNull(articleBuilder)){
+                    throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "baseRequestDTO，articleBuilder不能为空");
+                }
+
+                baseRequestDTO.setLogStr("act=listHotReadArticles");
+                context = ArticleQueryContextInfo.create(baseRequestDTO);
+            }
+
+            @Override
+            protected List<ArticleVO> process() {
+                context.setArticleBuilder(articleBuilder);
+
+                articleEngine.execute(ArticleQueryFlow.getHotReadArticlevosQueryFlow(), context);
+                return context.getArticleVOs();
+            }
+
+            @Override
+            protected String getParams() {
+                if (Objects.isNull(baseRequestDTO)){
+                    return null;
+                }
+                return JsonUtils.objectToJson(baseRequestDTO);
+            }
+
+            @Override
+            protected String getProcessorName() {
+                return "listHotReadArticles";
+            }
+
+        }.execute();
     }
 
     /**

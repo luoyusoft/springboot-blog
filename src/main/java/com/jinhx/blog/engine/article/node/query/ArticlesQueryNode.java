@@ -1,4 +1,4 @@
-package com.jinhx.blog.engine.article.node;
+package com.jinhx.blog.engine.article.node.query;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Lists;

@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.entity.article.dto.PortalArticleVOIPageQueryDTO;
+import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
@@ -182,10 +184,27 @@ public class ArticleController {
      */
     @GetMapping("/article/listarticles")
     @LogView(module = 0)
-    public Response listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+    public Response<PageData> listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                  @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
                                  @RequestParam("like") Boolean like, @RequestParam("read") Boolean read) {
-        return Response.success(articleService.listArticleVOs(page, limit, latest, categoryId, like, read));
+        if (Objects.isNull(page) || Objects.isNull(limit) || Objects.isNull(categoryId)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit，categoryId不能为空");
+        }
+
+        PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO = new PortalArticleVOIPageQueryDTO();
+        portalArticleVOIPageQueryDTO.setLogStr("con=listArticleVOs");
+        portalArticleVOIPageQueryDTO.setPage(page);
+        portalArticleVOIPageQueryDTO.setLimit(limit);
+        portalArticleVOIPageQueryDTO.setCategoryId(categoryId);
+        portalArticleVOIPageQueryDTO.setLatest(latest);
+        portalArticleVOIPageQueryDTO.setLike(like);
+        portalArticleVOIPageQueryDTO.setRead(read);
+        portalArticleVOIPageQueryDTO.setArticleBuilder(ArticleBuilder.builder()
+                .tagList(true)
+                .author(true)
+                .build());
+
+        return Response.success(articleService.listArticleVOs(portalArticleVOIPageQueryDTO));
     }
 
     /**
@@ -236,8 +255,11 @@ public class ArticleController {
      */
     @GetMapping("/article/listhotreadarticles")
     @LogView(module = 0)
-    public Response listHotReadArticles(){
-        return Response.success(articleService.listHotReadArticles());
+    public Response<List<ArticleVO>> listHotReadArticles(){
+        BaseRequestDTO baseRequestDTO = new BaseRequestDTO();
+        baseRequestDTO.setLogStr("con=listHotReadArticles");
+
+        return Response.success(articleService.listHotReadArticles(baseRequestDTO, ArticleBuilder.builder().build()));
     }
 
     /**
