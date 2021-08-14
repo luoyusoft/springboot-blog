@@ -25,7 +25,7 @@ public class PortalArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        if (Objects.isNull(context.getPage()) || Objects.isNull(context.getLimit()) || Objects.isNull(context.getCategoryId())){
+        if (Objects.isNull(context.getPage()) || Objects.isNull(context.getLimit())){
             context.setExNextNode(false);
         }
         return false;

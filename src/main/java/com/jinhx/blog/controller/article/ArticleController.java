@@ -4,16 +4,15 @@ import com.google.common.collect.Lists;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.entity.article.dto.PortalArticleVOIPageQueryDTO;
-import com.jinhx.blog.entity.base.BaseRequestDTO;
-import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.AddGroup;
-import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
+import com.jinhx.blog.entity.article.dto.PortalArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.base.BaseRequestDTO;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.service.article.ArticleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -93,7 +92,6 @@ public class ArticleController {
 
         ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
         articleVOsQueryDTO.setLogStr("con=info");
-        articleVOsQueryDTO.setPublish(Article.PUBLISH_TRUE);
         articleVOsQueryDTO.setArticleIds(Lists.newArrayList(articleId));
         articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
                 .categoryListStr(true)
@@ -187,8 +185,8 @@ public class ArticleController {
     public Response<PageData> listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                  @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
                                  @RequestParam("like") Boolean like, @RequestParam("read") Boolean read) {
-        if (Objects.isNull(page) || Objects.isNull(limit) || Objects.isNull(categoryId)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit，categoryId不能为空");
+        if (Objects.isNull(page) || Objects.isNull(limit)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
         }
 
         PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO = new PortalArticleVOIPageQueryDTO();

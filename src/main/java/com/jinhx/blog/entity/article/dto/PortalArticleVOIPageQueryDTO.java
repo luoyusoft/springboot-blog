@@ -41,7 +41,6 @@ public class PortalArticleVOIPageQueryDTO extends BaseRequestDTO {
     /**
      * 分类
      */
-    @NotNull(message = "分类不能为空", groups = {QueryGroup.class})
     private Integer categoryId;
 
     /**

@@ -47,8 +47,9 @@ public class ArticlesQueryNode extends ArticleNode<BaseRequestDTO> {
                 }
                 context.setArticles(Lists.newArrayList(article));
             }
+        }else {
+            context.setArticles(articleMapperService.getArticles(context.getArticleIds(), context.getPublish()));
         }
-        // todo 批量
     }
 
     @Override

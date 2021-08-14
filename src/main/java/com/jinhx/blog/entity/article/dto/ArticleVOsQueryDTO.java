@@ -36,7 +36,6 @@ public class ArticleVOsQueryDTO extends BaseRequestDTO {
     /**
      * 发布状态
      */
-    @NotNull(message = "发布状态不能为空", groups = {QueryGroup.class})
     private Boolean publish;
 
 }

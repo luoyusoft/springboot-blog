@@ -3,6 +3,7 @@ package com.jinhx.blog.service.article;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
@@ -10,7 +11,6 @@ import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.mapper.article.ArticleMapper;
-import org.apache.shiro.util.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,7 +94,20 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
     public Article getArticle(Integer articleId, Boolean publish) {
         return baseMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getId, articleId)
-                .eq(publish != null, Article::getPublish, publish));
+                .eq(!Objects.isNull(publish), Article::getPublish, publish));
+    }
+
+    /**
+     * 根据文章id获取文章信息列表
+     *
+     * @param articleIds 文章id列表
+     * @param publish publish
+     * @return 文章信息列表
+     */
+    public List<Article> getArticles(List<Integer> articleIds, Boolean publish) {
+        return baseMapper.selectList(new LambdaQueryWrapper<Article>()
+                .in(CollectionUtils.isNotEmpty(articleIds), Article::getId, articleIds)
+                .eq(!Objects.isNull(publish), Article::getPublish, publish));
     }
 
     /**
@@ -105,7 +118,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      */
     public boolean checkByCategoryId(Integer categoryId) {
         return baseMapper.selectCount(new LambdaQueryWrapper<Article>()
-                .like(categoryId != null, Article::getCategoryId, categoryId)) > 0;
+                .like(!Objects.isNull(categoryId), Article::getCategoryId, categoryId)) > 0;
     }
 
     /**
@@ -158,7 +171,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
     public IPage<Article> listArticles(Integer page, Integer limit, Integer categoryId, Boolean latest, Boolean like, Boolean read) {
         return baseMapper.selectPage(new QueryPage<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
                 .eq(Article::getPublish, Article.PUBLISH_TRUE)
-                .like(categoryId != null, Article::getCategoryId, categoryId)
+                .like(!Objects.isNull(categoryId), Article::getCategoryId, categoryId)
                 .orderByDesc(latest, Article::getCreateTime)
                 .orderByDesc(like, Article::getLikeNum)
                 .orderByDesc(read, Article::getReadNum)
