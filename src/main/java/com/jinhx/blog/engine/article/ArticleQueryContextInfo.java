@@ -2,6 +2,7 @@ package com.jinhx.blog.engine.article;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import com.google.common.collect.Maps;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.article.Article;
@@ -103,27 +104,27 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     /**
      * k：文章id，value：文章所属分类，以逗号分
      */
-    private Map<Integer, String> articleCategoryListStrMap;
+    private Map<Integer, String> articleCategoryListStrMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：所属标签
      */
-    private Map<Integer, List<Tag>> articleTagListMap;
+    private Map<Integer, List<Tag>> articleTagListMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：推荐
      */
-    private Map<Integer, Boolean> articleRecommendMap;
+    private Map<Integer, Boolean> articleRecommendMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：置顶
      */
-    private Map<Integer, Boolean> articleTopMap;
+    private Map<Integer, Boolean> articleTopMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：文章作者
      */
-    private Map<Integer, String> articleAuthorMap;
+    private Map<Integer, String> articleAuthorMap = Maps.newHashMap();
 
     /**
      * 文章部分信息
