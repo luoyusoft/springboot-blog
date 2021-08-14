@@ -44,4 +44,12 @@ public class ArticleVO extends Article {
      */
     private String author;
 
+    /**
+     * 列表数据脱敏
+     */
+    public void listDataDesensitization(){
+        this.setContent(null);
+        this.setContentFormat(null);
+    }
+
 }

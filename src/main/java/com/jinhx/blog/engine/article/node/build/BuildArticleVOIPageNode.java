@@ -45,6 +45,8 @@ public class BuildArticleVOIPageNode extends ArticleNode<BaseRequestDTO> {
             ArticleVO articleVO = new ArticleVO();
             BeanUtils.copyProperties(item, articleVO);
 
+            articleVO.listDataDesensitization();
+
             if (articleBuilder.getCategoryListStr()){
                 articleVO.setCategoryListStr(context.getArticleCategoryListStrMap().get(articleVO.getId()));
             }

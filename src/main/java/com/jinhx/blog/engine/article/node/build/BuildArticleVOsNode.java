@@ -37,6 +37,10 @@ public class BuildArticleVOsNode extends ArticleNode<BaseRequestDTO> {
             ArticleVO articleVO = new ArticleVO();
             BeanUtils.copyProperties(item, articleVO);
 
+            if (context.getArticles().size() > 1){
+                articleVO.listDataDesensitization();
+            }
+
             if (articleBuilder.getCategoryListStr()){
                 articleVO.setCategoryListStr(context.getArticleCategoryListStrMap().get(articleVO.getId()));
             }
