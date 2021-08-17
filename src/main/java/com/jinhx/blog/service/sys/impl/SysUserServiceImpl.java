@@ -141,11 +141,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      * 新增用户信息
      *
      * @param sysUserDTO 用户信息
-     * @return 新增结果
+     * @return 密码
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean insertSysUser(SysUserDTO sysUserDTO) {
+    public String insertSysUser(SysUserDTO sysUserDTO) {
         // 如果新增超级管理员，需要当前用户拥有超级管理员权限
         if (!CollectionUtils.isEmpty(sysUserDTO.getRoleIdList()) && SysAdminUtils.isHaveSuperAdmin(sysUserDTO.getRoleIdList())){
             SysAdminUtils.checkSuperAdmin();
@@ -156,14 +156,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         // sha256加密
+        String password = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
         String salt = RandomStringUtils.randomAlphanumeric(20);
-        sysUserDTO.setPassword(new Sha256Hash(sysUserDTO.getPassword(), salt).toHex());
+        sysUserDTO.setPassword(new Sha256Hash(password, salt).toHex());
         sysUserDTO.setSalt(salt);
         baseMapper.insert(sysUserDTO);
 
         // 保存用户与角色关系
         sysUserRoleMapperService.saveOrUpdate(sysUserDTO.getId(), sysUserDTO.getRoleIdList());
-        return true;
+        return password;
     }
 
     /**

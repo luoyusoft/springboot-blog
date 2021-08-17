@@ -43,8 +43,6 @@ public class SysUser extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "用户名")
     private String username;
 
-    @NotBlank(message = "密码不能为空" ,groups = {AddGroup.class})
-    @Length(min = 6, max = 20, message = "密码长度必须位于6到20之间", groups = {AddGroup.class})
     @ApiModelProperty(value = "密码")
     private String password;
 
@@ -67,11 +65,5 @@ public class SysUser extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "头像")
     private String profile;
-
-    @ApiModelProperty(value = "创建者id")
-    private Integer createrId;
-
-    @ApiModelProperty(value = "更新者id")
-    private Integer updaterId;
 
 }

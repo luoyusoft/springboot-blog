@@ -57,9 +57,9 @@ public interface SysUserService extends IService<SysUser> {
      * 新增用户信息
      *
      * @param sysUserDTO 用户信息
-     * @return 新增结果
+     * @return 密码
      */
-    boolean insertSysUser(SysUserDTO sysUserDTO);
+    String insertSysUser(SysUserDTO sysUserDTO);
 
     /**
      * 根据用户id更新用户信息

@@ -112,19 +112,18 @@ public class SysUserController {
      * 新增用户信息
      *
      * @param sysUserDTO 用户信息
-     * @return 新增结果
+     * @return 密码
      */
     @PostMapping("/manage/sys/user/save")
     @RequiresPermissions("sys:user:save")
-    public Response insertSysUser(@RequestBody SysUserDTO sysUserDTO){
+    public Response<String> insertSysUser(@RequestBody SysUserDTO sysUserDTO){
         ValidatorUtils.validateEntity(sysUserDTO, AddGroup.class);
 
         if(StringUtils.isEmpty(sysUserDTO.getProfile())){
             sysUserDTO.setProfile(SysUser.sysUserDefaultProfile);
         }
-        sysUserService.insertSysUser(sysUserDTO);
 
-        return Response.success();
+        return Response.success(sysUserService.insertSysUser(sysUserDTO));
     }
 
     /**
