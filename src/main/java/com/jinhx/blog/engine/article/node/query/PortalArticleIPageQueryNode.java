@@ -1,7 +1,10 @@
 package com.jinhx.blog.engine.article.node.query;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.engine.article.ArticleNode;
 import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
+import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.service.article.ArticleMapperService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +36,11 @@ public class PortalArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        context.setArticleIPage(articleMapperService.listArticles(context.getPage(), context.getLimit(), context.getCategoryId(), context.getLatest(), context.getLike(), context.getRead()));
+        IPage<Article> articleIPage = articleMapperService.listArticles(context.getPage(), context.getLimit(), context.getCategoryId(), context.getLatest(), context.getLike(), context.getRead());
+        if (Objects.nonNull(articleIPage) && CollectionUtils.isNotEmpty(articleIPage.getRecords())){
+            context.setArticles(articleIPage.getRecords());
+        }
+        context.setArticleIPage(articleIPage);
     }
 
     @Override

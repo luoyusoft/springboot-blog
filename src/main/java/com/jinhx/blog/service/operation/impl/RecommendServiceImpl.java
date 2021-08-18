@@ -105,7 +105,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
 
             List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
 
-            if (CollectionUtils.isNotEmpty(articleVOs) && !Objects.isNull(articleVOs.get(0))){
+            if (CollectionUtils.isNotEmpty(articleVOs) && Objects.nonNull(articleVOs.get(0))){
                 ArticleVO articleVO = articleVOs.get(0);
                 if (recommendAdaptorBuilder.getDescription()){
                     recommendVO.setDescription(articleVO.getDescription());
@@ -135,7 +135,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
 
         if(ModuleTypeConstants.VIDEO.equals(recommendVO.getModule())){
             VideoVO videoVO = videoService.getVideoVO(recommendVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
-            if (!Objects.isNull(videoVO)){
+            if (Objects.nonNull(videoVO)){
                 if (recommendAdaptorBuilder.getWatchNum()){
                     recommendVO.setWatchNum(videoVO.getWatchNum());
                 }
@@ -343,7 +343,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
     public void updateRecommend(Recommend recommend) {
         Recommend existRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
                 .eq(Recommend::getOrderNum, recommend.getOrderNum()));
-        if (!Objects.isNull(existRecommend) && !existRecommend.getId().equals(recommend.getId())){
+        if (Objects.nonNull(existRecommend) && !existRecommend.getId().equals(recommend.getId())){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){

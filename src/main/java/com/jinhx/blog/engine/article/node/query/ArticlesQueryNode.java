@@ -41,7 +41,7 @@ public class ArticlesQueryNode extends ArticleNode<BaseRequestDTO> {
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         if (context.getArticleIds().size() == 1){
             Article article = articleMapperService.getArticle(context.getArticleIds().get(0), context.getPublish());
-            if (!Objects.isNull(article)){
+            if (Objects.nonNull(article)){
                 if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
                     throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "后台查看未公开的文章只能由创建者查看");
                 }

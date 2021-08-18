@@ -36,7 +36,7 @@ public class ArticleRecommendMapQueryNode extends ArticleNode<BaseRequestDTO> {
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         Map<Integer, Boolean> map = Maps.newHashMap();
         context.getArticles().forEach(item -> {
-            map.put(item.getId(), !Objects.isNull(recommendMapperService.selectRecommendByLinkIdAndType(item.getId(), ModuleTypeConstants.ARTICLE)));
+            map.put(item.getId(), Objects.nonNull(recommendMapperService.selectRecommendByLinkIdAndType(item.getId(), ModuleTypeConstants.ARTICLE)));
         });
         context.setArticleRecommendMap(map);
     }

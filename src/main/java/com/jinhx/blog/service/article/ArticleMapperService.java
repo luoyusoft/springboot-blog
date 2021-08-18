@@ -94,7 +94,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
     public Article getArticle(Integer articleId, Boolean publish) {
         return baseMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getId, articleId)
-                .eq(!Objects.isNull(publish), Article::getPublish, publish));
+                .eq(Objects.nonNull(publish), Article::getPublish, publish));
     }
 
     /**
@@ -107,7 +107,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
     public List<Article> getArticles(List<Integer> articleIds, Boolean publish) {
         return baseMapper.selectList(new LambdaQueryWrapper<Article>()
                 .in(CollectionUtils.isNotEmpty(articleIds), Article::getId, articleIds)
-                .eq(!Objects.isNull(publish), Article::getPublish, publish));
+                .eq(Objects.nonNull(publish), Article::getPublish, publish));
     }
 
     /**
@@ -118,7 +118,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      */
     public boolean checkByCategoryId(Integer categoryId) {
         return baseMapper.selectCount(new LambdaQueryWrapper<Article>()
-                .like(!Objects.isNull(categoryId), Article::getCategoryId, categoryId)) > 0;
+                .like(Objects.nonNull(categoryId), Article::getCategoryId, categoryId)) > 0;
     }
 
     /**
@@ -171,7 +171,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
     public IPage<Article> listArticles(Integer page, Integer limit, Integer categoryId, Boolean latest, Boolean like, Boolean read) {
         return baseMapper.selectPage(new QueryPage<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
                 .eq(Article::getPublish, Article.PUBLISH_TRUE)
-                .like(!Objects.isNull(categoryId), Article::getCategoryId, categoryId)
+                .like(Objects.nonNull(categoryId), Article::getCategoryId, categoryId)
                 .orderByDesc(latest, Article::getCreateTime)
                 .orderByDesc(like, Article::getLikeNum)
                 .orderByDesc(read, Article::getReadNum)

@@ -318,7 +318,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 更新
         articleMapperService.updateArticleById(adaptorArticleVOToArticle(articleVO));
 
-        if (!Objects.isNull(articleVO.getRecommend())){
+        if (Objects.nonNull(articleVO.getRecommend())){
             if (articleVO.getRecommend()){
                 if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){
                     Integer maxOrderNum = recommendMapperService.selectRecommendMaxOrderNum();
@@ -371,7 +371,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "未公开的文章只能由创建者修改");
         }
 
-        if (!Objects.isNull(articleVO.getPublish())){
+        if (Objects.nonNull(articleVO.getPublish())){
             // 更新发布，公开状态
             articleMapperService.updateArticleById(adaptorArticleVOToArticle(articleVO));
 
@@ -394,7 +394,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
         }
 
-        if (!Objects.isNull(articleVO.getRecommend())){
+        if (Objects.nonNull(articleVO.getRecommend())){
             // 更新推荐状态
             if (articleVO.getRecommend()){
                 if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){

@@ -73,7 +73,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
         if (categoryAdaptorBuilder.getParentName()){
             Category parentCategory = categoryMapperService.getById(categoryVO.getParentId());
-            if (!Objects.isNull(parentCategory)){
+            if (Objects.nonNull(parentCategory)){
                 categoryVO.setParentName(parentCategory.getName());
             }
         }
@@ -115,7 +115,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<Category> select(Integer module) {
         List<Category> categorys = baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(!Objects.isNull(module), Category::getModule, module));
+                .eq(Objects.nonNull(module), Category::getModule, module));
 
         //添加顶级分类
         Category root = new Category();

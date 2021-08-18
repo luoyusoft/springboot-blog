@@ -97,7 +97,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
 
             List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
 
-            if (CollectionUtils.isNotEmpty(articleVOs) && !Objects.isNull(articleVOs.get(0))){
+            if (CollectionUtils.isNotEmpty(articleVOs) && Objects.nonNull(articleVOs.get(0))){
                 ArticleVO articleVO = articleVOs.get(0);
                 if (topAdaptorBuilder.getDescription()){
                     topVO.setDescription(articleVO.getDescription());
@@ -127,7 +127,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
 
         if(ModuleTypeConstants.VIDEO.equals(topVO.getModule())){
             VideoVO videoVO = videoService.getVideoVO(topVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
-            if (!Objects.isNull(videoVO)){
+            if (Objects.nonNull(videoVO)){
                 if (topAdaptorBuilder.getWatchNum()){
                     topVO.setWatchNum(videoVO.getWatchNum());
                 }
@@ -310,7 +310,7 @@ public class TopServiceImpl extends ServiceImpl<TopMapper, Top> implements TopSe
     public void updateTop(Top top) {
         Top existTop = baseMapper.selectOne(new LambdaQueryWrapper<Top>()
                 .eq(Top::getOrderNum, top.getOrderNum()));
-        if (!Objects.isNull(existTop) && !existTop.getId().equals(top.getId())){
+        if (Objects.nonNull(existTop) && !existTop.getId().equals(top.getId())){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
         if (ModuleTypeConstants.ARTICLE.equals(top.getModule())){
