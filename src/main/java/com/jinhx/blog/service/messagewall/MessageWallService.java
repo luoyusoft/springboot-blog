@@ -37,7 +37,7 @@ public interface MessageWallService extends IService<MessageWall> {
      * @param floorNum 楼层数
      * @return 留言列表
      */
-    PageData manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum);
+    PageData<MessageWall> manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum);
 
     /**
      * 后台批量删除

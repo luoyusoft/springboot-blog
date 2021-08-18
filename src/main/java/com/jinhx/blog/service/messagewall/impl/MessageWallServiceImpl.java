@@ -1,9 +1,6 @@
 package com.jinhx.blog.service.messagewall.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -17,6 +14,7 @@ import com.jinhx.blog.entity.messagewall.vo.MessageWallVO;
 import com.jinhx.blog.mapper.messagewall.MessageWallMapper;
 import com.jinhx.blog.service.messagewall.MessageWallService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -110,40 +108,11 @@ public class MessageWallServiceImpl extends ServiceImpl<MessageWallMapper, Messa
      * @return 留言列表
      */
     @Override
-    public PageData manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum) {
-        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new QueryPage<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
-                .like(ObjectUtil.isNotEmpty(name), MessageWall::getName, name)
-                .eq(floorNum != null, MessageWall::getFloorNum, floorNum)
-                .orderByDesc(MessageWall::getId));
-
-        if (CollectionUtils.isEmpty(messageWallIPage.getRecords())){
-            return new PageData(messageWallIPage);
-        }
-
-        List<MessageWall> messageWalls = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                .in(MessageWall::getId, messageWallIPage.getRecords().stream().map(MessageWall::getReplyId).distinct().collect(Collectors.toList())));
-
-        if (CollectionUtils.isEmpty(messageWalls)){
-            messageWallIPage.setRecords(Lists.newArrayList());
-            return new PageData(messageWallIPage);
-        }
-
-        // key：id，value：name
-        Map<Integer, String> map = messageWalls.stream().collect(Collectors.toMap(MessageWall::getId, MessageWall::getName));
-
-        List<MessageWallVO> messageWallVOs = Lists.newArrayList();
-        messageWallIPage.getRecords().forEach(item -> {
-            MessageWallVO messageWallVO = new MessageWallVO();
-            BeanUtils.copyProperties(item, messageWallVO);
-            messageWallVO.setReplyName(map.get(item.getReplyId()));
-            messageWallVOs.add(messageWallVO);
-        });
-
-        IPage<MessageWallVO> messageWallVOIPage = new Page<>();
-        BeanUtils.copyProperties(messageWallIPage, messageWallVOIPage);
-        messageWallVOIPage.setRecords(messageWallVOs);
-
-        return new PageData(messageWallVOIPage);
+    public PageData<MessageWall> manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum) {
+        return new PageData<>(baseMapper.selectPage(new QueryPage<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
+                .like(StringUtils.isNotEmpty(name), MessageWall::getName, name)
+                .eq(Objects.nonNull(floorNum), MessageWall::getFloorNum, floorNum)
+                .orderByDesc(MessageWall::getId)));
     }
 
     /**

@@ -69,14 +69,13 @@ public class MessageWallController {
      */
     @GetMapping("/manage/messagewalls")
     @RequiresPermissions("messagewall:list")
-    public Response manageGetMessageWalls(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+    public Response<PageData<MessageWall>> manageGetMessageWalls(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                           @RequestParam("name") String name, @RequestParam("floorNum") Integer floorNum){
         if (page < 1 || limit < 1){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能小于1");
         }
 
-        PageData messageWallPage = messageWallService.manageGetMessageWalls(page, limit, name, floorNum);
-        return Response.success(messageWallPage);
+        return Response.success(messageWallService.manageGetMessageWalls(page, limit, name, floorNum));
     }
 
     /**

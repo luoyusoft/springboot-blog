@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class PageData implements Serializable {
+public class PageData<T> implements Serializable {
 
 	private static final long serialVersionUID = 9199167140939378054L;
 
@@ -42,7 +42,7 @@ public class PageData implements Serializable {
 	/**
 	 * 列表数据
 	 */
-	private List<?> list;
+	private List<T> list;
 	
 	/**
 	 * 分页
@@ -51,7 +51,7 @@ public class PageData implements Serializable {
 	 * @param pageSize    每页记录数
 	 * @param currPage    当前页数
 	 */
-	public PageData(List<?> list, int totalCount, int pageSize, int currPage) {
+	public PageData(List<T> list, int totalCount, int pageSize, int currPage) {
 		this.list = list;
 		this.totalCount = totalCount;
 		this.pageSize = pageSize;
@@ -64,7 +64,7 @@ public class PageData implements Serializable {
 	 *
 	 * @param page page
 	 */
-	public PageData(IPage<?> page) {
+	public PageData(IPage<T> page) {
 		list = page.getRecords();
 		totalCount = (int) page.getTotal();
 		pageSize = page.getSize();
