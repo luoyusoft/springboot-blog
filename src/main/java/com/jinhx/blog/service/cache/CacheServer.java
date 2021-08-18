@@ -1,5 +1,7 @@
 package com.jinhx.blog.service.cache;
 
+import java.util.List;
+
 /**
  * CacheServer
  *
@@ -18,9 +20,9 @@ public interface CacheServer {
     /**
      * 清除文章相关缓存
      *
-     * @param ids 文章id数组
+     * @param articleIds 文章id列表
      */
-    void cleanArticlesCache(Integer[] ids);
+    void cleanArticlesCache(List<Integer> articleIds);
 
     /**
      * 清除相关模块推荐缓存

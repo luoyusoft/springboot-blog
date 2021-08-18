@@ -1,5 +1,6 @@
 package com.jinhx.blog.service.cache.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.service.cache.CacheServer;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -47,18 +49,18 @@ public class CacheServerImpl implements CacheServer {
     /**
      * 清除文章相关缓存
      *
-     * @param ids 文章id数组
+     * @param articleIds 文章id列表
      */
     @Override
-    public void cleanArticlesCache(Integer[] ids) {
+    public void cleanArticlesCache(List<Integer> articleIds) {
         Set<String> keys = redisTemplate.keys(RedisKeyConstants.ARTICLES + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX);
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.TIMELINES + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX)));
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.SEARCHS + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX)));
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.RECOMMENDS + ":" + ModuleTypeConstants.ARTICLE)));
 
-        if (ids != null && ids.length > 0){
-            Arrays.stream(ids).forEach(videoId -> {
-                keys.add(RedisKeyConstants.ARTICLE + ":" + videoId);
+        if (CollectionUtils.isNotEmpty(articleIds)){
+            articleIds.forEach(articleId -> {
+                keys.add(RedisKeyConstants.ARTICLE + ":" + articleId);
             });
         }
 

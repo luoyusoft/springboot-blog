@@ -43,7 +43,7 @@ public interface ArticleService extends IService<Article> {
      * @param articleVOIPageQueryDTO articleVOQueryDTO
      * @return 文章列表
      */
-    PageData queryPage(ArticleVOIPageQueryDTO articleVOIPageQueryDTO);
+    PageData<ArticleVO> queryPage(ArticleVOIPageQueryDTO articleVOIPageQueryDTO);
 
     /**
      * 保存文章
@@ -55,9 +55,9 @@ public interface ArticleService extends IService<Article> {
     /**
      * 批量删除
      *
-     * @param ids 文章id列表
+     * @param articleIds 文章id列表
      */
-    void deleteArticles(Integer[] ids);
+    void deleteArticles(List<Integer> articleIds);
 
     /**
      * 更新文章
@@ -127,7 +127,7 @@ public interface ArticleService extends IService<Article> {
      * @param portalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO
      * @return 文章列表
      */
-    PageData listArticleVOs(PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO);
+    PageData<ArticleVO> listArticleVOs(PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO);
 
     /**
      * 分页获取首页文章列表
@@ -159,10 +159,9 @@ public interface ArticleService extends IService<Article> {
     /**
      * 文章点赞
      *
-     * @param id id
-     * @return 点赞结果
+     * @param articleId articleId
      */
-    Boolean updateArticle(Integer id) throws Exception;
+    void updateArticle(Integer articleId) throws Exception;
 
     /**
      * 根据文章id获取公开状态

@@ -183,8 +183,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      * @return 文章列表
      */
     @Override
-    public PageData queryPage(ArticleVOIPageQueryDTO articleVOIPageQueryDTO) {
-        return new LogicExecutor<PageData>() {
+    public PageData<ArticleVO> queryPage(ArticleVOIPageQueryDTO articleVOIPageQueryDTO) {
+        return new LogicExecutor<PageData<ArticleVO>>() {
 
             ArticleQueryContextInfo<ArticleVOIPageQueryDTO> context;
 
@@ -197,14 +197,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
 
             @Override
-            protected PageData process() {
+            protected PageData<ArticleVO> process() {
                 context.setPage(articleVOIPageQueryDTO.getPage());
                 context.setLimit(articleVOIPageQueryDTO.getLimit());
                 context.setTitle(articleVOIPageQueryDTO.getTitle());
                 context.setArticleBuilder(articleVOIPageQueryDTO.getArticleBuilder());
 
                 articleEngine.execute(ArticleQueryFlow.getArticlevoIpageQueryFlow(), context);
-                return new PageData(context.getArticleVOIPage());
+                return new PageData<>(context.getArticleVOIPage());
             }
 
             @Override
@@ -232,7 +232,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Transactional(rollbackFor = Exception.class)
     public void saveArticle(ArticleVO articleVO) {
         Article article = adaptorArticleVOToArticle(articleVO);
-        articleMapperService.saveArticle(article);
+        articleMapperService.insertArticle(article);
 
         articleVO.getTagList().forEach(item -> {
             tagMapperService.saveTagAndNew(item);
@@ -254,18 +254,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
         }
 
-        cleanArticlesCache(new Integer[]{});
+        cleanArticlesCache(Lists.newArrayList());
     }
 
     /**
      * 批量删除
      *
-     * @param ids 文章id列表
+     * @param articleIds 文章id列表
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteArticles(Integer[] ids) {
-        Arrays.stream(ids).forEach(articleId -> {
+    public void deleteArticles(List<Integer> articleIds) {
+        articleIds.forEach(articleId -> {
             Article article = articleMapperService.getArticle(articleId, null);
             if (Objects.isNull(article)){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "文章不存在");
@@ -282,9 +282,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         });
 
         // 发送rabbitmq消息同步到es
-        rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(ids));
+        rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(articleIds));
 
-        cleanArticlesCache(ids);
+        cleanArticlesCache(articleIds);
     }
 
     /**
@@ -320,7 +320,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         if (Objects.nonNull(articleVO.getRecommend())){
             if (articleVO.getRecommend()){
-                if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){
+                if (Objects.isNull(recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE))){
                     Integer maxOrderNum = recommendMapperService.selectRecommendMaxOrderNum();
                     Recommend recommend = new Recommend();
                     recommend.setModule(ModuleTypeConstants.ARTICLE);
@@ -329,7 +329,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     recommendMapperService.insertRecommend(recommend);
                 }
             }else {
-                if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null){
+                if (Objects.nonNull(recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE))){
                     recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(articleVO.getId()), ModuleTypeConstants.ARTICLE);
                 }
             }
@@ -352,7 +352,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
         }
 
-        cleanArticlesCache(new Integer[]{articleVO.getId()});
+        cleanArticlesCache(Lists.newArrayList(articleVO.getId()));
     }
 
     /**
@@ -385,7 +385,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
                         JsonUtils.objectToJson(articleMapperService.getArticle(articleVO.getId(), Article.PUBLISH_TRUE)));
             }
-        }else if (articleVO.getOpen() != null){
+        }else if (Objects.nonNull(articleVO.getOpen())){
             // 更新公开状态
             articleMapperService.updateArticleById(adaptorArticleVOToArticle(articleVO));
             if (article.getPublish()){
@@ -397,7 +397,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         if (Objects.nonNull(articleVO.getRecommend())){
             // 更新推荐状态
             if (articleVO.getRecommend()){
-                if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) == null){
+                if (Objects.isNull(recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE))){
                     Integer maxOrderNum = recommendMapperService.selectRecommendMaxOrderNum();
                     Recommend recommend = new Recommend();
                     recommend.setModule(ModuleTypeConstants.ARTICLE);
@@ -406,13 +406,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     recommendMapperService.insertRecommend(recommend);
                 }
             }else {
-                if (recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE) != null){
+                if (Objects.nonNull(recommendMapperService.selectRecommendByLinkIdAndType(articleVO.getId(), ModuleTypeConstants.ARTICLE))){
                     recommendMapperService.deleteRecommendsByLinkIdsAndType(Lists.newArrayList(articleVO.getId()), ModuleTypeConstants.ARTICLE);
                 }
             }
         }
 
-        cleanArticlesCache(new Integer[]{articleVO.getId()});
+        cleanArticlesCache(Lists.newArrayList(articleVO.getId()));
     }
 
     /**
@@ -539,11 +539,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 清除缓存
      *
-     * @param ids ids
+     * @param articleIds articleIds
      * */
-    private void cleanArticlesCache(Integer[] ids){
+    private void cleanArticlesCache(List<Integer> articleIds){
         ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
-            cacheServer.cleanArticlesCache(ids);
+            cacheServer.cleanArticlesCache(articleIds);
         });
     }
 
@@ -557,8 +557,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Cacheable(value = RedisKeyConstants.ARTICLES)
     @Override
-    public PageData listArticleVOs(PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO) {
-        return new LogicExecutor<PageData>() {
+    public PageData<ArticleVO> listArticleVOs(PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO) {
+        return new LogicExecutor<PageData<ArticleVO>>() {
 
             ArticleQueryContextInfo<PortalArticleVOIPageQueryDTO> context;
 
@@ -571,7 +571,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             }
 
             @Override
-            protected PageData process() {
+            protected PageData<ArticleVO> process() {
                 context.setPage(portalArticleVOIPageQueryDTO.getPage());
                 context.setLimit(portalArticleVOIPageQueryDTO.getLimit());
                 context.setCategoryId(portalArticleVOIPageQueryDTO.getCategoryId());
@@ -581,7 +581,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 context.setArticleBuilder(portalArticleVOIPageQueryDTO.getArticleBuilder());
 
                 articleEngine.execute(ArticleQueryFlow.getPortalArticlevoIpageQueryFlow(), context);
-                return new PageData(context.getArticleVOIPage());
+                return new PageData<>(context.getArticleVOIPage());
             }
 
             @Override
@@ -748,24 +748,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     /**
      * 文章点赞
      *
-     * @param id id
-     * @return 点赞结果
+     * @param articleId articleId
      */
     @Override
-    public Boolean updateArticle(Integer id) throws Exception {
+    public void updateArticle(Integer articleId) throws Exception {
         //获取request
         ParamsHttpServletRequestWrapper request = (ParamsHttpServletRequestWrapper) HttpContextUtils.getHttpServletRequest();
         String userId = EncodeUtils.encoderByMD5(IPUtils.getIpAddr(request) + UserAgentUtils.getBrowserName(request) +
                 UserAgentUtils.getBrowserVersion(request) + UserAgentUtils.getDeviceManufacturer(request) +
                 UserAgentUtils.getDeviceType(request) + UserAgentUtils.getOsVersion(request));
         // 每天重新计算点赞
-        if (!redisUtils.setIfAbsent(BLOG_ARTICLE_LIKE_LOCK_KEY + userId + ":" + id, "1", DateUtils.getRemainMilliSecondsOneDay())){
+        if (!redisUtils.setIfAbsent(BLOG_ARTICLE_LIKE_LOCK_KEY + userId + ":" + articleId, "1", DateUtils.getRemainMilliSecondsOneDay())){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "1天只能点赞1次，请明天再来点赞");
         }
 
-        return baseMapper.update(null, new LambdaUpdateWrapper<Article>()
-                .eq(Article::getId, id)
-                .setSql("like_num = like_num + 1")) > 0;
+        articleMapperService.addArticleLikeNum(articleId);
     }
 
     /**

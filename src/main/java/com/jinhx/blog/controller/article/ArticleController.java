@@ -1,5 +1,6 @@
 package com.jinhx.blog.controller.article;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -11,12 +12,12 @@ import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.dto.PortalArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
+import com.jinhx.blog.entity.article.vo.HomeArticleInfoVO;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.service.article.ArticleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -42,7 +43,7 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/homeinfo")
     @RequiresPermissions("article:list")
-    public Response getHomeArticleInfoVO() {
+    public Response<HomeArticleInfoVO> getHomeArticleInfoVO() {
         return Response.success(articleService.getHomeArticleInfoVO());
     }
 
@@ -56,7 +57,7 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/list")
     @RequiresPermissions("article:list")
-    public Response<PageData> listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
+    public Response<PageData<ArticleVO>> listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
         if (Objects.isNull(page) || Objects.isNull(limit)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
         }
@@ -116,7 +117,7 @@ public class ArticleController {
      */
     @PostMapping("/manage/article/save")
     @RequiresPermissions("article:save")
-    public Response saveArticle(@RequestBody ArticleVO articleVO){
+    public Response<Void> saveArticle(@RequestBody ArticleVO articleVO){
         ValidatorUtils.validateEntity(articleVO, AddGroup.class);
         articleService.saveArticle(articleVO);
 
@@ -130,7 +131,7 @@ public class ArticleController {
      */
     @PutMapping("/manage/article/update")
     @RequiresPermissions("article:update")
-    public Response updateArticle(@RequestBody ArticleVO articleVO){
+    public Response<Void> updateArticle(@RequestBody ArticleVO articleVO){
         articleService.updateArticle(articleVO);
         return Response.success();
     }
@@ -142,7 +143,7 @@ public class ArticleController {
      */
     @PutMapping("/manage/article/update/status")
     @RequiresPermissions("article:update")
-    public Response updateArticleStatus(@RequestBody ArticleVO articleVO){
+    public Response<Void> updateArticleStatus(@RequestBody ArticleVO articleVO){
         articleService.updateArticleStatus(articleVO);
         return Response.success();
     }
@@ -150,20 +151,20 @@ public class ArticleController {
     /**
      * 批量删除
      *
-     * @param ids 文章id列表
+     * @param articleIds 文章id列表
      */
     @DeleteMapping("/manage/article/delete")
     @RequiresPermissions("article:delete")
-    public Response deleteArticles(@RequestBody Integer[] ids) {
-        if (ids == null || ids.length < 1){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能为空");
+    public Response deleteArticles(@RequestBody List<Integer> articleIds) {
+        if (CollectionUtils.isEmpty(articleIds)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleIds不能为空");
         }
 
-        if (ids.length > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
+        if (articleIds.size() > 100){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleIds不能超过100个");
         }
 
-        articleService.deleteArticles(ids);
+        articleService.deleteArticles(articleIds);
         return Response.success();
     }
 
@@ -182,7 +183,7 @@ public class ArticleController {
      */
     @GetMapping("/article/listarticles")
     @LogView(module = 0)
-    public Response<PageData> listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+    public Response<PageData<ArticleVO>> listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                  @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
                                  @RequestParam("like") Boolean like, @RequestParam("read") Boolean read) {
         if (Objects.isNull(page) || Objects.isNull(limit)){
@@ -227,23 +228,26 @@ public class ArticleController {
      */
     @GetMapping("/article/{id}")
     @LogView(module = 0)
-    public Response getArticle(@PathVariable Integer id, @RequestParam(value = "password", required = false, defaultValue = "") String password){
+    public Response<ArticleVO> getArticle(@PathVariable Integer id, @RequestParam(value = "password", required = false, defaultValue = "") String password){
         return Response.success(articleService.getArticleVOByPassword(id, password));
     }
 
     /**
      * 文章点赞
      *
-     * @param id id
-     * @return 点赞结果
+     * @param id articleId
+     * @return Response
      */
     @PutMapping("/article/{id}")
     @LogView(module = 0)
-    public Response updateArticle(@PathVariable Integer id) throws Exception {
-        if (id == null) {
+    public Response<Void> updateArticle(@PathVariable Integer id) throws Exception {
+        if (Objects.isNull(id)) {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
         }
-        return Response.success(articleService.updateArticle(id));
+
+        articleService.updateArticle(id);
+
+        return Response.success();
     }
 
     /**

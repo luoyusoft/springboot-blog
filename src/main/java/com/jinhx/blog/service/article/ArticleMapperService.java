@@ -2,6 +2,7 @@ package com.jinhx.blog.service.article;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -61,8 +62,13 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      *
      * @param article 文章信息
      */
-    public void saveArticle(Article article) {
-        baseMapper.insert(article);
+    @Transactional(rollbackFor = Exception.class)
+    public int insertArticle(Article article) {
+        int result = baseMapper.insert(article);
+        if (result != 1){
+            throw new MyException(ResponseEnums.INSERT_FAIL);
+        }
+        return result;
     }
 
     /**
@@ -80,8 +86,13 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      *
      * @param article 文章信息
      */
-    public void updateArticleById(Article article) {
-        baseMapper.updateById(article);
+    @Transactional(rollbackFor = Exception.class)
+    public int updateArticleById(Article article) {
+        int result = baseMapper.updateById(article);
+        if (result != 1){
+            throw new MyException(ResponseEnums.UPDATE_FAILR);
+        }
+        return result;
     }
 
     /**
@@ -195,6 +206,23 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
                 .select(Article::getId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
                         Article::getCover, Article::getCoverType, Article::getCategoryId, Article::getPublish, Article::getOpen,
                         Article::getCreaterId, Article::getUpdaterId, Article::getCreateTime, Article::getUpdateTime));
+    }
+
+    /**
+     * 根据标题查询所有已发布的文章
+     *
+     * @param articleId 标题
+     * @return 所有已发布的文章
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int addArticleLikeNum(Integer articleId) {
+        int result = baseMapper.update(null, new LambdaUpdateWrapper<Article>()
+                .eq(Article::getId, articleId)
+                .setSql("like_num = like_num + 1"));
+        if (result != 1){
+            throw new MyException(ResponseEnums.UPDATE_FAILR);
+        }
+        return result;
     }
 
     /**
