@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.bill;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * BillMapperService
@@ -43,7 +43,7 @@ public class BillMapperService extends ServiceImpl<BillMapper, Bill> {
     public IPage<Bill> queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
         return baseMapper.selectPage(new QueryPage<Bill>(page, limit).getPage(),
                 new LambdaQueryWrapper<Bill>()
-                        .eq(ObjectUtil.isNotNull(incomeExpenditureType), Bill::getIncomeExpenditureType, incomeExpenditureType)
+                        .eq(Objects.nonNull(incomeExpenditureType), Bill::getIncomeExpenditureType, incomeExpenditureType)
                         .orderByDesc(Bill::getDate));
     }
 

@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.operation.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
@@ -234,8 +233,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<CategoryVO> queryWithParentName(String name, Integer module) {
         List<Category> categories = baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(!ObjectUtil.isNotNull(module), Category::getModule, module)
-                .like(!ObjectUtil.isNotEmpty(name), Category::getName, name));
+                .eq(Objects.nonNull(module), Category::getModule, module)
+                .like(StringUtils.isNotBlank(name), Category::getName, name));
 
         if (CollectionUtils.isEmpty(categories)){
             return Collections.emptyList();

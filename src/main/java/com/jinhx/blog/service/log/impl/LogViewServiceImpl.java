@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.log.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -22,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * LogViewServiceImpl
@@ -76,7 +76,7 @@ public class LogViewServiceImpl extends ServiceImpl<LogViewMapper, LogView> impl
     public PageData queryPage(Integer page, Integer limit, Integer module) {
         IPage<LogView> logViewIPage = baseMapper.selectPage(new QueryPage<LogView>(page, limit).getPage(),
                 new LambdaQueryWrapper<LogView>()
-                .eq(ObjectUtil.isNotNull(module), LogView::getModule, module)
+                .eq(Objects.nonNull(module), LogView::getModule, module)
                 .orderByDesc(LogView::getCreateTime)
         );
         return new PageData(logViewIPage);

@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.file;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -19,12 +18,12 @@ import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.service.operation.FriendLinkMapperService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -195,8 +194,8 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
     public List<FileVO> chunk(FileVO fileVO) {
         String bucketName = null;
         File fileResource = baseMapper.selectOne(new LambdaQueryWrapper<File>()
-                .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
-                .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                .eq(StringUtils.isNotBlank(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                .eq(Objects.nonNull(fileVO.getModule()), File::getModule, fileVO.getModule())
                 .eq(File::getIsChunk, File.IS_CHUNK_1));
         // 校验该文件是否上传过
         if(fileResource != null){
@@ -275,10 +274,10 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
      */
     public Boolean chunkUploadSuccess(FileVO fileVO) {
         File file = baseMapper.selectOne(new LambdaQueryWrapper<File>()
-                .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
-                .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                .eq(StringUtils.isNotBlank(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                .eq(Objects.nonNull(fileVO.getModule()), File::getModule, fileVO.getModule())
                 .eq(File::getIsChunk, File.IS_CHUNK_1));
-        if (file == null){
+        if (Objects.isNull(file)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件未上传过");
         }
 
@@ -297,8 +296,8 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
      */
     public String composeFile(FileVO fileVO) {
         if (baseMapper.selectOne(new LambdaQueryWrapper<File>()
-                .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
-                .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                .eq(StringUtils.isNotBlank(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                .eq(Objects.nonNull(fileVO.getModule()), File::getModule, fileVO.getModule())
                 .eq(File::getIsChunk, File.IS_CHUNK_1)) == null){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件未上传过");
         }
@@ -337,8 +336,8 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
             file.setUploadStatus(File.UPLOAD_STATUS_1);
 
             baseMapper.update(file, new LambdaUpdateWrapper<File>()
-                    .eq(ObjectUtil.isNotNull(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
-                    .eq(ObjectUtil.isNotNull(fileVO.getModule()), File::getModule, fileVO.getModule())
+                    .eq(StringUtils.isNotBlank(fileVO.getFileMd5()), File::getFileMd5, fileVO.getFileMd5())
+                    .eq(Objects.nonNull(fileVO.getModule()), File::getModule, fileVO.getModule())
                     .eq(File::getIsChunk, File.IS_CHUNK_1));
 
             return url;
@@ -355,8 +354,8 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
      */
     public String getFileUrl(String fileMd5, Integer module) {
         File file = baseMapper.selectOne(new LambdaQueryWrapper<File>()
-                .eq(ObjectUtil.isNotNull(fileMd5), File::getFileMd5, fileMd5)
-                .eq(ObjectUtil.isNotNull(module), File::getModule, module)
+                .eq(StringUtils.isNotBlank(fileMd5), File::getFileMd5, fileMd5)
+                .eq(Objects.nonNull(module), File::getModule, module)
                 .eq(File::getIsChunk, File.IS_CHUNK_1));
         if (file == null){
             return null;
