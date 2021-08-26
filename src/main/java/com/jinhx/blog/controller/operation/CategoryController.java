@@ -1,6 +1,5 @@
 package com.jinhx.blog.controller.operation;
 
-import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.base.Response;
@@ -111,9 +110,18 @@ public class CategoryController {
      * @return 类别列表
      */
     @GetMapping("/operation/listcategories")
-    public Response<List<Category>> selectPortalCategorysByModule(@RequestParam("module") Integer module) {
-        MyAssert.notNull(module, "module不能为空");
+    public Response<List<Category>> selectPortalCategorysByModule(@RequestParam(value = "module", required = false) Integer module) {
         return Response.success(categoryService.selectPortalCategorysByModule(module));
+    }
+
+    /**
+     * 查询所有类别列表
+     *
+     * @return 类别列表
+     */
+    @GetMapping("/operation/allcategories")
+    public Response<List<Category>> selectPortalAllCategorys() {
+        return Response.success(categoryService.selectPortalCategorysByModule(null));
     }
 
 }

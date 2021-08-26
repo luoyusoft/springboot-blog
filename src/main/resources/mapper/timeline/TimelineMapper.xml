@@ -12,7 +12,7 @@
     <select id="selectTimelinePosts" resultType="com.jinhx.blog.entity.timeline.TimelinePost">
         select *
         from (
-                 select a.id, a.title, a.description, a.create_time, a.open, 'article' as postType
+                 select a.article_id, a.title, a.description, a.create_time, a.open, 'article' as postType
                  from article a
                  where DATE_FORMAT(a.create_time, '%Y') = #{year}
                    and DATE_FORMAT(a.create_time, '%m') = #{month}
@@ -31,7 +31,7 @@
     <select id="selectTimelines" resultType="com.jinhx.blog.entity.timeline.Timeline">
         select t.year, count(t.year) as count
         from (
-            select a.id, a.title, a.description, a.create_time, DATE_FORMAT(a.create_time, '%Y') as year from article a where a.publish = 1) t
+            select a.article_id, a.title, a.description, a.create_time, DATE_FORMAT(a.create_time, '%Y') as year from article a where a.publish = 1) t
         group by t.year
         order by t.year desc
     </select>

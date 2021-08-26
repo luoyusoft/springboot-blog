@@ -169,12 +169,6 @@ public class MessageWallServiceImpl implements MessageWallService {
 
         List<MessageWall> messageWallNames = messageWallMapperService.selecttMessageWallsById(replyIds);
 
-        if (CollectionUtils.isEmpty(messageWallNames)){
-            messageWallListVO.setHaveMoreFloor(false);
-            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
-            return messageWallListVO;
-        }
-
         // key：id，value：name
         Map<Long, String> map = messageWallNames.stream().collect(Collectors.toMap(MessageWall::getMessageWallId, MessageWall::getName));
         // 设置站长名称

@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Data
 public class TimelinePost {
 
-    private Integer id;
+    private Integer articleId;
 
     private String title;
 

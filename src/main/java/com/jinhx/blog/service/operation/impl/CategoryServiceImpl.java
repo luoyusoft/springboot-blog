@@ -289,7 +289,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @param module 模块
      * @return 类别列表
      */
-    @Cacheable(value = RedisKeyConstants.CATEGORYS, key = "#module")
+//    @Cacheable(value = RedisKeyConstants.CATEGORYS, key = "#module")
     @Override
     public List<Category> selectPortalCategorysByModule(Integer module) {
         return categoryMapperService.selectCategorysByModule(module);

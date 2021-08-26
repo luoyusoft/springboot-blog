@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * CategoryMapperService
@@ -43,7 +44,7 @@ public class CategoryMapperService extends ServiceImpl<CategoryMapper, Category>
      */
     public List<Category> selectCategorysByModule(Integer module) {
         return baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(Category::getModule, module));
+                .eq(Objects.nonNull(module), Category::getModule, module));
     }
 
     /**
