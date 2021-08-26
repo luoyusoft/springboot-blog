@@ -1,4 +1,4 @@
-package com.jinhx.blog.engine.article.node.query;
+package com.jinhx.blog.engine.article.node.select.base;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Lists;
@@ -10,21 +10,19 @@ import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.service.article.ArticleMapperService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 /**
- * ArticlesQueryNode
+ * SelectArticlesNode
  *
  * @author jinhx
  * @since 2021-08-06
  */
-@Slf4j
 @Component
-public class ArticlesQueryNode extends ArticleNode<BaseRequestDTO> {
+public class SelectArticlesNode extends ArticleNode<BaseRequestDTO> {
 
     @Autowired
     private ArticleMapperService articleMapperService;
@@ -40,21 +38,21 @@ public class ArticlesQueryNode extends ArticleNode<BaseRequestDTO> {
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
         if (context.getArticleIds().size() == 1){
-            Article article = articleMapperService.getArticle(context.getArticleIds().get(0), context.getPublish());
+            Article article = articleMapperService.selectArticleByIdAndPublish(context.getArticleIds().get(0), context.getPublish());
             if (Objects.nonNull(article)){
-                if (!article.getCreaterId().equals(SysAdminUtils.getUserId()) && !article.getOpen()){
+                if (!article.getCreaterId().equals(SysAdminUtils.getSysUserId()) && !article.getOpen()){
                     throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "后台查看未公开的文章只能由创建者查看");
                 }
                 context.setArticles(Lists.newArrayList(article));
             }
         }else {
-            context.setArticles(articleMapperService.getArticles(context.getArticleIds(), context.getPublish()));
+            context.setArticles(articleMapperService.selectArticlesByIdAndPublish(context.getArticleIds(), context.getPublish()));
         }
     }
 
     @Override
     public String getProcessorName() {
-        return "ArticlesQueryNode";
+        return "SelectArticlesNode";
     }
 
 }

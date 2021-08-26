@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.log.LogView">
-        <id column="id" property="id" />
+        <id column="id" property="logViewId" />
         <result column="module" property="module" />
         <result column="method" property="method" />
         <result column="headr_params" property="headrParams" />

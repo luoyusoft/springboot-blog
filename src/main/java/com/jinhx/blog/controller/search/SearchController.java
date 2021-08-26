@@ -31,7 +31,7 @@ public class SearchController {
      */
     @GetMapping("/search")
     @LogView(module = 3)
-    public Response search(@RequestParam(value = "keyword", required = false) String keyword) throws Exception {
+    public Response<SearchListVO> search(@RequestParam(value = "keyword", required = false) String keyword) throws Exception {
         SearchListVO searchListVO = searchServer.search(keyword);
         return Response.success(searchListVO);
     }

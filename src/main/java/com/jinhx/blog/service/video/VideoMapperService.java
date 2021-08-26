@@ -87,9 +87,9 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      * @param publish publish
      * @return Video
      */
-    public Video getVideo(Integer videoId, Boolean publish) {
+    public Video getVideo(Long videoId, Boolean publish) {
         return baseMapper.selectOne(new LambdaQueryWrapper<Video>()
-                .eq(Video::getId, videoId)
+                .eq(Video::getVideoId, videoId)
                 .eq(publish != null, Video::getPublish, publish));
     }
 
@@ -99,7 +99,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      * @param categoryId categoryId
      * @return 类别下是否有视频
      */
-    public Boolean checkByCategoryId(Integer categoryId) {
+    public Boolean checkByCategoryId(Long categoryId) {
         return baseMapper.selectCount(new LambdaQueryWrapper<Video>()
                 .like(categoryId != null, Video::getCategoryId, categoryId)) > 0;
     }
@@ -123,7 +123,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      * @param ids 视频id数组
      */
     @Transactional(rollbackFor = Exception.class)
-    public void deleteVideos(List<Integer> ids) {
+    public void deleteVideos(List<Long> ids) {
         baseMapper.deleteBatchIds(ids);
     }
 
@@ -135,7 +135,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
     public List<Video> listVideosByPublish() {
         return baseMapper.selectList(new LambdaQueryWrapper<Video>()
                 .eq(Video::getPublish, Video.PUBLISH_TRUE)
-                .orderByDesc(Video::getId));
+                .orderByDesc(Video::getVideoId));
     }
 
     /**
@@ -151,7 +151,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
                         qw.like(ObjectUtil.isNotEmpty(title), Video::getTitle, title)
                                 .or()
                                 .like(ObjectUtil.isNotEmpty(title), Video::getAlternateName, title))
-                .orderByDesc(Video::getId));
+                .orderByDesc(Video::getVideoId));
     }
 
     /********************** portal ********************************/
@@ -167,7 +167,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      * @param watch 观看量排序
      * @return 视频列表
      */
-    public IPage<Video> listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch) {
+    public IPage<Video> listVideos(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch) {
         return baseMapper.selectPage(new QueryPage<Video>(page, limit).getPage(), new LambdaQueryWrapper<Video>()
                 .eq(Video::getPublish, Video.PUBLISH_TRUE)
                 .like(categoryId != null, Video::getCategoryId, categoryId)

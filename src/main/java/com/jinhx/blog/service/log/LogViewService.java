@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.log;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.log.LogView;
 import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
@@ -11,28 +10,23 @@ import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
  * @author jinhx
  * @since 2019-02-24
  */
-public interface LogViewService extends IService<LogView> {
+public interface LogViewService {
 
     /**
-     * 获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
-    HomeLogInfoVO getHommeLogInfoVO();
+    HomeLogInfoVO selectHommeLogInfoVO();
 
     /**
-     * 分页查询日志
+     * 分页查询日志列表
      *
      * @param page page
      * @param limit limit
      * @param module module
-     * @return PageUtils
+     * @return 日志列表
      */
-    PageData queryPage(Integer page, Integer limit, Integer module);
-
-    /**
-     * 清洗城市信息
-     */
-    void cleanCityInfo();
+    PageData<LogView> selectPage(Integer page, Integer limit, Integer module);
 
 }

@@ -13,16 +13,16 @@ public interface CacheServer {
     /**
      * 清除视频相关缓存
      *
-     * @param ids 视频id数组
+     * @param videoIds 视频id列表
      */
-    void cleanVideosCache(Integer[] ids);
+    void cleanVideosCache(List<Long> videoIds);
 
     /**
      * 清除文章相关缓存
      *
      * @param articleIds 文章id列表
      */
-    void cleanArticlesCache(List<Integer> articleIds);
+    void cleanArticlesCache(List<Long> articleIds);
 
     /**
      * 清除相关模块推荐缓存

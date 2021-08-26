@@ -1,11 +1,12 @@
 package com.jinhx.blog.controller.video;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
@@ -16,6 +17,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * VideoController
@@ -64,7 +66,7 @@ public class VideoController {
      */
     @GetMapping("/manage/video/info/{videoId}")
     @RequiresPermissions("video:list")
-    public Response info(@PathVariable("videoId") Integer videoId) {
+    public Response info(@PathVariable("videoId") Long videoId) {
         return Response.success(videoService.getVideoVO(videoId, null, new VideoAdaptorBuilder.Builder<Video>().setAll().build()));
     }
 
@@ -76,7 +78,7 @@ public class VideoController {
     @PostMapping("/manage/video/save")
     @RequiresPermissions("video:save")
     public Response saveVideo(@RequestBody VideoVO videoVO){
-        ValidatorUtils.validateEntity(videoVO, AddGroup.class);
+        ValidatorUtils.validateEntity(videoVO, InsertGroup.class);
         videoService.saveVideo(videoVO);
 
         return Response.success();
@@ -109,20 +111,20 @@ public class VideoController {
     /**
      * 批量删除
      *
-     * @param ids 视频id数组
+     * @param videoIds 视频id列表
      */
     @DeleteMapping("/manage/video/delete")
     @RequiresPermissions("video:delete")
-    public Response deleteVideos(@RequestBody Integer[] ids) {
-        if (ids == null || ids.length < 1){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能为空");
+    public Response<Void> deleteVideos(@RequestBody List<Long> videoIds) {
+        if (CollectionUtils.isEmpty(videoIds)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "videoIds不能为空");
         }
 
-        if (ids.length > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
+        if (videoIds.size() > 100){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "videoIds不能超过100个");
         }
 
-        videoService.deleteVideos(ids);
+        videoService.deleteVideos(videoIds);
         return Response.success();
     }
 
@@ -142,7 +144,7 @@ public class VideoController {
     @GetMapping("/video/listvideos")
     @LogView(module = 1)
     public Response listVideos(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
-                               @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
+                               @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Long categoryId,
                                @RequestParam("like") Boolean like, @RequestParam("watch") Boolean watch) {
         PageData queryPageCondition = videoService.listVideos(page, limit, latest, categoryId, like, watch);
         return Response.success(queryPageCondition);
@@ -156,7 +158,7 @@ public class VideoController {
      */
     @GetMapping("/video/{id}")
     @LogView(module = 1)
-    public Response getVideo(@PathVariable Integer id){
+    public Response getVideo(@PathVariable Long id){
         return Response.success(videoService.getVideoVO(id));
     }
 
@@ -179,7 +181,7 @@ public class VideoController {
      */
     @PutMapping("/video/{id}")
     @LogView(module = 1)
-    public Response updateVideo(@PathVariable Integer id) throws Exception{
+    public Response updateVideo(@PathVariable Long id) throws Exception{
         if (id == null) {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
         }

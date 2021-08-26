@@ -2,7 +2,7 @@ package com.jinhx.blog.common.util;
 
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.entity.sys.dto.SysUserDTO;
+import com.jinhx.blog.entity.sys.vo.SysUserVO;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,43 +10,43 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * AbstractController
+ * SysAdminUtils
+ *
  * @author jinhx
- * @date 2018/10/22 12:35
- * @description
+ * @since 2019-06-07
  */
 @Component
 public class SysAdminUtils {
 
     // 超级管理员角色id
-    public static Integer sysSuperAdminRoleId;
+    public static Long sysSuperAdminRoleId;
 
     @Value("${sys.super.admin.roleId}")
-    public void setSysSuperAdminRoleId(Integer sysSuperAdminRoleId) {
+    public void setSysSuperAdminRoleId(Long sysSuperAdminRoleId) {
         SysAdminUtils.sysSuperAdminRoleId = sysSuperAdminRoleId;
     }
 
     /**
      * 获取当前登录用户的信息
      */
-    public static SysUserDTO getUserDTO(){
-        return (SysUserDTO) SecurityUtils.getSubject().getPrincipal();
+    public static SysUserVO getSysUserVO(){
+        return (SysUserVO) SecurityUtils.getSubject().getPrincipal();
     }
 
     /**
      * 获取当前登录用户的用户id
      */
-    public static Integer getUserId(){
-        if (getUserDTO() == null){
+    public static Long getSysUserId(){
+        if (getSysUserVO() == null){
             return null;
         }
-        return getUserDTO().getId();
+        return getSysUserVO().getSysUserId();
     }
 
     /**
      * 检测角色id列表是否包含超级管理员
      */
-    public static boolean isHaveSuperAdmin(List<Integer> roleIdList){
+    public static boolean isHaveSuperAdmin(List<Long> roleIdList){
         return roleIdList.contains(sysSuperAdminRoleId);
     }
 
@@ -54,7 +54,7 @@ public class SysAdminUtils {
      * 检测当前用户是否是超级管理员
      */
     public static boolean isSuperAdmin(){
-        return getUserDTO().getRoleIdList().contains(sysSuperAdminRoleId);
+        return getSysUserVO().getRoleIdList().contains(sysSuperAdminRoleId);
     }
 
     /**

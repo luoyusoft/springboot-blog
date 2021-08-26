@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysParam">
-        <id column="id" property="id" />
+        <id column="id" property="sysParamId" />
         <result column="par_key" property="parKey" />
         <result column="par_value" property="parValue" />
         <result column="menu_url" property="menuUrl" />

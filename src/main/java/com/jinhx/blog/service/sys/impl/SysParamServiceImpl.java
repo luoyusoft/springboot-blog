@@ -4,10 +4,8 @@ import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.sys.SysParam;
 import com.jinhx.blog.service.sys.SysParamMapperService;
 import com.jinhx.blog.service.sys.SysParamService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,75 +16,73 @@ import java.util.List;
  * @since 2018-10-22
  */
 @Service
-@Slf4j
 public class SysParamServiceImpl implements SysParamService {
 
     @Autowired
     private SysParamMapperService sysParamMapperService;
 
     /**
-     * 分页查询
+     * 分页查询系统参数列表
      *
      * @param page page
      * @param limit limit
      * @param menuUrl menuUrl
      * @param type type
-     * @return PageData
+     * @return 系统参数列表
      */
     @Override
-    public PageData queryPage(Integer page, Integer limit, String menuUrl, String type) {
-        return sysParamMapperService.queryPage(page, limit, menuUrl, type);
+    public PageData<SysParam> selectPage(Integer page, Integer limit, String menuUrl, String type) {
+        return sysParamMapperService.selectPage(page, limit, menuUrl, type);
     }
 
     /**
-     * 获取所有参数列表
+     * 查询所有参数列表
      *
-     * @return 所有参数列表
+     * @return 参数列表
      */
     @Override
-    public List<SysParam> list() {
+    public List<SysParam> selectAllSysParams() {
         return sysParamMapperService.list();
     }
 
     /**
-     * 根据角色id列表批量删除角色
+     * 根据sysParamId查询参数
      *
-     * @param roleIds 角色id列表
+     * @param sysParamId sysParamId
+     * @return 参数
      */
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteBatch(List<Integer> roleIds) {
-        sysParamMapperService.removeByIds(roleIds);
+    @Override
+    public SysParam selectSysParamById(Long sysParamId) {
+        return sysParamMapperService.selectSysParamById(sysParamId);
     }
 
     /**
-     * 修改
+     * 新增参数
      *
      * @param sysParam sysParam
      */
     @Override
-    public void updateById(SysParam sysParam) {
-        sysParamMapperService.updateById(sysParam);
+    public void insertSysParam(SysParam sysParam) {
+        sysParamMapperService.insertSysParam(sysParam);
     }
 
     /**
-     * 保存
+     * 根据sysParamId更新参数
      *
      * @param sysParam sysParam
      */
     @Override
-    public void save(SysParam sysParam) {
-        sysParamMapperService.save(sysParam);
+    public void updateSysParamById(SysParam sysParam) {
+        sysParamMapperService.updateSysParamById(sysParam);
     }
 
     /**
-     * 信息
+     * 批量根据sysParamId删除参数
      *
-     * @param id id
-     * @return 信息
+     * @param sysParamIds sysParamIds
      */
-    @Override
-    public SysParam getById(Integer id) {
-        return sysParamMapperService.getById(id);
+    public void deleteSysParamsById(List<Long> sysParamIds) {
+        sysParamMapperService.deleteSysParamsById(sysParamIds);
     }
 
 }

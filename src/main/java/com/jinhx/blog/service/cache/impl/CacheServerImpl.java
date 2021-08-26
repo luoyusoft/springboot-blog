@@ -8,7 +8,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -28,16 +27,16 @@ public class CacheServerImpl implements CacheServer {
     /**
      * 清除视频相关缓存
      *
-     * @param ids 视频id数组
+     * @param videoIds 视频id列表
      */
     @Override
-    public void cleanVideosCache(Integer[] ids) {
+    public void cleanVideosCache(List<Long> videoIds) {
         Set<String> keys = redisTemplate.keys(RedisKeyConstants.VIDEOS + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX);
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.SEARCHS + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX)));
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.RECOMMENDS + ":" + ModuleTypeConstants.VIDEO)));
 
-        if (ids != null && ids.length > 0){
-            Arrays.stream(ids).forEach(videoId -> {
+        if (CollectionUtils.isNotEmpty(videoIds)){
+            videoIds.forEach(videoId -> {
                 keys.add(RedisKeyConstants.VIDEO + ":" + videoId);
             });
         }
@@ -52,7 +51,7 @@ public class CacheServerImpl implements CacheServer {
      * @param articleIds 文章id列表
      */
     @Override
-    public void cleanArticlesCache(List<Integer> articleIds) {
+    public void cleanArticlesCache(List<Long> articleIds) {
         Set<String> keys = redisTemplate.keys(RedisKeyConstants.ARTICLES + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX);
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.TIMELINES + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX)));
         keys.addAll(Objects.requireNonNull(redisTemplate.keys(RedisKeyConstants.SEARCHS + ":" + RedisKeyConstants.REDIS_MATCH_PREFIX)));

@@ -17,19 +17,19 @@ public interface TagMapper extends BaseMapper<Tag> {
     /********************** portal ********************************/
 
     /**
-     * 获取tagVos
+     * 根据模块查询标签列表
      *
-     * @param module module
-     * @return List<TagVO>
+     * @param module 模块
+     * @return 标签列表
      */
-    List<TagVO> listTagVOsByArticle(Integer module);
+    List<TagVO> selectTagVOsByArticle(Integer module);
 
     /**
-     * 获取tagVos
+     * 根据模块查询标签列表
      *
-     * @param module module
-     * @return List<TagVO>
+     * @param module 模块
+     * @return 标签列表
      */
-    List<TagVO> listTagVOsByVideo(Integer module);
+    List<TagVO> selectTagVOsByVideo(Integer module);
 
 }

@@ -1,5 +1,7 @@
 package com.jinhx.blog.entity.log;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -16,16 +18,23 @@ import java.io.Serializable;
  * @since 2019-02-15
  */
 @Data
-@ApiModel(value="ViewLog对象", description="浏览日志")
+@ApiModel(value="LogView对象", description="浏览日志")
 @EqualsAndHashCode(callSuper = true)
 @TableName("log_view")
 public class LogView extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -6163019509159971632L;
 
-    public static final Integer CREATER_UPDATER_SYS_ID = -1;
+    public static final Long CREATER_UPDATER_SYS_ID = -1L;
 
     public static final String CREATER_UPDATER_SYS_NAME = "sys";
+
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "浏览日志id主键")
+    @TableId(type = IdType.INPUT)
+    private Long logViewId;
 
     @ApiModelProperty(value = "浏览模块")
     private Integer module;

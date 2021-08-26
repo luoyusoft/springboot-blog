@@ -36,7 +36,7 @@ public enum ResponseEnums {
 
     // 七牛OSS错误
     OSS_CONFIG_ERROR(10050,"七牛配置信息错误"),
-    OSS_UPLOAD_ERROR(10051,"七牛云OSS上传失败"),
+    OSS_UPLOAD_ERROR(10051,"七牛云上传失败"),
 
     // Minio错误
     MINIO_UPLOAD_ERROR(10060,"Minio上传失败"),

@@ -14,8 +14,8 @@ import java.util.List;
  */
 public interface TimelineMapper {
 
-    List<TimelinePost> listTimelinePost(@Param("year") Integer year, @Param("month") Integer month);
+    List<TimelinePost> selectTimelinePosts(@Param("year") Integer year, @Param("month") Integer month);
 
-    List<Timeline> listTimeline();
+    List<Timeline> selectTimelines();
 
 }

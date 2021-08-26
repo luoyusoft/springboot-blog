@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * 配置属性
- * @author top
+ * MinioProperties
+ *
+ * @author jinhx
+ * @since 2020-10-07
  */
 @Data
 @Component
@@ -29,5 +31,17 @@ public class MinioProperties {
      */
     @Value("${minio.secretKey}")
     private String secretKey;
+
+    /**
+     * minioBaseUrl
+     */
+    @Value("${minio.base.url}")
+    private String minioBaseUrl;
+
+    /**
+     * minioInitUrl
+     */
+    @Value("${minio.init.url:https://minio.jinhx.cc}")
+    private String minioInitUrl;
 
 }

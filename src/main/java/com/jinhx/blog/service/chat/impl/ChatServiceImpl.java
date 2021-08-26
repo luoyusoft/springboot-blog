@@ -1,5 +1,6 @@
 package com.jinhx.blog.service.chat.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
@@ -16,7 +17,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ public class ChatServiceImpl implements ChatService {
      * @return 用户信息
      */
     @Override
-    public Response insertUser(String id){
+    public Response<UserVO> insertUser(String id){
         if (websocketServerEndpoint.isOnline(id)){
             throw new MyException(ResponseEnums.CHAT_USER_REPEAT);
         }
@@ -75,7 +75,7 @@ public class ChatServiceImpl implements ChatService {
 
             if (!oldName.equals(user.getName())) {
                 Set<String> names = redisTemplate.opsForSet().members(RedisKeyConstants.CHAT_NAME);
-                if (!CollectionUtils.isEmpty(names)) {
+                if (CollectionUtils.isNotEmpty(names)) {
                     names.forEach(namesItem -> {
                         if (namesItem.equals(user.getName())) {
                             throw new MyException(ResponseEnums.CHAT_NAME_REPEAT);
@@ -101,7 +101,7 @@ public class ChatServiceImpl implements ChatService {
         }
 
         Set<String> names = redisTemplate.opsForSet().members(RedisKeyConstants.CHAT_NAME);
-        if (!CollectionUtils.isEmpty(names)){
+        if (CollectionUtils.isNotEmpty(names)){
             names.forEach(namesItem -> {
                 if (namesItem.equals(user.getName())){
                     throw new MyException(ResponseEnums.CHAT_NAME_REPEAT);
@@ -131,7 +131,7 @@ public class ChatServiceImpl implements ChatService {
 
             if (!oldName.equals(user.getName())){
                 Set<String> names = redisTemplate.opsForSet().members(RedisKeyConstants.CHAT_NAME);
-                if (!CollectionUtils.isEmpty(names)){
+                if (CollectionUtils.isNotEmpty(names)){
                     names.forEach(namesItem -> {
                         if (namesItem.equals(user.getName())){
                             throw new MyException(ResponseEnums.CHAT_NAME_REPEAT);
@@ -192,8 +192,8 @@ public class ChatServiceImpl implements ChatService {
         Message entity = new Message();
         entity.setMessage(message);
         entity.setFrom(getUser(fromId));
-        entity.setCreateTime(DateUtils.getNowTimeString());
-        if (toId != null) {
+        entity.setCreateTime(DateUtils.getNowDateTimeString());
+        if (Objects.nonNull(toId)) {
             //查询接收方信息
             entity.setTo(getUser(toId));
             //单个用户推送
@@ -236,7 +236,7 @@ public class ChatServiceImpl implements ChatService {
     public List<UserVO> listOnlineUsers() {
         List<UserVO> list = new ArrayList<>();
         Set<String> keys = redisTemplate.keys(RedisKeyConstants.CHAT_USER_PREFIX + RedisKeyConstants.REDIS_MATCH_PREFIX);
-        if (keys != null && keys.size() > 0) {
+        if (CollectionUtils.isNotEmpty(keys)) {
             keys.forEach(key -> {
                 if (websocketServerEndpoint.isOnline(key.substring(key.lastIndexOf(":") + 1))){
                     UserVO userVO = new UserVO();
@@ -257,7 +257,7 @@ public class ChatServiceImpl implements ChatService {
     public List<Message> listCommonMessages() {
         List<Message> list = new ArrayList<>();
         Set<String> keys = redisTemplate.keys(RedisKeyConstants.CHAT_COMMON_PREFIX + RedisKeyConstants.REDIS_MATCH_PREFIX);
-        if (keys != null && keys.size() > 0) {
+        if (CollectionUtils.isNotEmpty(keys)) {
             keys.forEach(key -> {
                 String value = redisTemplate.boundValueOps(key).get();
                 List<Message> messageList = Objects.requireNonNull(JsonUtils.jsonToList(value, Message.class));
@@ -285,11 +285,11 @@ public class ChatServiceImpl implements ChatService {
 
         List<Message> fromToList = JsonUtils.jsonToList(fromTo, Message.class);
         List<Message> toFromList = JsonUtils.jsonToList(toFrom, Message.class);
-        if (!CollectionUtils.isEmpty(fromToList)) {
+        if (CollectionUtils.isNotEmpty(fromToList)) {
             JsonUtils.jsonToList(fromTo, Message.class);
             list.addAll(fromToList);
         }
-        if (!CollectionUtils.isEmpty(toFromList)) {
+        if (CollectionUtils.isNotEmpty(toFromList)) {
             list.addAll(toFromList);
         }
 

@@ -1,7 +1,5 @@
 package com.jinhx.blog.service.operation;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.entity.operation.TopAdaptorBuilder;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.Top;
 import com.jinhx.blog.entity.operation.vo.TopVO;
@@ -14,94 +12,60 @@ import java.util.List;
  * @author jinhx
  * @since 2019-02-22
  */
-public interface TopService extends IService<Top> {
+public interface TopService {
 
     /**
-     * 将Top转换为TopVO
-     *
-     * @param topAdaptorBuilder topAdaptorBuilder
-     * @return TopVO
-     */
-    TopVO adaptorTopToTopVO(TopAdaptorBuilder<Top> topAdaptorBuilder);
-
-    /**
-     * 将Top列表按需转换为TopVO列表
-     *
-     * @param topAdaptorBuilder topAdaptorBuilder
-     * @return TopVO列表
-     */
-    List<TopVO> adaptorTopsToTopVOs(TopAdaptorBuilder<List<Top>> topAdaptorBuilder);
-
-    /**
-     * 分页查询
+     * 分页查询置顶列表
      *
      * @param page page
      * @param limit limit
-     * @return PageUtils
+     * @return 置顶列表
      */
-     PageData queryPage(Integer page, Integer limit);
+     PageData<TopVO> selectPage(Integer page, Integer limit);
 
     /**
-     * 获取置顶列表
+     * 根据模块，标题查询置顶列表
      *
      * @param module module
      * @param title title
-     * @return List<TopVO>
+     * @return 置顶列表
      */
-    List<TopVO> select(Integer module, String title);
+    List<TopVO> selectTopVOsByModuleAndTitle(Integer module, String title);
 
     /**
-     * 新增
+     * 根据topId查询置顶
+     *
+     * @param topId topId
+     * @return 置顶
+     */
+    Top selectTopById(Long topId);
+
+    /**
+     * 新增置顶
      *
      * @param top top
      */
     void insertTop(Top top);
 
     /**
-     * 更新
+     * 根据topId更新置顶
      *
      * @param top top
      */
-    void updateTop(Top top);
+    void updateTopById(Top top);
 
     /**
-     * 置顶
+     * 根据topId进行置顶
      *
-     * @param id id
+     * @param topId topId
      */
-    void updateTopTop(Integer id);
+    void updateTopToTopById(Long topId);
 
     /**
-     * 删除
+     * 批量根据topId删除置顶
      *
-     * @param ids ids
+     * @param topIds topIds
      */
-    void deleteTopsByIds(List<Integer> ids);
-
-    /**
-     * 查找最大顺序
-     *
-     * @return 最大顺序
-     */
-    Integer selectTopMaxOrderNum();
-
-    /**
-     * 是否已置顶
-     *
-     * @param module module
-     * @param linkId linkId
-     * @return 是否已置顶
-     */
-    Boolean isTopByModuleAndLinkId(Integer module, Integer linkId);
-
-    /********************** portal ********************************/
-
-    /**
-     * 查询列表
-     *
-     * @param module module
-     * @return List<TopVO>
-     */
-    List<TopVO> listTopVO(Integer module);
+    void deleteTopsById(List<Long> topIds);
 
 }

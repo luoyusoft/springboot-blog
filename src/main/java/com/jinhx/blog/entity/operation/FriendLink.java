@@ -1,7 +1,9 @@
 package com.jinhx.blog.entity.operation;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,12 +27,19 @@ public class FriendLink extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -5450078578713186942L;
 
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "友链id主键")
+    @TableId(type = IdType.INPUT)
+    private Long friendLinkId;
+
     @ApiModelProperty(value = "链接名称")
-    @NotBlank(message = "链接名称不能为空", groups = {AddGroup.class})
+    @NotBlank(message = "链接名称不能为空", groups = {InsertGroup.class})
     private String title;
 
     @ApiModelProperty(value = "链接地址")
-    @NotBlank(message = "链接地址不能为空", groups = {AddGroup.class})
+    @NotBlank(message = "链接地址不能为空", groups = {InsertGroup.class})
     private String url;
 
     @ApiModelProperty(value = "链接头像")

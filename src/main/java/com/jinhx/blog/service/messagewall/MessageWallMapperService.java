@@ -1,9 +1,6 @@
 package com.jinhx.blog.service.messagewall;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -11,17 +8,18 @@ import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.messagewall.MessageWall;
-import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
-import com.jinhx.blog.entity.messagewall.vo.MessageWallVO;
+import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
 import com.jinhx.blog.mapper.messagewall.MessageWallMapper;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * MessageWallMapperService
@@ -32,49 +30,27 @@ import java.util.stream.Collectors;
 @Service
 public class MessageWallMapperService extends ServiceImpl<MessageWallMapper, MessageWall> {
 
-    @Value("${message.wall.default.profile}")
-    private String messageWallDefaultProfile;
-
-    @Value("${message.wall.default.manage.profile}")
-    private String messageWallDefaultManageProfile;
-
-    @Value("${message.wall.default.manage.name}")
-    private String messageWallDefaultManageName;
-
-    @Value("${message.wall.default.manage.email}")
-    private String messageWallDefaultManageEmail;
-
-    @Value("${message.wall.default.manage.website}")
-    private String messageWallDefaultManageWebsite;
-
     /**
-     * 后台新增留言
+     * 查询首页信息
      *
-     * @param messageWall 留言
+     * @return 首页信息
      */
-    public void manageAddMessageWall(MessageWall messageWall) {
-        // 新楼层
-        if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
-            messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                    .select(MessageWall::getFloorNum)
-                    .orderByDesc(MessageWall::getFloorNum)
-                    .last("limit 1")).get(0).getFloorNum() + 1);
-        } else {
-            if (messageWall.getFloorNum() == null){
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
-            }
-        }
-        messageWall.setProfile(messageWallDefaultManageProfile);
-        messageWall.setName(messageWallDefaultManageName);
-        messageWall.setEmail(messageWallDefaultManageEmail);
-        messageWall.setWebsite(messageWallDefaultManageWebsite);
-
-        baseMapper.insert(messageWall);
+    public HomeMessageWallInfoVO selectHomeMessageWallInfoVO() {
+        // 当天零点
+        LocalDateTime createTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        HomeMessageWallInfoVO homeMessageWallInfoVO = new HomeMessageWallInfoVO();
+        homeMessageWallInfoVO.setMaxFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .select(MessageWall::getFloorNum)
+                .orderByDesc(MessageWall::getFloorNum)
+                .last("limit 1")).get(0).getFloorNum());
+        homeMessageWallInfoVO.setAllCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
+        homeMessageWallInfoVO.setTodayCount(baseMapper.selectCount(new LambdaQueryWrapper<MessageWall>()
+                .ge(MessageWall::getCreateTime, createTime)));
+        return homeMessageWallInfoVO;
     }
 
     /**
-     * 后台分页查询留言列表
+     * 分页查询留言列表
      *
      * @param page 页码
      * @param limit 页数
@@ -82,137 +58,108 @@ public class MessageWallMapperService extends ServiceImpl<MessageWallMapper, Mes
      * @param floorNum 楼层数
      * @return 留言列表
      */
-    public PageData manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum) {
-        IPage<MessageWall> messageWallIPage = baseMapper.selectPage(new QueryPage<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
-                .like(ObjectUtil.isNotEmpty(name), MessageWall::getName, name)
-                .eq(floorNum != null, MessageWall::getFloorNum, floorNum)
-                .orderByDesc(MessageWall::getId));
-
-        if (CollectionUtils.isEmpty(messageWallIPage.getRecords())){
-            return new PageData(messageWallIPage);
-        }
-
-        List<MessageWall> messageWalls = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                .in(MessageWall::getId, messageWallIPage.getRecords().stream().map(MessageWall::getReplyId).distinct().collect(Collectors.toList())));
-
-        if (CollectionUtils.isEmpty(messageWalls)){
-            messageWallIPage.setRecords(Lists.newArrayList());
-            return new PageData(messageWallIPage);
-        }
-
-        // key：id，value：name
-        Map<Integer, String> map = messageWalls.stream().collect(Collectors.toMap(MessageWall::getId, MessageWall::getName));
-
-        List<MessageWallVO> messageWallVOs = Lists.newArrayList();
-        messageWallIPage.getRecords().forEach(item -> {
-            MessageWallVO messageWallVO = new MessageWallVO();
-            BeanUtils.copyProperties(item, messageWallVO);
-            messageWallVO.setReplyName(map.get(item.getReplyId()));
-            messageWallVOs.add(messageWallVO);
-        });
-
-        IPage<MessageWallVO> messageWallVOIPage = new Page<>();
-        BeanUtils.copyProperties(messageWallIPage, messageWallVOIPage);
-        messageWallVOIPage.setRecords(messageWallVOs);
-
-        return new PageData(messageWallVOIPage);
+    public PageData<MessageWall> selectMessageWallPage(Integer page, Integer limit, String name, Integer floorNum) {
+        return new PageData<>(baseMapper.selectPage(new QueryPage<MessageWall>(page, limit).getPage(), new LambdaQueryWrapper<MessageWall>()
+                .like(StringUtils.isNotEmpty(name), MessageWall::getName, name)
+                .eq(Objects.nonNull(floorNum), MessageWall::getFloorNum, floorNum)
+                .orderByDesc(MessageWall::getMessageWallId)));
     }
 
     /**
-     * 后台批量删除
+     * 新增留言
      *
-     * @param ids ids
+     * @param messageWall 留言
      */
-    public void manageDeleteMessageWalls(Integer[] ids) {
-        baseMapper.deleteBatchIds(Lists.newArrayList(ids));
+    @Transactional(rollbackFor = Exception.class)
+    public void insertMessageWall(MessageWall messageWall) {
+        insertMessageWalls(Lists.newArrayList(messageWall));
+    }
+
+    /**
+     * 批量新增留言
+     *
+     * @param messageWalls 留言列表
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertMessageWalls(List<MessageWall> messageWalls) {
+        if (CollectionUtils.isNotEmpty(messageWalls)){
+            if (messageWalls.stream().mapToInt(item -> baseMapper.insert(item)).sum() != messageWalls.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
+        }
+    }
+
+    /**
+     * 查询最大楼层
+     *
+     * @return 最大楼层
+     */
+    public Integer selectMaxFloorNum() {
+        MessageWall messageWall = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+                .select(MessageWall::getFloorNum)
+                .orderByDesc(MessageWall::getFloorNum)
+                .last("limit 1")).get(0);
+
+        if (Objects.isNull(messageWall)){
+            return null;
+        }
+
+        return messageWall.getFloorNum();
+    }
+
+    /**
+     * 批量根据messageWallId删除留言
+     *
+     * @param messageWallIds messageWallIds
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteMessageWallsById(List<Long> messageWallIds) {
+        if (CollectionUtils.isNotEmpty(messageWallIds)){
+            if (baseMapper.deleteBatchIds(messageWallIds) != messageWallIds.size()){
+                throw new MyException(ResponseEnums.DELETE_FAIL);
+            }
+        }
     }
 
     /********************** portal ********************************/
 
     /**
-     * 新增留言
+     * 查询总留言数
      *
-     * @param messageWall 留言对象
+     * @return 总留言数
      */
-    public void insertMessageWall(MessageWall messageWall) {
-        messageWall.setName(MessageWall.NAME_PREFIX + messageWall.getName());
-        // 新楼层
-        if (MessageWall.REPLY_ID_LAYER_MASTER.equals(messageWall.getReplyId()) || messageWall.getReplyId() == null){
-            messageWall.setReplyId(MessageWall.REPLY_ID_LAYER_MASTER);
-            messageWall.setFloorNum(baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                    .select(MessageWall::getFloorNum)
-                    .orderByDesc(MessageWall::getFloorNum)
-                    .last("limit 1")).get(0).getFloorNum() + 1);
-        }else {
-            if (messageWall.getFloorNum() == null){
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "floorNum不能为空");
-            }
-        }
-        messageWall.setProfile(messageWallDefaultProfile);
-        messageWall.setCreaterId(MessageWall.CREATER_UPDATER_GUEST_ID);
-        messageWall.setUpdaterId(MessageWall.CREATER_UPDATER_GUEST_ID);
-
-        baseMapper.insert(messageWall);
+    public Integer selectTotalCount() {
+        return baseMapper.selectCount(new LambdaQueryWrapper<>());
     }
 
     /**
-     * 按楼层分页获取留言列表
+     * 根据楼层范围查询留言列表
      *
-     * @param page 页码
-     * @param limit 页数
-     * @return 留言列表
+     * @param minFloorNum minFloorNum
+     * @param maxFloorNum maxFloorNum
+     * @return  留言列表
      */
-    public MessageWallListVO listMessageWalls(Integer page, Integer limit) {
-        MessageWallListVO messageWallListVO = new MessageWallListVO();
-        messageWallListVO.setTotalCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
-        if (messageWallListVO.getTotalCount() == null || messageWallListVO.getTotalCount() < 1){
-            messageWallListVO.setHaveMoreFloor(false);
-            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
-            return messageWallListVO;
-        }
-
-        Integer maxFloorNum = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                .select(MessageWall::getFloorNum)
-                .orderByDesc(MessageWall::getFloorNum)
-                .last("limit 1")).get(0).getFloorNum() - (page - 1) * limit;
-        Integer minFloorNum = maxFloorNum - limit + 1;
-
-        messageWallListVO.setHaveMoreFloor(minFloorNum > 1);
-
-        List<MessageWall> messageWalls = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
+    @Transactional(rollbackFor = Exception.class)
+    public List<MessageWall> selectMessageWallsByFloorNumRange(Integer minFloorNum, Integer maxFloorNum) {
+        return baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
                 .ge(MessageWall::getFloorNum, minFloorNum)
                 .le(MessageWall::getFloorNum, maxFloorNum)
                 .orderByDesc(MessageWall::getFloorNum)
-                .orderByAsc(MessageWall::getId));
+                .orderByAsc(MessageWall::getMessageWallId));
+    }
 
-        if (CollectionUtils.isEmpty(messageWalls)){
-            messageWallListVO.setHaveMoreFloor(false);
-            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
-            return messageWallListVO;
+    /**
+     * 根据messageWallId查询留言列表
+     *
+     * @param messageWallIds messageWallIds
+     * @return 留言列表
+     */
+    public List<MessageWall> selecttMessageWallsById(List<Long> messageWallIds) {
+        if (CollectionUtils.isEmpty(messageWallIds)){
+            return Lists.newArrayList();
         }
 
-        List<MessageWall> messageWallNames = baseMapper.selectList(new LambdaQueryWrapper<MessageWall>()
-                .in(MessageWall::getId, messageWalls.stream().map(MessageWall::getReplyId).distinct().collect(Collectors.toList())));
-
-        if (CollectionUtils.isEmpty(messageWallNames)){
-            messageWallListVO.setHaveMoreFloor(false);
-            messageWallListVO.setMessageWallVOList(Lists.newArrayList());
-            return messageWallListVO;
-        }
-
-        // key：id，value：name
-        Map<Integer, String> map = messageWallNames.stream().collect(Collectors.toMap(MessageWall::getId, MessageWall::getName));
-
-        List<MessageWallVO> messageWallVOs = Lists.newArrayList();
-        messageWalls.forEach(item -> {
-            MessageWallVO messageWallVO = new MessageWallVO();
-            BeanUtils.copyProperties(item, messageWallVO);
-            messageWallVO.setReplyName(map.get(item.getReplyId()));
-            messageWallVOs.add(messageWallVO);
-        });
-
-        messageWallListVO.setMessageWallVOList(messageWallVOs);
-        return messageWallListVO;
+        return baseMapper.selectList(new LambdaQueryWrapper<MessageWall>().in(MessageWall::getMessageWallId, messageWallIds));
     }
 
 }

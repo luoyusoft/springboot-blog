@@ -1,16 +1,20 @@
 package com.jinhx.blog.service.sys;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jinhx.blog.common.util.SysAdminUtils;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.sys.SysUserRole;
 import com.jinhx.blog.mapper.sys.SysUserRoleMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * SysUserRoleMapperService
@@ -22,85 +26,122 @@ import java.util.List;
 public class SysUserRoleMapperService extends ServiceImpl<SysUserRoleMapper, SysUserRole> {
 
     /**
-     * 批量删除roleId
+     * 批量根据sysRoleId删除用户角色关联
      *
-     * @param roleIds roleIds
-     */
-    public void deleteBatchByRoleId(Integer[] roleIds) {
-        Arrays.stream(roleIds).forEach(roleId -> {
-            baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
-                    .eq(roleId!=null, SysUserRole::getRoleId,roleId));
-        });
-    }
-
-    /**
-     * 批量删除userId
-     *
-     * @param userIds userIds
-     */
-    public void deleteBatchByUserId(Integer[] userIds) {
-        Arrays.stream(userIds).forEach(userId -> {
-            baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
-                    .eq(userId!=null, SysUserRole::getUserId,userId));
-        });
-    }
-
-    /**
-     * 更新或保存用户角色
-     *
-     * @param userId userId
-     * @param roleIdList roleIdList
+     * @param sysRoleIds sysRoleIds
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveOrUpdate(Integer userId, List<Integer> roleIdList) {
+    public void deleteSysUserRolesBySysRoleId(List<Long> sysRoleIds) {
+        baseMapper.delete(new LambdaUpdateWrapper<SysUserRole>().in(SysUserRole::getSysRoleId, sysRoleIds));
+    }
+
+    /**
+     * 批量根据sysUserId删除用户角色关联
+     *
+     * @param sysUserIds sysUserIds
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteSysUserRolesBySysUserId(List<Long> sysUserIds) {
+        baseMapper.delete(new LambdaUpdateWrapper<SysUserRole>().in(SysUserRole::getSysUserId, sysUserIds));
+    }
+
+    /**
+     * 删除旧的用户角色关联，新增心的用户角色关联
+     *
+     * @param sysUserId sysUserId
+     * @param sysRoleIds sysRoleIds
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOldAndInsertNewSysUserRole(Long sysUserId, List<Long> sysRoleIds) {
         // 先删除用户与角色关系
-        baseMapper.delete(new UpdateWrapper<SysUserRole>().lambda()
-                .eq(userId!=null, SysUserRole::getUserId,userId));
+        deleteSysUserRoleBySysUserId(sysUserId);
 
-        if(roleIdList.size() == 0){
-            return ;
+        if (CollectionUtils.isNotEmpty(sysRoleIds)){
+            // 保存用户与角色关系
+            List<SysUserRole> list = new ArrayList<>(sysRoleIds.size());
+            for(Long sysRoleId : sysRoleIds){
+                SysUserRole sysUserRole = new SysUserRole();
+                sysUserRole.setSysUserId(sysUserId);
+                sysUserRole.setSysRoleId(sysRoleId);
+                list.add(sysUserRole);
+            }
+            this.insertSysUserRoles(list);
         }
+    }
 
-        // 保存用户与角色关系
-        List<SysUserRole> list = new ArrayList<>(roleIdList.size());
-        for(Integer roleId : roleIdList){
-            SysUserRole SysUserRole = new SysUserRole();
-            SysUserRole.setUserId(userId);
-            SysUserRole.setRoleId(roleId);
+    /**
+     * 根据sysUserId删除用户角色关联
+     *
+     * @param sysUserId sysUserId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteSysUserRoleBySysUserId(Long sysUserId) {
+        baseMapper.delete(new LambdaUpdateWrapper<SysUserRole>().eq(SysUserRole::getSysUserId, sysUserId));
+    }
 
-            list.add(SysUserRole);
+    /**
+     * 新增用户角色关联
+     *
+     * @param sysUserRole sysUserRole
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertSysUserRole(SysUserRole sysUserRole) {
+        insertSysUserRoles(Lists.newArrayList(sysUserRole));
+    }
+
+    /**
+     * 批量新增用户角色关联
+     *
+     * @param sysUserRoles sysUserRoles
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertSysUserRoles(List<SysUserRole> sysUserRoles) {
+        if (CollectionUtils.isNotEmpty(sysUserRoles)){
+            if (sysUserRoles.stream().mapToInt(item -> baseMapper.insert(item)).sum() != sysUserRoles.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
         }
-        this.saveBatch(list);
     }
 
     /**
      * 根据用户id查询角色id列表
      *
-     * @param userId 用户id
+     * @param sysUserId 用户id
      * @return 角色id列表
      */
-    public List<Integer> getRoleIdListByUserId(Integer userId) {
-        return baseMapper.getRoleIdListByUserId(userId);
+    public List<Long> selectSysRoleIdsBySysUserId(Long sysUserId) {
+        List<SysUserRole> sysUserRoles = baseMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getSysUserId, sysUserId)
+                .select(SysUserRole::getSysRoleId));
+
+        if (CollectionUtils.isEmpty(sysUserRoles)){
+            return Lists.newArrayList();
+        }
+
+        return sysUserRoles.stream().map(SysUserRole::getSysRoleId).collect(Collectors.toList());
     }
 
     /**
-     * 根据userId查询roleName
+     * 根据sysUserId查询角色名列表
      *
-     * @param userId userId
-     * @return List<String>
+     * @param sysUserId sysUserId
+     * @return 角色名列表
      */
-    public List<String> queryRoleNameList(Integer userId) {
-        return baseMapper.queryRoleNameList(userId);
+    public List<String> selectRoleNamesBySysUserId(Long sysUserId) {
+        return baseMapper.selectRoleNamesBySysUserId(sysUserId);
     }
 
     /**
-     * 是否包含超级管理员
+     * 根据sysUserId，sysUserIds查询用户角色关联数量
      *
-     * @param userIds 用户id列表
-     * @return 是否包含超级管理员
+     * @param sysUserIds sysUserIds
+     * @param sysRoleId sysRoleId
+     * @return 用户角色关联数量
      */
-    public boolean isHaveSuperAdmin(Integer[] userIds) {
-        return baseMapper.countSysUserRoleByRoleIdAndUserIds(userIds, SysAdminUtils.sysSuperAdminRoleId) > 0;
+    public Integer selectSysUserRoleCountBySysUserIdAndSysRoleId(List<Long> sysUserIds, Long sysRoleId) {
+        return baseMapper.selectCount(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getSysRoleId, sysRoleId)
+                .in(SysUserRole::getSysUserId, sysUserIds));
     }
 
 }

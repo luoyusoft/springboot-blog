@@ -1,15 +1,20 @@
 package com.jinhx.blog.service.sys;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.sys.SysRoleMenu;
 import com.jinhx.blog.mapper.sys.SysRoleMenuMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * SysRoleMenuMapperService
@@ -21,54 +26,89 @@ import java.util.List;
 public class SysRoleMenuMapperService extends ServiceImpl<SysRoleMenuMapper, SysRoleMenu> {
 
     /**
-     * 保存角色与菜单关系
+     * 删除旧的角色菜单关联，新增心的角色菜单关联
      *
-     * @param roleId 角色id
-     * @param menuIdList 菜单列表
+     * @param sysRoleId sysRoleId
+     * @param sysMenuIds sysMenuIds
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveOrUpdate(Integer roleId, List<Integer> menuIdList) {
-        //先删除角色与菜单关系
-        baseMapper.delete(new UpdateWrapper<SysRoleMenu>().lambda()
-                .eq(roleId!=null, SysRoleMenu::getRoleId,roleId));
+    public void deleteOldAndInsertNewSysRoleMenu(Long sysRoleId, List<Long> sysMenuIds) {
+        // 先删除角色与菜单关系
+        deleteSysRoleMenuBySysRoleId(sysRoleId);
 
-        if(menuIdList.size() == 0){
-            return ;
+        if (CollectionUtils.isNotEmpty(sysMenuIds)){
+            // 保存角色与菜单关系
+            List<SysRoleMenu> list = new ArrayList<>(sysMenuIds.size());
+            for(Long sysMenuId : sysMenuIds){
+                SysRoleMenu sysRoleMenu = new SysRoleMenu();
+                sysRoleMenu.setSysMenuId(sysMenuId);
+                sysRoleMenu.setSysRoleId(sysRoleId);
+                list.add(sysRoleMenu);
+            }
+            insertSysRoleMenus(list);
         }
-
-        //保存角色与菜单关系
-        List<SysRoleMenu> list = new ArrayList<>(menuIdList.size());
-        for(Integer menuId : menuIdList){
-            SysRoleMenu SysRoleMenu = new SysRoleMenu();
-            SysRoleMenu.setMenuId(menuId);
-            SysRoleMenu.setRoleId(roleId);
-
-            list.add(SysRoleMenu);
-        }
-        this.saveBatch(list);
     }
 
     /**
-     * 获取角色菜单列表
+     * 根据sysRoleId删除角色菜单关联
      *
-     * @param roleId 角色id
-     * @return 角色菜单列表
+     * @param sysRoleId sysRoleId
      */
-    public List<Integer> queryMenuIdList(Integer roleId) {
-        return baseMapper.queryMenuIdList(roleId);
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteSysRoleMenuBySysRoleId(Long sysRoleId) {
+        baseMapper.delete(new LambdaUpdateWrapper<SysRoleMenu>().eq(SysRoleMenu::getSysRoleId, sysRoleId));
     }
 
     /**
-     * 删除角色与菜单关联
+     * 根据角色id查询菜单id列表
      *
-     * @param roleIds 角色id列表
+     * @param sysRoleId sysRoleId
+     * @return 菜单id列表
+     */
+    public List<Long> selectSysMenuIdsBySysRoleId(Long sysRoleId) {
+        List<SysRoleMenu> sysRoleMenus = baseMapper.selectList(new LambdaQueryWrapper<SysRoleMenu>()
+                .eq(SysRoleMenu::getSysRoleId, sysRoleId)
+                .select(SysRoleMenu::getSysMenuId));
+
+        if (CollectionUtils.isEmpty(sysRoleMenus)){
+            return Lists.newArrayList();
+        }
+
+        return sysRoleMenus.stream().map(SysRoleMenu::getSysMenuId).collect(Collectors.toList());
+    }
+
+    /**
+     * 批量根据sysRoleId删除角色菜单关联
+     *
+     * @param sysRoleIds sysRoleIds
      */
     @Transactional(rollbackFor = Exception.class)
-    public void deleteBatchByRoleId(Integer[] roleIds) {
-        Arrays.stream(roleIds).forEach(roleId -> {
-            baseMapper.delete(new UpdateWrapper<SysRoleMenu>().lambda()
-                    .eq(roleId!=null, SysRoleMenu::getRoleId,roleId));
-        });
+    public void deleteSysRoleMenusBySysRoleId(List<Long> sysRoleIds) {
+        baseMapper.delete(new LambdaUpdateWrapper<SysRoleMenu>().in(SysRoleMenu::getSysRoleId, sysRoleIds));
+    }
+
+    /**
+     * 新增角色菜单关联
+     *
+     * @param sysRoleMenu sysRoleMenu
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertSysRoleMenu(SysRoleMenu sysRoleMenu) {
+        insertSysRoleMenus(Lists.newArrayList(sysRoleMenu));
+    }
+
+    /**
+     * 批量新增角色菜单关联
+     *
+     * @param sysRoleMenus sysRoleMenus
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertSysRoleMenus(List<SysRoleMenu> sysRoleMenus) {
+        if (CollectionUtils.isNotEmpty(sysRoleMenus)){
+            if (sysRoleMenus.stream().mapToInt(item -> baseMapper.insert(item)).sum() != sysRoleMenus.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
+        }
     }
 
 }

@@ -1,8 +1,11 @@
 package com.jinhx.blog.service.job;
 
-import com.jinhx.blog.service.log.LogViewMapperService;
+import com.jinhx.blog.common.api.IPApi;
+import com.jinhx.blog.entity.log.LogView;
+import com.jinhx.blog.entity.sys.IPInfo;
 import com.jinhx.blog.service.chat.ChatService;
 import com.jinhx.blog.service.gitalk.GitalkService;
+import com.jinhx.blog.service.log.LogViewMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.search.VideoEsServer;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -19,6 +22,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * XxlJob开发示例（Bean模式）
@@ -45,6 +50,9 @@ public class XxlJobService {
 
     @Autowired
     private ChatService chatService;
+
+    @Autowired
+    private IPApi ipApi;
 
     @Autowired
     private LogViewMapperService logViewMapperService;
@@ -95,7 +103,41 @@ public class XxlJobService {
      */
     @XxlJob("cleanCityInfo")
     public ReturnT<String> cleanCityInfo(String param) throws Exception {
-        logViewMapperService.cleanCityInfo();
+        log.info("开始清洗log_view表");
+        XxlJobLogger.log("开始清洗log_view表");
+
+        Long maxLogViewId = logViewMapperService.selectMaxLogViewId();
+
+        if (Objects.isNull(maxLogViewId)){
+            return ReturnT.SUCCESS;
+        }
+
+        for (long start = 0L, end = 500L; start < maxLogViewId; start += 500, end += 500) {
+            List<LogView> logViews = logViewMapperService.selectNullCityLogViewsByIdRange(start, end);
+
+            logViews.forEach(logViewsItem -> {
+                try {
+                    IPInfo ipInfo = ipApi.getIpInfo(logViewsItem.getIp());
+                    LogView logView = new LogView();
+                    logView.setLogViewId(logViewsItem.getLogViewId());
+                    logView.setCountry(ipInfo.getCountry());
+                    logView.setRegion(ipInfo.getRegionName());
+                    logView.setCity(ipInfo.getCity());
+
+                    logViewMapperService.updateLogViewById(logView);
+
+                    log.info("清洗成功：{}", logViewsItem);
+                    XxlJobLogger.log("清洗成功：{}", logViewsItem.toString());
+                    Thread.sleep(1000);
+                }catch (Exception e){
+                    log.info("清洗失败：" + e);
+                    XxlJobLogger.log("清洗失败：" + e);
+                }
+            });
+        }
+        log.info("清洗log_view表结束");
+        XxlJobLogger.log("清洗log_view表结束");
+
         return ReturnT.SUCCESS;
     }
 

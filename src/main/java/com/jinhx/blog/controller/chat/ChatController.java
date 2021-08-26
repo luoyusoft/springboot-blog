@@ -3,20 +3,15 @@ package com.jinhx.blog.controller.chat;
 import com.jinhx.blog.common.aop.annotation.LogView;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.DateUtils;
-import com.jinhx.blog.common.util.EncodeUtils;
-import com.jinhx.blog.common.util.IPUtils;
-import com.jinhx.blog.common.util.UserAgentUtils;
+import com.jinhx.blog.common.util.*;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.chat.Message;
 import com.jinhx.blog.entity.chat.User;
 import com.jinhx.blog.entity.chat.vo.UserVO;
 import com.jinhx.blog.service.chat.ChatService;
 import com.jinhx.blog.service.chat.WebsocketServerEndpoint;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +23,6 @@ import java.util.List;
  * @author jinhx
  * @since 2019-06-07
  */
-@Slf4j
 @RestController
 @RequestMapping("/chat")
 public class ChatController {
@@ -48,7 +42,7 @@ public class ChatController {
      * @return 用户信息
      */
     @PostMapping("/user")
-    public Response insertUser(HttpServletRequest request) throws Exception {
+    public Response<UserVO> insertUser(HttpServletRequest request) throws Exception {
         String ip = IPUtils.getIpAddr(request);
         String browserName = UserAgentUtils.getBrowserName(request);
         String browserVersion = UserAgentUtils.getBrowserVersion(request);
@@ -70,10 +64,9 @@ public class ChatController {
      */
     @PostMapping("/user/login")
     @LogView(module = 2)
-    public Response userLogin(HttpServletRequest request, @RequestBody User user) throws Exception {
-        if (user == null || StringUtils.isEmpty(user.getName()) || StringUtils.isEmpty(user.getAvatar())){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "名称，头像不能为空");
-        }
+    public Response<UserVO> userLogin(HttpServletRequest request, @RequestBody User user) throws Exception {
+        MyAssert.notBlank(user.getName(), "名称不能为空");
+        MyAssert.notBlank(user.getAvatar(), "头像不能为空");
 
         String ip = IPUtils.getIpAddr(request);
         String borderName = UserAgentUtils.getBrowserName(request);
@@ -90,7 +83,7 @@ public class ChatController {
 
         user.setId(id);
         user.setIp(ip);
-        user.setCreateTime(DateUtils.getNowTimeString());
+        user.setCreateTime(DateUtils.getNowDateTimeString());
         user.setBorderName(borderName);
         user.setBorderVersion(browserVersion);
         user.setDeviceManufacturer(deviceManufacturer);
@@ -108,11 +101,10 @@ public class ChatController {
      * @return 用户信息
      */
     @PutMapping("/user")
-    public Response updateUser(HttpServletRequest request, @RequestBody User user) throws Exception {
-        if (user == null || StringUtils.isEmpty(user.getId())
-                || (StringUtils.isEmpty(user.getName()) && StringUtils.isEmpty(user.getAvatar()))){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id，名称，头像不能为空");
-        }
+    public Response<UserVO> updateUser(HttpServletRequest request, @RequestBody User user) throws Exception {
+        MyAssert.notBlank(user.getId(), "id不能为空");
+        MyAssert.notBlank(user.getName(), "名称不能为空");
+        MyAssert.notBlank(user.getAvatar(), "头像不能为空");
 
         String ip = IPUtils.getIpAddr(request);
         String borderName = UserAgentUtils.getBrowserName(request);
@@ -133,7 +125,7 @@ public class ChatController {
 
         user.setId(id);
         user.setIp(ip);
-        user.setCreateTime(DateUtils.getNowTimeString());
+        user.setCreateTime(DateUtils.getNowDateTimeString());
         user.setBorderName(borderName);
         user.setBorderVersion(browserVersion);
         user.setDeviceManufacturer(deviceManufacturer);
@@ -150,7 +142,7 @@ public class ChatController {
      * @return 当前窗口用户信息
      */
     @GetMapping("/user/{id}")
-    public Response getUser(@PathVariable("id") String id) {
+    public Response<UserVO> getUser(@PathVariable("id") String id) {
         User user = chatService.getUser(id);
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
@@ -164,7 +156,7 @@ public class ChatController {
      * @param message 消息对象
      */
     @PostMapping("/message/{toId}")
-    public Response insertMessage(@PathVariable("toId") String toId, @RequestBody Message message) {
+    public Response<Void> insertMessage(@PathVariable("toId") String toId, @RequestBody Message message) {
         WebsocketServerEndpoint endpoint = new WebsocketServerEndpoint();
         endpoint.sendTo(toId, message);
         return Response.success();
@@ -176,7 +168,7 @@ public class ChatController {
      * @return 在线用户列表
      */
     @GetMapping("/listonlineusers")
-    public Response listOnlineUsers() {
+    public Response<List<UserVO>> listOnlineUsers() {
         return Response.success(chatService.listOnlineUsers());
     }
 
@@ -186,7 +178,7 @@ public class ChatController {
      * @return 消息列表
      */
     @GetMapping("/listcommonmessages")
-    public Response listCommonMessages() {
+    public Response<List<Message>> listCommonMessages() {
         return Response.success(chatService.listCommonMessages());
     }
 
@@ -198,7 +190,7 @@ public class ChatController {
      * @return 消息列表
      */
     @GetMapping("/listmessages/{fromId}/{toId}")
-    public Response listMessages(@PathVariable("fromId") String fromId, @PathVariable("toId") String toId) {
+    public Response<List<Message>> listMessages(@PathVariable("fromId") String fromId, @PathVariable("toId") String toId) {
         List<Message> list = chatService.listMessages(fromId, toId);
         return Response.success(list);
     }

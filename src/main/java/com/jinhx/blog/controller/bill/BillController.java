@@ -1,20 +1,20 @@
 package com.jinhx.blog.controller.bill;
 
-import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.validator.ValidatorUtils;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.bill.Bill;
 import com.jinhx.blog.service.bill.BillService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * IncomeExpenditureBillController
+ * BillController
  *
  * @author jinhx
  * @since 2021-07-28
@@ -22,23 +22,23 @@ import java.util.List;
 @RestController
 public class BillController {
 
-    @Resource
+    @Autowired
     private BillService billService;
 
     /**
-     * 查询单个账单信息
+     * 根据billId查询账单
      *
      * @param billId billId
-     * @return 单个账单信息
+     * @return 根据billId查询账单
      */
     @GetMapping("/manage/bill/{billId}")
     @RequiresPermissions("bill:info")
-    public Response getBill(@PathVariable("billId") Integer billId) {
-        return Response.success(billService.getBill(billId));
+    public Response<Bill> selectBillById(@PathVariable("billId") Long billId) {
+        return Response.success(billService.selectBillById(billId));
     }
 
     /**
-     * 查询账单列表
+     * 分页查询账单列表
      *
      * @param page page
      * @param limit limit
@@ -47,23 +47,8 @@ public class BillController {
      */
     @GetMapping("/manage/bills")
     @RequiresPermissions("bill:list")
-    public Response listBills(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("incomeExpenditureType") Boolean incomeExpenditureType) {
-        return Response.success(billService.queryPage(page, limit, incomeExpenditureType));
-    }
-
-    /**
-     * 新增单个账单
-     *
-     * @param bill bill
-     * @return 新增结果
-     */
-    @PostMapping("/manage/bill")
-    @RequiresPermissions("bill:insert")
-    public Response insertBill(@RequestBody Bill bill){
-        ValidatorUtils.validateEntity(bill, AddGroup.class);
-        Boolean result = billService.insertBill(bill);
-
-        return Response.success(result);
+    public Response<PageData<Bill>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("incomeExpenditureType") Boolean incomeExpenditureType) {
+        return Response.success(billService.selectPage(page, limit, incomeExpenditureType));
     }
 
     /**
@@ -74,59 +59,41 @@ public class BillController {
      */
     @PostMapping("/manage/bills")
     @RequiresPermissions("bill:insert")
-    public Response insertBill(@RequestBody List<Bill> bills){
+    public Response<Void> insertBills(@RequestBody List<Bill> bills){
         bills.forEach(item -> {
-            ValidatorUtils.validateEntity(item, AddGroup.class);
+            ValidatorUtils.validateEntity(item, InsertGroup.class);
         });
-        Boolean result = billService.insertBills(bills);
 
-        return Response.success(result);
+        billService.insertBills(bills);
+
+        return Response.success();
     }
 
     /**
-     * 更新单个账单
-     *
-     * @param bill bill
-     * @return 更新结果
-     */
-    @PutMapping("/manage/bill")
-    @RequiresPermissions("bill:update")
-    public Response updateBill(@RequestBody Bill bill){
-        Boolean result = billService.updateBill(bill);
-        return Response.success(result);
-    }
-
-    /**
-     * 批量更新账单
+     * 批量根据billId更新账单
      *
      * @param bills bills
      * @return 更新结果
      */
     @PutMapping("/manage/bills")
     @RequiresPermissions("bill:update")
-    public Response updateBill(@RequestBody List<Bill> bills){
-        Boolean result = billService.updateBills(bills);
-        return Response.success(result);
+    public Response<Void> updateBillsById(@RequestBody List<Bill> bills){
+        MyAssert.sizeBetween(bills, 1, 100, "bills");
+        billService.updateBillsById(bills);
+        return Response.success();
     }
 
     /**
-     * 批量删除账单
+     * 批量根据billId删除账单
      *
      * @param billIds billIds
      * @return 删除结果
      */
     @DeleteMapping("/manage/bill/delete")
     @RequiresPermissions("bill:delete")
-    public Response deleteBills(@RequestBody Integer[] billIds) {
-        if (billIds == null || billIds.length < 1){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "billIds不能为空");
-        }
-
-        if (billIds.length > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "billIds不能超过100个");
-        }
-
-        billService.deleteBills(billIds);
+    public Response<Void> deleteBillsById(@RequestBody List<Long> billIds) {
+        MyAssert.sizeBetween(billIds, 1, 100, "billIds");
+        billService.deleteBillsById(billIds);
         return Response.success();
     }
 

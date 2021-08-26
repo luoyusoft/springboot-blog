@@ -56,14 +56,14 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initArticleList(){
-        List<Article> articles = articleMapperService.listArticlesByPublish();
+        List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PUBLISH_TRUE);
 
         XxlJobLogger.log("初始化gitalk文章数据，查到个数：{}", articles.size());
         log.info("初始化gitalk文章数据，查到个数：{}", articles.size());
         if (CollectionUtils.isNotEmpty(articles)){
             articles.forEach(x -> {
                 InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
-                initGitalkRequest.setId(x.getId());
+                initGitalkRequest.setId(x.getArticleId());
                 initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_ARTICLE);
                 initGitalkRequest.setTitle(x.getTitle());
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
@@ -85,7 +85,7 @@ public class GitalkServiceImpl implements GitalkService {
         if (CollectionUtils.isNotEmpty(videos)){
             videos.forEach(x -> {
                 InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
-                initGitalkRequest.setId(x.getId());
+                initGitalkRequest.setId(x.getVideoId());
                 initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);
                 initGitalkRequest.setTitle(x.getTitle());
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));

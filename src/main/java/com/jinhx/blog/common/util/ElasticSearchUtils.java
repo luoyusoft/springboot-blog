@@ -1,8 +1,8 @@
 package com.jinhx.blog.common.util;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.entity.article.Article;
-import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -33,19 +33,20 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * RabbitMqUtils
- * @author luoyu
- * @date 2019/03/16 22:08
- * @description
+ *
+ * @author jinhx
+ * @since 2019-03-07
  */
-@Slf4j
 @Component
 public class ElasticSearchUtils {
 
@@ -182,7 +183,7 @@ public class ElasticSearchUtils {
         contents.forEach(x -> {
             bulkRequest.add(
                     new IndexRequest(index)
-                            .id(x.getId().toString())
+                            .id(x.getArticleId().toString())
                             .source(JsonUtils.objectToJson(x), XContentType.JSON));
         });
         BulkResponse bulkItemResponse = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
@@ -212,7 +213,7 @@ public class ElasticSearchUtils {
         // 每页多少条数据
         searchSourceBuilder.size(100);
         // 配置高亮
-        if (!CollectionUtils.isEmpty(highlightBuilderList)){
+        if (CollectionUtils.isNotEmpty(highlightBuilderList)){
             HighlightBuilder highlightBuilder = new HighlightBuilder();
             highlightBuilderList.forEach(highlightBuilder::field);
             highlightBuilder.preTags("<span style='color:red'>");
@@ -253,7 +254,7 @@ public class ElasticSearchUtils {
             // 原来的结果
             Map<String, Object> sourceMap = searchHit.getSourceAsMap();
             // 高亮结果
-            if (!CollectionUtils.isEmpty(highlightBuilderList)){
+            if (CollectionUtils.isNotEmpty(highlightBuilderList)){
                 Map<String, HighlightField> highlightFieldMap = searchHit.getHighlightFields();
                 highlightBuilderList.forEach(highlightBuilderListItem -> {
                     HighlightField title = highlightFieldMap.get(highlightBuilderListItem);

@@ -1,10 +1,7 @@
 package com.jinhx.blog.service.bill.impl;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.bill.Bill;
-import com.jinhx.blog.mapper.bill.BillMapper;
 import com.jinhx.blog.service.bill.BillMapperService;
 import com.jinhx.blog.service.bill.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +16,24 @@ import java.util.List;
  * @since 2021-07-28
  */
 @Service
-public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements BillService {
+public class BillServiceImpl implements BillService {
 
     @Autowired
     private BillMapperService billMapperService;
 
     /**
-     * 查询单个账单信息
+     * 根据billId查询账单
      *
      * @param billId billId
-     * @return 单个账单信息
+     * @return 账单
      */
     @Override
-    public Bill getBill(Integer billId) {
-        return billMapperService.getBill(billId);
+    public Bill selectBillById(Long billId) {
+        return billMapperService.selectBillById(billId);
     }
 
     /**
-     * 查询账单列表
+     * 分页查询账单列表
      *
      * @param page page
      * @param limit limit
@@ -44,65 +41,38 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      * @return 账单列表
      */
     @Override
-    public PageData queryPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
-        IPage<Bill> billIPage = billMapperService.queryPage(page, limit, incomeExpenditureType);
-
-        return new PageData(billIPage);
-    }
-
-    /**
-     * 新增单个账单
-     *
-     * @param bill bill
-     * @return 新增结果
-     */
-    @Override
-    public Boolean insertBill(Bill bill) {
-        return billMapperService.insertBill(bill);
+    public PageData<Bill> selectPage(Integer page, Integer limit, Boolean incomeExpenditureType) {
+        return new PageData<>(billMapperService.selectPage(page, limit, incomeExpenditureType));
     }
 
     /**
      * 批量新增账单
      *
      * @param bills bills
-     * @return 新增结果
      */
     @Override
-    public Boolean insertBills(List<Bill> bills) {
-        return billMapperService.insertBills(bills);
+    public void insertBills(List<Bill> bills) {
+        billMapperService.insertBills(bills);
     }
 
     /**
-     * 更新单个账单
-     *
-     * @param bill bill
-     * @return 更新结果
-     */
-    @Override
-    public Boolean updateBill(Bill bill) {
-        return billMapperService.updateBill(bill);
-    }
-
-    /**
-     * 批量更新账单
+     * 批量根据billId更新账单
      *
      * @param bills bills
-     * @return 更新结果
      */
     @Override
-    public Boolean updateBills(List<Bill> bills) {
-        return billMapperService.updateBills(bills);
+    public void updateBillsById(List<Bill> bills) {
+        billMapperService.updateBillsById(bills);
     }
 
     /**
-     * 批量删除账单
+     * 批量根据billId删除账单
      *
      * @param billIds billIds
-     * @return 删除结果
      */
     @Override
-    public Boolean deleteBills(Integer[] billIds) {
-        return billMapperService.deleteBills(billIds);
+    public void deleteBillsById(List<Long> billIds) {
+        billMapperService.deleteBillsById(billIds);
     }
 
 }

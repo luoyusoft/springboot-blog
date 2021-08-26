@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysRole">
-        <id column="id" property="id" />
+        <id column="id" property="sysRoleId" />
         <result column="role_name" property="roleName" />
         <result column="remark" property="remark" />
         <result column="creater_id" property="createrId" />
@@ -17,9 +17,5 @@
     <sql id="AllColumn">
         id, role_name, remark, creater_id,updater_id, create_time,update_time
     </sql>
-
-    <select id="queryRoleIdList" resultType="java.lang.Integer">
-        select sr.id from sys_role sr where sr.creater_id = #{createrId}
-    </select>
 
 </mapper>

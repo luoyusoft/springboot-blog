@@ -13,10 +13,10 @@ import java.util.List;
 public interface TimelineService {
 
     /**
-     * 获取时间线列表
+     * 查询时间线列表
      *
      * @return 时间线列表
      */
-    List<Timeline> listTimelines();
+    List<Timeline> selectTimelines();
 
 }

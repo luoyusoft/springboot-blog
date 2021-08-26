@@ -39,10 +39,14 @@ public class LogViewAspect {
 
     private static final String PROFILES_ACTIVE_PRO = "prod";
 
-    // 每隔1小时重新计算pv，时间，单位：毫秒
+    /**
+     * 每隔1小时重新计算pv，时间，单位：毫秒
+     */
     private static final long LOG_VIEW_LOCK_TIME = 60 * 60 * 1000;
 
-    // 每隔1小时重新计算pv，key
+    /**
+     * 每隔1小时重新计算pv，key
+     */
     private static final String BLOG_LOG_VIEW_LOCK_KEY = "blog:log:view:lock:";
 
     @Value("${spring.profiles.active}")
@@ -50,9 +54,6 @@ public class LogViewAspect {
 
     @Autowired
     private IPApi ipApi;
-
-    @Resource
-    private RedisUtils redisUtils;
 
     @Resource
     private LogViewMapper logViewMapper;
@@ -99,7 +100,7 @@ public class LogViewAspect {
                     viewLogEntity.getDeviceType() + viewLogEntity.getOsVersion());
 
             // 每隔1小时重新计算pv
-            if (redisUtils.setIfAbsent(BLOG_LOG_VIEW_LOCK_KEY + id, "1", LOG_VIEW_LOCK_TIME)){
+            if (RedisUtils.setIfAbsent(BLOG_LOG_VIEW_LOCK_KEY + id, "1", LOG_VIEW_LOCK_TIME)){
                 ThreadPoolEnum.COMMON.getThreadPoolExecutor().execute(() ->{
                     //保存日志
                     saveViewLog(viewLogEntity, proceedingJoinPoint, stopWatch.getTime());

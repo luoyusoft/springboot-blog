@@ -1,12 +1,14 @@
 package com.jinhx.blog.entity.bill;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -34,17 +36,24 @@ public class Bill extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1370579136074196212L;
 
-    @NotNull(message = "账单类型不能为空", groups = {AddGroup.class})
-    @ApiModelProperty(value = "账单类型id")
-    private Integer billTypeId;
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "账单id主键")
+    @TableId(type = IdType.INPUT)
+    private Long billId;
 
-    @NotNull(message = "收入支出类型不能为空", groups = {AddGroup.class})
+    @NotNull(message = "账单类型不能为空", groups = {InsertGroup.class})
+    @ApiModelProperty(value = "账单类型id")
+    private Long billTypeId;
+
+    @NotNull(message = "收入支出类型不能为空", groups = {InsertGroup.class})
     @ApiModelProperty(value = "收入支出类型（0：支出，1：收入）")
     private Boolean incomeExpenditureType;
 
-    @NotNull(message = "数额不能为空", groups = {AddGroup.class})
+    @NotNull(message = "数额不能为空", groups = {InsertGroup.class})
     @ApiModelProperty(value = "数额（单位：RMB，分）")
-    private Integer amount;
+    private Long amount;
 
     @ApiModelProperty(value = "日期")
     @Field(type = FieldType.Date, format = DateFormat.none)

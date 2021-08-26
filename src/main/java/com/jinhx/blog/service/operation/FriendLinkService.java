@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.operation;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.FriendLink;
 import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
@@ -13,40 +12,61 @@ import java.util.List;
  * @author jinhx
  * @since 2019-02-14
  */
-public interface FriendLinkService extends IService<FriendLink> {
+public interface FriendLinkService {
 
     /**
      * 获取首页信息
      *
      * @return 首页信息
      */
-    HomeFriendLinkInfoVO getHommeFriendLinkInfoVO();
+    HomeFriendLinkInfoVO selectHommeFriendLinkInfoVO();
 
     /**
-     * 分页查询
+     * 分页查询友链列表
      *
      * @param page page
      * @param limit limit
      * @param title title
-     * @return PageUtils
+     * @return 友链列表
      */
-     PageData queryPage(Integer page, Integer limit, String title);
+     PageData<FriendLink> selectPage(Integer page, Integer limit, String title);
 
     /**
-     * 判断上传文件下是否有友链
+     * 根据friendLinkId查询友链
      *
-     * @param url url
-     * @return 是否有友链
+     * @param friendLinkId friendLinkId
+     * @return 友链
      */
-    Boolean checkByFile(String url);
+    FriendLink selectFriendLinkById(Long friendLinkId);
+
+    /**
+     * 新增友链
+     *
+     * @param friendLink friendLink
+     */
+    void insertFriendLink(FriendLink friendLink);
+
+    /**
+     * 根据friendLinkId更新友链
+     *
+     * @param friendLink friendLink
+     */
+    void updateFriendLinkById(FriendLink friendLink);
+
+    /**
+     * 批量根据friendLinkId删除友链
+     *
+     * @param friendLinkIds friendLinkIds
+     */
+    void deleteFriendLinksById(List<Long> friendLinkIds);
 
     /********************** portal ********************************/
 
     /**
-     * 获取友链列表
+     * 查询友链列表
      *
      * @return 友链列表
      */
-    List<FriendLink> listFriendLinks();
+    List<FriendLink> selectPortalFriendLinks();
 
 }

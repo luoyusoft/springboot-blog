@@ -14,7 +14,7 @@ public class InitGitalkRequest {
     /**
      * 地址的相对路径后面的id 例如：1
      */
-    private Integer id;
+    private Long id;
 
     /**
      * 地址的相对路径 例如：article

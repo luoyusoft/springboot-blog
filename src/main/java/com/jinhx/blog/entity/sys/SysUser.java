@@ -1,7 +1,9 @@
 package com.jinhx.blog.entity.sys;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -25,7 +27,7 @@ import java.io.Serializable;
 @Component
 @TableName("sys_user")
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value="SysUser对象", description="用户管理")
+@ApiModel(value="SysUser对象", description="系统用户")
 public class SysUser extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 3285754866443165412L;
@@ -38,8 +40,15 @@ public class SysUser extends BaseEntity implements Serializable {
         SysUser.sysUserDefaultProfile = sysUserDefaultProfile;
     }
 
-    @NotBlank(message = "用户名不能为空" , groups = {AddGroup.class, UpdateGroup.class})
-    @Length(min = 4, max = 20, message = "用户名长度必须位于4到20之间", groups = {AddGroup.class, UpdateGroup.class})
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "系统用户id主键")
+    @TableId(type = IdType.INPUT)
+    private Long sysUserId;
+
+    @NotBlank(message = "用户名不能为空" , groups = {InsertGroup.class, UpdateGroup.class})
+    @Length(min = 4, max = 20, message = "用户名长度必须位于4到20之间", groups = {InsertGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "用户名")
     private String username;
 
@@ -58,8 +67,8 @@ public class SysUser extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "密码盐")
     private String salt;
 
-    @NotBlank(message = "昵称不能为空" ,groups = {AddGroup.class, UpdateGroup.class})
-    @Length(min = 2, max = 20, message = "昵称长度必须位于2到20之间", groups = {AddGroup.class, UpdateGroup.class})
+    @NotBlank(message = "昵称不能为空" ,groups = {InsertGroup.class, UpdateGroup.class})
+    @Length(min = 2, max = 20, message = "昵称长度必须位于2到20之间", groups = {InsertGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "昵称")
     private String nickname;
 

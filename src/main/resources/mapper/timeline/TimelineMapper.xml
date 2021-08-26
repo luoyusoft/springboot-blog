@@ -9,7 +9,7 @@
               select bn.id,bn.title,bn.description,bn.create_time,'bookNote' as postType from book_note bn  where DATE_FORMAT(bn.create_time,'%Y')=#{year} and DATE_FORMAT(bn.create_time,'%m') = #{month} and bn.publish = 1) t order by t.create_time desc
     </select>-->
 
-    <select id="listTimelinePost" resultType="com.jinhx.blog.entity.timeline.TimelinePost">
+    <select id="selectTimelinePosts" resultType="com.jinhx.blog.entity.timeline.TimelinePost">
         select *
         from (
                  select a.id, a.title, a.description, a.create_time, a.open, 'article' as postType
@@ -28,7 +28,7 @@
                       select bn.id,bn.title,bn.description,bn.create_time ,DATE_FORMAT(bn.create_time,'%Y') as year from book_note bn where bn.publish = 1) t group by t.year order by t.year desc
     </select>-->
 
-    <select id="listTimeline" resultType="com.jinhx.blog.entity.timeline.Timeline">
+    <select id="selectTimelines" resultType="com.jinhx.blog.entity.timeline.Timeline">
         select t.year, count(t.year) as count
         from (
             select a.id, a.title, a.description, a.create_time, DATE_FORMAT(a.create_time, '%Y') as year from article a where a.publish = 1) t

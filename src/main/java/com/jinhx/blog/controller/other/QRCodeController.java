@@ -28,7 +28,7 @@ public class QRCodeController {
         ServletOutputStream stream = null;
         try {
             stream = response.getOutputStream();
-            //使用工具类生成二维码
+            // 使用工具类生成二维码
             QRCodeUtils.encode(url, stream);
         } finally {
             if (stream != null) {
@@ -53,7 +53,7 @@ public class QRCodeController {
             String logoPath = Thread.currentThread().getContextClassLoader().getResource("").getPath()
                     + "templates" + File.separator + "advator.jpg";
             // String logoPath = "springboot-demo-list/qr-code/src/main/resources/templates/advator.jpg";
-            //使用工具类生成二维码
+            // 使用工具类生成二维码
             QRCodeUtils.encode(url, logoPath, stream, true);
         } finally {
             if (stream != null) {

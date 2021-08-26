@@ -4,9 +4,9 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysUserRole">
-        <id column="id" property="id" />
-        <result column="user_id" property="userId" />
-        <result column="role_id" property="roleId" />
+        <id column="id" property="sysUserRoleId" />
+        <result column="user_id" property="sysUserId" />
+        <result column="role_id" property="sysRoleId" />
         <result column="creater_id" property="createrId" />
         <result column="updater_id" property="updaterId" />
         <result column="create_time" property="createTime" />
@@ -18,28 +18,11 @@
         id, user_id, role_id,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <!-- 根据用户id查询角色id列表 -->
-    <select id="getRoleIdListByUserId" resultType="java.lang.Integer">
-        select role_id
-        from sys_user_role
-        where user_id = #{userId}
-    </select>
-
-    <select id="queryRoleNameList" resultType="java.lang.String">
+    <select id="selectRoleNamesBySysUserId" resultType="java.lang.String">
         select sr.role_name
         from sys_user_role sur
-                 left join sys_role sr on sur.role_id = sr.id
-        where sur.user_id = #{userId}
-    </select>
-
-    <select id="countSysUserRoleByRoleIdAndUserIds" resultType="java.lang.Integer">
-        select count(*)
-        from sys_user_role
-        where role_id = #{roleId} and user_id in
-        <foreach item="item" index="index" collection="userIds"
-                 open="(" separator="," close=")">
-            #{item}
-        </foreach>
+                 left join sys_role sr on sur.sys_role_id = sr.sys_role_id
+        where sur.sys_user_id = #{sysUserId}
     </select>
 
 </mapper>

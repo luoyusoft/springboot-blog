@@ -2,6 +2,7 @@ package com.jinhx.blog.controller.log;
 
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
+import com.jinhx.blog.entity.log.LogView;
 import com.jinhx.blog.entity.log.vo.HomeLogInfoVO;
 import com.jinhx.blog.service.log.LogViewService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -23,30 +24,28 @@ public class LogViewController {
     private LogViewService logViewService;
 
     /**
-     * 获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
     @GetMapping("/manage/log/homeinfo")
     @RequiresPermissions("log:list")
-    public Response getHommeLogInfoVO() {
-        HomeLogInfoVO hommeLogInfoVO = logViewService.getHommeLogInfoVO();
-        return Response.success(hommeLogInfoVO);
+    public Response<HomeLogInfoVO> selectHommeLogInfoVO() {
+        return Response.success(logViewService.selectHommeLogInfoVO());
     }
 
     /**
-     * 分页查询日志
+     * 分页查询日志列表
      *
      * @param page page
      * @param limit limit
      * @param module module
-     * @return PageUtils
+     * @return 日志列表
      */
     @GetMapping("/manage/log/list")
     @RequiresPermissions("log:list")
-    public Response listTimeline(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("module") Integer module) {
-        PageData logViewPage = logViewService.queryPage(page, limit, module);
-        return Response.success(logViewPage);
+    public Response<PageData<LogView>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("module") Integer module) {
+        return Response.success(logViewService.selectPage(page, limit, module));
     }
 
 }

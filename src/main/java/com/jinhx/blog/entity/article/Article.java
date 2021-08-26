@@ -1,5 +1,7 @@
 package com.jinhx.blog.entity.article;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -37,6 +39,13 @@ public class Article extends BaseEntity implements Serializable {
      * 置顶状态
      */
     public static final Boolean TOP_TRUE = true;
+
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "文章id主键")
+    @TableId(type = IdType.INPUT)
+    private Long articleId;
 
     @ApiModelProperty(value = "文章标题")
     private String title;

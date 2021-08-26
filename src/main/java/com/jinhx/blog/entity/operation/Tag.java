@@ -1,7 +1,10 @@
 package com.jinhx.blog.entity.operation;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,12 +29,19 @@ public class Tag extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1465693932599154429L;
 
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "标签id主键")
+    @TableId(type = IdType.INPUT)
+    private Long tagId;
+
     @ApiModelProperty(value = "标签名称")
-    @NotBlank(message="标签名称不能为空", groups = {AddGroup.class})
+    @NotBlank(message="标签名称不能为空", groups = {InsertGroup.class, UpdateGroup.class})
     private String name;
 
     @ApiModelProperty(value = "标签所属模块：0文章，1视频")
-    @NotNull(message="标签所属模块不能为空", groups = {AddGroup.class})
+    @NotNull(message="标签所属模块不能为空", groups = {InsertGroup.class, UpdateGroup.class})
     private Integer module;
 
 }

@@ -1,5 +1,7 @@
 package com.jinhx.blog.entity.video;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -22,7 +24,7 @@ import java.time.LocalDate;
  * @since 2018-11-22
  */
 @Data
-@ApiModel(value="Video对象", description="视频表")
+@ApiModel(value="Video对象", description="视频")
 @EqualsAndHashCode(callSuper = true)
 @TableName("video")
 public class Video extends BaseEntity implements Serializable {
@@ -33,6 +35,13 @@ public class Video extends BaseEntity implements Serializable {
      * 发布状态
      */
     public static final Boolean PUBLISH_TRUE = true;
+
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "视频id主键")
+    @TableId(type = IdType.INPUT)
+    private Long videoId;
 
     @ApiModelProperty(value = "视频标题")
     private String title;

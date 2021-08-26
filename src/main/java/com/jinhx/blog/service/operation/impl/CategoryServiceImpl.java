@@ -1,9 +1,7 @@
 package com.jinhx.blog.service.operation.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.CategoryRankEnum;
@@ -13,15 +11,12 @@ import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.CategoryAdaptorBuilder;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
-import com.jinhx.blog.mapper.operation.CategoryMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.CategoryMapperService;
 import com.jinhx.blog.service.operation.CategoryService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,7 +36,7 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
-public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
+public class CategoryServiceImpl implements CategoryService {
 
     @Resource
     private VideoMapperService videoMapperService;
@@ -61,8 +56,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * @param categoryAdaptorBuilder categoryAdaptorBuilder
      * @return CategoryVO
      */
-    @Override
-    public CategoryVO adaptorCategoryToCategoryVO(CategoryAdaptorBuilder<Category> categoryAdaptorBuilder){
+    private CategoryVO adaptorCategoryToCategoryVO(CategoryAdaptorBuilder<Category> categoryAdaptorBuilder){
         if(Objects.isNull(categoryAdaptorBuilder) || Objects.isNull(categoryAdaptorBuilder.getData())){
             return null;
         }
@@ -71,7 +65,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         BeanUtils.copyProperties(category, categoryVO);
 
         if (categoryAdaptorBuilder.getParentName()){
-            Category parentCategory = categoryMapperService.getById(categoryVO.getParentId());
+            Category parentCategory = categoryMapperService.selectCategoryById(categoryVO.getParentId());
             if (Objects.nonNull(parentCategory)){
                 categoryVO.setParentName(parentCategory.getName());
             }
@@ -86,8 +80,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * @param categoryAdaptorBuilder categoryAdaptorBuilder
      * @return CategoryVO列表
      */
-    @Override
-    public List<CategoryVO> adaptorCategorysToCategoryVOs(CategoryAdaptorBuilder<List<Category>> categoryAdaptorBuilder){
+    private List<CategoryVO> adaptorCategorysToCategoryVOs(CategoryAdaptorBuilder<List<Category>> categoryAdaptorBuilder){
         if(Objects.isNull(categoryAdaptorBuilder) || CollectionUtils.isEmpty(categoryAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
@@ -106,83 +99,64 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     /**
-     * 树状列表
+     * 根据父主键名称，模块查询类别列表
      *
+     * @param name name
      * @param module module
-     * @return 分类列表
+     * @return 类别列表
      */
     @Override
-    public List<Category> select(Integer module) {
-        List<Category> categorys = baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(Objects.nonNull(module), Category::getModule, module));
+    public List<CategoryVO> selectCategoryVOsByParentNameAndModule(String name, Integer module) {
+        List<Category> categories = categoryMapperService.selectCategoryVOsByParentNameAndModule(name, module);
 
-        //添加顶级分类
+        if (CollectionUtils.isEmpty(categories)){
+            return Collections.emptyList();
+        }
+
+        return adaptorCategorysToCategoryVOs(new CategoryAdaptorBuilder.Builder<List<Category>>()
+                .setParentName()
+                .build(categories));
+    }
+
+    /**
+     * 根据模块查询类别列表
+     *
+     * @param module module
+     * @return 类别列表
+     */
+    @Override
+    public List<Category> selectCategorysByModule(Integer module) {
+        List<Category> categorys = categoryMapperService.selectCategorysByModule(module);
+
+        // 添加顶级分类
         Category root = new Category();
-        root.setId(-1);
+        root.setCategoryId(-1L);
         root.setName("根目录");
-        root.setParentId(-1);
+        root.setParentId(-1L);
         categorys.add(root);
         return categorys;
     }
 
     /**
-     * 信息
+     * 根据categoryId查询类别
      *
-     * @param id id
-     * @return Category
+     * @param categoryId categoryId
+     * @return 类别
      */
     @Override
-    public Category info(Integer id) {
-        return baseMapper.selectById(id);
+    public Category selectCategoryById(Long categoryId) {
+        return categoryMapperService.selectCategoryById(categoryId);
     }
 
     /**
-     * 保存
+     * 新增类别
      *
      * @param category category
      */
     @Override
-    public void add(Category category) {
+    public void insertCategory(Category category) {
         verifyCategory(category);
-        baseMapper.insert(category);
-
-        cleanCategorysAllCache();
-    }
-
-    /**
-     * 修改
-     *
-     * @param category category
-     */
-    @Override
-    public void update(Category category) {
-        baseMapper.updateById(category);
-
-        cleanCategorysAllCache();
-    }
-
-    /**
-     * 删除
-     *
-     * @param id id
-     */
-    @Override
-    public void delete(Integer id) {
-        // 判断是否有子菜单或按钮
-        List<Category> categorys = queryListByParentId(id);
-        if(!CollectionUtils.isEmpty(categorys)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请先删除子级别");
-        }
-        // 判断是否有文章
-        if(articleMapperService.checkByCategoryId(id)) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有文章，无法删除");
-        }
-        // 判断是否有视频
-        if(videoMapperService.checkByCategoryId(id)) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有视频，无法删除");
-        }
-
-        baseMapper.deleteById(id);
+        categoryMapperService.insertCategory(category);
 
         cleanCategorysAllCache();
     }
@@ -197,7 +171,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         int parentRank = CategoryRankEnum.ROOT.getCode();
         if (category.getParentId() != CategoryRankEnum.FIRST.getCode()
                 && category.getParentId() != CategoryRankEnum.ROOT.getCode()) {
-            Category parentCategory = info(category.getParentId());
+            Category parentCategory = categoryMapperService.selectCategoryById(category.getParentId());
             parentRank = parentCategory.getRank();
         }
 
@@ -224,71 +198,71 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     /**
-     * 查询所有菜单
+     * 根据categoryId更新类别
      *
-     * @param name name
-     * @param module module
-     * @return List<Category>
+     * @param category category
      */
     @Override
-    public List<CategoryVO> queryWithParentName(String name, Integer module) {
-        List<Category> categories = baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(Objects.nonNull(module), Category::getModule, module)
-                .like(StringUtils.isNotBlank(name), Category::getName, name));
+    public void updateCategoryById(Category category) {
+        categoryMapperService.updateCategoryById(category);
 
-        if (CollectionUtils.isEmpty(categories)){
-            return Collections.emptyList();
+        cleanCategorysAllCache();
+    }
+
+    /**
+     * 根据categoryId删除类别
+     *
+     * @param categoryId categoryId
+     */
+    @Override
+    public void deleteCategoryById(Long categoryId) {
+        // 判断是否有子菜单或按钮
+        List<Category> categorys = categoryMapperService.selectCategorysByParentId(categoryId);
+        if(CollectionUtils.isNotEmpty(categorys)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请先删除子类别");
         }
 
-        return adaptorCategorysToCategoryVOs(new CategoryAdaptorBuilder.Builder<List<Category>>()
-                .setParentName()
-                .build(categories));
+        // 判断是否有文章
+        if(articleMapperService.existByCategoryId(categoryId)) {
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有文章，无法删除");
+        }
+
+        // 判断是否有视频
+        if(videoMapperService.checkByCategoryId(categoryId)) {
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有视频，无法删除");
+        }
+
+        categoryMapperService.deleteCategoryById(categoryId);
+
+        cleanCategorysAllCache();
     }
 
     /**
-     * 根据父级别查询子级别
-     *
-     * @param id id
-     * @return List<Category>
-     */
-    @Override
-    public List<Category> queryListByParentId(Integer id) {
-        return baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(Category::getParentId, id));
-    }
-
-    /**
-     * 根据id查询
-     *
-     * @param id id
-     * @return Category
-     */
-    @Override
-    public Category getById(Integer id) {
-        return baseMapper.selectById(id);
-    }
-
-    /**
-     * 根据类别Id数组查询类别数组
+     * 将类别Id列表字符串转换为类别名称列表字符串
      *
      * @param categoryIds categoryIds
-     * @param categoryList categoryList
-     * @return String
+     * @param module module
+     * @return 类别名称列表字符串
      */
     @Override
-    public String renderCategoryArr(String categoryIds, List<Category> categoryList) {
+    public String adaptorcategoryIdsToCategoryNames(String categoryIds, Integer module) {
         if (ObjectUtils.isEmpty(categoryIds)) {
+            return "";
+        }
+        List<Category> categorys = categoryMapperService.selectCategorysByModule(module);
+
+        if (CollectionUtils.isEmpty(categorys)){
             return "";
         }
 
         List<String> categoryStrList = new ArrayList<>();
         String[] categoryIdArr = categoryIds.split(",");
         for (int i = 0; i < categoryIdArr.length; i++) {
-            Integer categoryId = Integer.parseInt(categoryIdArr[i]);
+            Long categoryId = Long.parseLong(categoryIdArr[i]);
             // 根据Id查找类别名称
-            String categoryStr = categoryList
+            String categoryStr = categorys
                     .stream()
-                    .filter(category -> category.getId().equals(categoryId))
+                    .filter(category -> category.getCategoryId().equals(categoryId))
                     .map(Category::getName)
                     .findAny()
                     .orElse("");
@@ -310,16 +284,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     /********************** portal ********************************/
 
     /**
-     * 获取分类列表
+     * 根据模块查询类别列表
      *
      * @param module 模块
-     * @return 分类列表
+     * @return 类别列表
      */
     @Cacheable(value = RedisKeyConstants.CATEGORYS, key = "#module")
     @Override
-    public List<Category> listCategories(String module) {
-        return baseMapper.selectList(new QueryWrapper<Category>().lambda()
-                .eq(StringUtils.isNotEmpty(module), Category::getModule,module));
+    public List<Category> selectPortalCategorysByModule(Integer module) {
+        return categoryMapperService.selectCategorysByModule(module);
     }
 
 }

@@ -4,7 +4,7 @@
 
 	<!-- 通用查询映射结果 -->
 	<resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysMenu">
-		<id column="id" property="id" />
+		<id column="id" property="sysMenuId" />
 		<result column="parent_id" property="parentId" />
 		<result column="name" property="name" />
 		<result column="url" property="url" />
@@ -22,13 +22,5 @@
 	<sql id="AllColumn">
 		id, parent_id, name,url,perms,type,icon,order_num,creater_id,updater_id,create_time,update_time
 	</sql>
-
-    <select id="queryListParentId" resultMap="BaseResultMap">
-		select <include refid="AllColumn"/> from sys_menu where parent_id = #{parentId} order by order_num asc
-	</select>
-
-    <select id="queryNotButtonList" resultMap="BaseResultMap">
-		select <include refid="AllColumn"/> from sys_menu where type != 2 order by order_num asc
-	</select>
 
 </mapper>

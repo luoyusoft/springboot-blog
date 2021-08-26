@@ -1,10 +1,11 @@
 package com.jinhx.blog.service.messagewall;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.messagewall.MessageWall;
 import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
 import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
+
+import java.util.List;
 
 /**
  * MessageWallService
@@ -12,24 +13,17 @@ import com.jinhx.blog.entity.messagewall.vo.MessageWallListVO;
  * @author jinhx
  * @since 2021-04-11
  */
-public interface MessageWallService extends IService<MessageWall> {
+public interface MessageWallService {
 
     /**
-     * 后台获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
-    HomeMessageWallInfoVO manageGetHomeMessageWallInfoVO();
+    HomeMessageWallInfoVO selectHomeMessageWallInfoVO();
 
     /**
-     * 后台新增留言
-     *
-     * @param messageWall 留言
-     */
-    void manageAddMessageWall(MessageWall messageWall);
-
-    /**
-     * 后台分页查询留言列表
+     * 分页查询留言列表
      *
      * @param page 页码
      * @param limit 页数
@@ -37,31 +31,38 @@ public interface MessageWallService extends IService<MessageWall> {
      * @param floorNum 楼层数
      * @return 留言列表
      */
-    PageData<MessageWall> manageGetMessageWalls(Integer page, Integer limit, String name, Integer floorNum);
+    PageData<MessageWall> selectMessageWallPage(Integer page, Integer limit, String name, Integer floorNum);
 
     /**
-     * 后台批量删除
+     * 新增留言
      *
-     * @param ids ids
+     * @param messageWall 留言信息
      */
-    void manageDeleteMessageWalls(Integer[] ids);
+    void insertMessageWall(MessageWall messageWall);
+
+    /**
+     * 批量根据messageWallId删除留言
+     *
+     * @param messageWallIds messageWallIds
+     */
+    void deleteMessageWallsById(List<Long> messageWallIds);
 
     /********************** portal ********************************/
 
     /**
      * 新增留言
      *
-     * @param messageWall 留言对象
+     * @param messageWall 留言信息
      */
-    void insertMessageWall(MessageWall messageWall);
+    void insertPortalMessageWall(MessageWall messageWall);
 
     /**
-     * 按楼层分页获取留言列表
+     * 按楼层分页查询留言列表
      *
      * @param page 页码
      * @param limit 页数
      * @return 留言列表
      */
-    MessageWallListVO listMessageWalls(Integer page, Integer limit);
+    MessageWallListVO selectPortalMessageWallPage(Integer page, Integer limit);
 
 }

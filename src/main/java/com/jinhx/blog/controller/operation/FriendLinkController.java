@@ -1,22 +1,20 @@
 package com.jinhx.blog.controller.operation;
 
-import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
-import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.validator.ValidatorUtils;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.operation.FriendLink;
 import com.jinhx.blog.entity.operation.vo.HomeFriendLinkInfoVO;
 import com.jinhx.blog.service.operation.FriendLinkService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -29,7 +27,7 @@ import java.util.List;
 @CacheConfig(cacheNames = RedisKeyConstants.FRIENDLINKS)
 public class FriendLinkController {
 
-    @Resource
+    @Autowired
     private FriendLinkService friendLinkService;
 
     /**
@@ -38,99 +36,90 @@ public class FriendLinkController {
      * @return 首页信息
      */
     @GetMapping("/manage/operation/friendlink/homeinfo")
-    public Response getHommeFriendLinkInfoVO() {
-        HomeFriendLinkInfoVO homeFriendLinkInfoVO = friendLinkService.getHommeFriendLinkInfoVO();
-        return Response.success(homeFriendLinkInfoVO);
+    public Response<HomeFriendLinkInfoVO> selectHommeFriendLinkInfoVO() {
+        return Response.success(friendLinkService.selectHommeFriendLinkInfoVO());
     }
 
     /**
-     * 分页查询
+     * 分页查询友链列表
      *
      * @param page page
      * @param limit limit
      * @param title title
-     * @return PageUtils
+     * @return 友链列表
      */
     @GetMapping("/manage/operation/friendlink/list")
     @RequiresPermissions("operation:friendlink:list")
-    public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title){
-        PageData linkPage = friendLinkService.queryPage(page, limit, title);
-        return Response.success(linkPage);
+    public Response<PageData<FriendLink>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title){
+        return Response.success(friendLinkService.selectPage(page, limit, title));
     }
 
     /**
-     * 信息
+     * 根据friendLinkId查询友链
      *
-     * @param id id
-     * @return 信息
+     * @param friendLinkId friendLinkId
+     * @return 友链
      */
     @GetMapping("/manage/operation/friendlink/info/{id}")
     @RequiresPermissions("operation:friendlink:info")
-    public Response info(@PathVariable("id") String id){
-       FriendLink friendLink = friendLinkService.getById(id);
-        return Response.success(friendLink);
+    public Response<FriendLink> selectFriendLinkById(@PathVariable("id") Long friendLinkId){
+        return Response.success(friendLinkService.selectFriendLinkById(friendLinkId));
     }
 
     /**
-     * 保存
+     * 新增友链
      *
      * @param friendLink friendLink
+     * @return 新增结果
      */
     @PostMapping("/manage/operation/friendlink/save")
     @RequiresPermissions("operation:friendlink:save")
     @CacheEvict(allEntries = true)
-    public Response save(@RequestBody FriendLink friendLink){
-        ValidatorUtils.validateEntity(friendLink, AddGroup.class);
-        friendLinkService.save(friendLink);
-
+    public Response<Void> insertFriendLink(@RequestBody FriendLink friendLink){
+        ValidatorUtils.validateEntity(friendLink, InsertGroup.class);
+        friendLinkService.insertFriendLink(friendLink);
         return Response.success();
     }
 
     /**
-     * 修改
+     * 根据friendLinkId更新友链
      *
      * @param friendLink friendLink
+     * @return 更新结果
      */
     @PutMapping("/manage/operation/friendlink/update")
     @RequiresPermissions("operation:friendlink:update")
     @CacheEvict(allEntries = true)
-    public Response update(@RequestBody FriendLink friendLink){
-        friendLinkService.updateById(friendLink);
+    public Response<Void> updateFriendLinkById(@RequestBody FriendLink friendLink){
+        friendLinkService.updateFriendLinkById(friendLink);
         return Response.success();
     }
 
     /**
-     * 删除
+     * 批量根据friendLinkId删除友链
      *
-     * @param ids ids
+     * @param friendLinkIds friendLinkIds
+     * @return 删除结果
      */
     @DeleteMapping("/manage/operation/friendlink/delete")
     @RequiresPermissions("operation:friendlink:delete")
     @CacheEvict(allEntries = true)
-    public Response delete(@RequestBody String[] ids){
-        if (ids == null || ids.length < 1){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能为空");
-        }
-
-        if (ids.length > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
-        }
-
-        friendLinkService.removeByIds(Lists.newArrayList(ids));
+    public Response<Void> deleteFriendLinksById(@RequestBody List<Long> friendLinkIds){
+        MyAssert.sizeBetween(friendLinkIds, 1, 100, "friendLinkIds");
+        friendLinkService.deleteFriendLinksById(friendLinkIds);
         return Response.success();
     }
 
     /********************** portal ********************************/
 
     /**
-     * 获取友链列表
+     * 查询友链列表
      *
      * @return 友链列表
      */
     @RequestMapping("/operation/listfriendlinks")
-    public Response listFriendLinks() {
-        List<FriendLink> friendLinkList = friendLinkService.listFriendLinks();
-        return Response.success(friendLinkList);
+    public Response<List<FriendLink>> selectPortalFriendLinks() {
+        return Response.success(friendLinkService.selectPortalFriendLinks());
     }
 
 }

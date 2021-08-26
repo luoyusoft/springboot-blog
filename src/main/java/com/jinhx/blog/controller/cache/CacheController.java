@@ -24,7 +24,7 @@ public class CacheController {
      */
     @DeleteMapping("/manage/cache/cleanAll")
     @RequiresPermissions("cache:cleanAll")
-    public Response cleanAllCache() {
+    public Response<Void> cleanAllCache() {
         cacheServer.cleanAllCache();
         return Response.success();
     }

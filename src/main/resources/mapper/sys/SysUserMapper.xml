@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysUser">
-        <id column="id" property="id" />
+        <id column="id" property="sysUserId" />
         <result column="username" property="username" />
         <result column="password" property="password" />
         <result column="status" property="status" />
@@ -24,49 +24,17 @@
         id, username, password, status, mobile,email,salt,nickname,profile,creater_id,updater_id,create_time,update_time
     </sql>
 
-    <!-- 根据用户id查询用户有权限所有菜单列表 -->
-    <select id="getAllPermsByUserId" resultType="java.lang.String">
+    <select id="selectAllPermsBySysUserId" resultType="java.lang.String">
         select sm.perms from sys_user_role sur
-          left join sys_role_menu srm on sur.role_id=srm.role_id
-          left join sys_menu sm on srm.menu_id = sm.id
-        where sur.user_id = #{userId}
+          left join sys_role_menu srm on sur.sys_role_id=srm.sys_role_id
+          left join sys_menu sm on srm.sys_menu_id = sm.sys_menu_id
+        where sur.sys_user_id = #{sysUserId}
     </select>
 
-    <!-- 查询用户的所有菜单ID -->
-    <select id="queryAllMenuId" resultType="java.lang.Integer">
-		select distinct rm.menu_id from sys_user_role ur
-			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
-		where ur.user_id = #{userId}
+    <select id="selectSysMenuIdsBySysUserId" resultType="java.lang.Long">
+		select distinct rm.sys_menu_id from sys_user_role ur
+			LEFT JOIN sys_role_menu rm on ur.sys_role_id = rm.sys_role_id
+		where ur.sys_user_id = #{sysUserId}
 	</select>
-
-    <!-- 根据用户名查询用户信息 -->
-    <select id="getSysUserByUsername" resultMap="BaseResultMap">
-        select
-        <include refid="AllColumn"/>
-        from sys_user
-        where username = #{username}
-	</select>
-
-    <!-- 根据用户id查询用户信息 -->
-    <select id="getSysUserByUserId" resultMap="BaseResultMap">
-        select
-        <include refid="AllColumn"/>
-        from sys_user
-        where id = #{userId}
-	</select>
-
-    <!-- 根据用户名查询用户信息 -->
-    <select id="countSysUserByUsername" resultType="java.lang.Integer">
-        select count(*)
-        from sys_user
-        where username = #{username}
-    </select>
-
-    <!-- 根据用户id获取用户昵称 -->
-    <select id="getNicknameByUserId" resultType="java.lang.String">
-        select nickname
-        from sys_user
-        where id = #{userId}
-    </select>
 
 </mapper>

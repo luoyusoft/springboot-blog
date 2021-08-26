@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.messagewall.MessageWall">
-        <id column="id" property="id" />
+        <id column="id" property="messageWallId" />
         <result column="floor_num" property="floorNum" />
         <result column="reply_id" property="replyId" />
         <result column="name" property="name" />

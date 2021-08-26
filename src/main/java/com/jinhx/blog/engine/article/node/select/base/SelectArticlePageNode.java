@@ -1,4 +1,4 @@
-package com.jinhx.blog.engine.article.node.query;
+package com.jinhx.blog.engine.article.node.select.base;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -7,21 +7,19 @@ import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.service.article.ArticleMapperService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 /**
- * ArticleIPageQueryNode
+ * SelectArticlePageNode
  *
  * @author jinhx
  * @since 2021-08-06
  */
-@Slf4j
 @Component
-public class ArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
+public class SelectArticlePageNode extends ArticleNode<BaseRequestDTO> {
 
     @Autowired
     private ArticleMapperService articleMapperService;
@@ -36,7 +34,7 @@ public class ArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        IPage<Article> articleIPage = articleMapperService.queryPage(context.getPage(), context.getLimit(), context.getTitle());
+        IPage<Article> articleIPage = articleMapperService.selectPage(context.getPage(), context.getLimit(), context.getTitle());
         if (Objects.nonNull(articleIPage) && CollectionUtils.isNotEmpty(articleIPage.getRecords())){
             context.setArticles(articleIPage.getRecords());
         }
@@ -45,7 +43,7 @@ public class ArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public String getProcessorName() {
-        return "ArticleIPageQueryNode";
+        return "SelectArticlePageNode";
     }
 
 }

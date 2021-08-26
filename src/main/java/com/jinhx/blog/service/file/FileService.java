@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.file;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.file.File;
 import com.jinhx.blog.entity.file.vo.FileVO;
@@ -15,7 +14,7 @@ import java.util.List;
  * @author jinhx
  * @since 2018-11-07
  */
-public interface FileService extends IService<File> {
+public interface FileService {
 
     /**
      * 上传
@@ -24,28 +23,60 @@ public interface FileService extends IService<File> {
      * @param fileModule fileModule
      * @return FileVO
      */
-    FileVO upload(MultipartFile file, Integer fileModule);
+    FileVO uploadByQiNiu(MultipartFile file, Integer fileModule);
 
     /**
-     * 分片上传文件
+     * Minio文件上传
+     *
+     * @param file file
+     * @param fileModule fileModule
+     * @return FileVO
+     */
+    FileVO uploadByMinio(MultipartFile file, Integer fileModule);
+
+    /**
+     * Minio分片上传文件
      *
      * @param file file
      * @param bucketName bucketName
      * @param fileMd5 fileMd5
      * @param chunkNumber chunkNumber
      */
-    void chunkUpload(MultipartFile file, String bucketName, String fileMd5, Integer chunkNumber);
+    void chunkUploadByMinio(MultipartFile file, String bucketName, String fileMd5, Integer chunkNumber);
 
     /**
-     * 下载文件
+     * Minio下载文件
      *
      * @param response response
      * @param fileName fileName
      */
-    void download(HttpServletResponse response, String fileName);
+    void downloadByMinio(HttpServletResponse response, String fileName);
 
     /**
-     * 分页查询文件
+     * 获取各个分片上传地址
+     *
+     * @param fileVO fileVO
+     * @return List<FileVO>
+     */
+    List<FileVO> getUploadChunkFileVOsByMinio(FileVO fileVO);
+
+    /**
+     * 更新单个分片上传成功
+     *
+     * @param fileVO fileVO
+     */
+    void updateChunkUploadSuccess(FileVO fileVO);
+
+    /**
+     * 合并文件并返回文件信息
+     *
+     * @param fileVO fileVO
+     * @return 文件信息
+     */
+    String composeFileByMinio(FileVO fileVO);
+
+    /**
+     * 分页查询文件列表
      *
      * @param page page
      * @param limit limit
@@ -53,48 +84,24 @@ public interface FileService extends IService<File> {
      * @param fileName fileName
      * @param fileMd5 fileMd5
      * @param url url
-     * @return PageUtils
+     * @return 文件列表
      */
-    PageData queryPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url);
-
-    /**
-     * 分片上传文件，获取各个分片上传地址
-     *
-     * @param fileVO fileVO
-     * @return List<FileVO>
-     */
-    List<FileVO> chunk(FileVO fileVO);
-
-    /**
-     * 分片上传，单个分片成功
-     *
-     * @param fileVO fileVO
-     * @return Boolean
-     */
-    Boolean chunkUploadSuccess(FileVO fileVO);
-
-    /**
-     * 合并文件并返回文件信息
-     *
-     * @param fileVO fileVO
-     * @return String
-     */
-    String composeFile(FileVO fileVO);
+    PageData<File> selectPage(Integer page, Integer limit, Integer module, String fileName, String fileMd5, String url);
 
     /**
      * 获取文件访问地址
      *
      * @param fileMd5 fileMd5
      * @param module module
-     * @return String
+     * @return 文件访问地址
      */
     String getFileUrl(String fileMd5, Integer module);
 
     /**
-     * 批量删除文件
+     * 批量根据fileId删除文件
      *
-     * @param ids ids
+     * @param fileIds fileIds
      */
-    void deleteFile(List<Integer> ids);
+    void deleteFilesById(List<Long> fileIds);
 
 }

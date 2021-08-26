@@ -1,11 +1,13 @@
 package com.jinhx.blog.service.sys.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.MenuTypeEnum;
+import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.MapUtils;
 import com.jinhx.blog.entity.sys.SysMenu;
-import com.jinhx.blog.mapper.sys.SysMenuMapper;
+import com.jinhx.blog.service.sys.SysMenuMapperService;
 import com.jinhx.blog.service.sys.SysMenuService;
 import com.jinhx.blog.service.sys.SysRoleMenuMapperService;
 import com.jinhx.blog.service.sys.SysUserMapperService;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 1、查询用户所属菜单
@@ -23,124 +26,166 @@ import java.util.List;
  * @since 2018-10-22
  */
 @Service
-public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements SysMenuService {
+public class SysMenuServiceImpl implements SysMenuService {
 
     @Autowired
     private SysUserMapperService sysUserMapperService;
 
     @Autowired
+    private SysMenuMapperService sysMenuMapperService;
+
+    @Autowired
     private SysRoleMenuMapperService sysRoleMenuMapperService;
 
     /**
-     * 获取用户的所有菜单列表
+     * 根据用户id查询用户的所有菜单列表
      *
-     * @param userId 用户id
+     * @param sysUserId 用户id
      * @return 用户的所有菜单列表
      */
     @Override
-    public List<SysMenu> listUserMenu(Integer userId) {
+    public List<SysMenu> selectSysMenusBySysUserId(Long sysUserId) {
         // 用户菜单列表
-        List<Integer> menuIdList = sysUserMapperService.queryAllMenuId(userId);
-        return getAllMenuList(menuIdList);
+        List<Long> sysMenuIds = sysUserMapperService.selectSysMenuIdsBySysUserId(sysUserId);
+        return selectAllSysMenus(sysMenuIds);
     }
 
-    private List<SysMenu> getAllMenuList(List<Integer> menuIdList) {
+    /**
+     * 根据sysMenuId查询菜单
+     *
+     * @param sysMenuId sysMenuId
+     * @return 菜单
+     */
+    @Override
+    public SysMenu selectSysMenuById(Long sysMenuId) {
+        return sysMenuMapperService.selectSysMenuById(sysMenuId);
+    }
+
+    /**
+     * 完善菜单列表
+     *
+     * @param sysMenuIds sysMenuIds
+     * @return 菜单列表
+     */
+    private List<SysMenu> selectAllSysMenus(List<Long> sysMenuIds) {
         // 查询用户所属所有目录
-        List<SysMenu> menuList = queryListParentId(0, menuIdList);
+        List<SysMenu> sysMenus = selectSysMenusByParentIdAndSysMenuId(0L, sysMenuIds);
         // 递归生成特定格式的菜单列表
-        getMenuTreeList(menuList, menuIdList);
+        getMenuTreeList(sysMenus, sysMenuIds);
 
-        return menuList;
+        return sysMenus;
     }
+
     /**
      * 递归
      *
-     * @param menuList menuList
-     * @param menuIdList menuIdList
+     * @param sysMenus sysMenus
+     * @param sysMenuIds sysMenuIds
      * @return List<SysMenu>
      */
-    private List<SysMenu> getMenuTreeList(List<SysMenu> menuList, List<Integer> menuIdList){
+    private List<SysMenu> getMenuTreeList(List<SysMenu> sysMenus, List<Long> sysMenuIds){
         List<SysMenu> subMenuList = new ArrayList<>();
 
-        for(SysMenu entity : menuList){
+        for(SysMenu sysMenu : sysMenus){
             // 目录
-            if(entity.getType() == MenuTypeEnum.CATALOG.getCode()){
-                entity.setList(getMenuTreeList(queryListParentId(entity.getId(), menuIdList), menuIdList));
+            if(sysMenu.getType() == MenuTypeEnum.CATALOG.getCode()){
+                sysMenu.setList(getMenuTreeList(selectSysMenusByParentIdAndSysMenuId(sysMenu.getSysMenuId(), sysMenuIds), sysMenuIds));
             }
-            subMenuList.add(entity);
+            subMenuList.add(sysMenu);
         }
 
         return subMenuList;
     }
 
     /**
-     * 根据父菜单，查询子菜单，用于鉴权
+     * 根据parentId，menuIds查询子菜单，用于鉴权
      *
-     * @param parentId 父菜单ID
-     * @param menuIdList  用户菜单ID
+     * @param parentId 父菜单id
+     * @param sysMenuIds  用户菜单id
      * @return List<SysMenu>
      */
-    @Override
-    public List<SysMenu> queryListParentId(Integer parentId, List<Integer> menuIdList) {
-        List<SysMenu> menuList = queryListParentId(parentId);
-        if(CollectionUtils.isEmpty(menuList)){
-            return menuList;
+    private List<SysMenu> selectSysMenusByParentIdAndSysMenuId(Long parentId, List<Long> sysMenuIds) {
+        List<SysMenu> sysMenus = sysMenuMapperService.selectSysMenusByParentId(parentId);
+        if(CollectionUtils.isEmpty(sysMenus)){
+            return sysMenus;
         }
 
         List<SysMenu> userMenuList = new ArrayList<>();
-        for(SysMenu menu : menuList){
-            if(menuIdList.contains(menu.getId())){
-                userMenuList.add(menu);
+        for(SysMenu sysMenu : sysMenus){
+            if(sysMenuIds.contains(sysMenu.getSysMenuId())){
+                userMenuList.add(sysMenu);
             }
         }
         return userMenuList;
     }
 
     /**
-     * 根据父菜单，查询子菜单
+     * 查询不是按钮的菜单列表
      *
-     * @param parentId 父菜单ID
-     * @return List<SysMenu>
+     * @return 菜单列表
      */
     @Override
-    public List<SysMenu> queryListParentId(Integer parentId) {
-        return baseMapper.queryListParentId(parentId);
+    public List<SysMenu> selectNotButtonSysMenus() {
+        return sysMenuMapperService.selectSysMenusByType(SysMenu.TYPE_BUTTON);
     }
 
     /**
-     * 获取不包含按钮的菜单列表
+     * 查询所有菜单列表
      *
-     * @return List<SysMenu>
+     * @return 菜单列表
      */
     @Override
-    public List<SysMenu> queryNotButtonList() {
-        return baseMapper.queryNotButtonList();
+    public List<SysMenu> selectAllSysRoles() {
+        List<SysMenu> sysMenus = sysMenuMapperService.selectAllSysRoles();
+        if (CollectionUtils.isEmpty(sysMenus)){
+            return Lists.newArrayList();
+        }
+
+        sysMenus.forEach(sysMenu -> {
+            SysMenu parentSysMenu = sysMenuMapperService.selectSysMenuById(sysMenu.getParentId());
+            if(Objects.nonNull(parentSysMenu)){
+                sysMenu.setParentName(parentSysMenu.getName());
+            }
+        });
+        return sysMenuMapperService.selectAllSysRoles();
     }
 
     /**
-     * 获取用户菜单列表
+     * 根据sysMenuId删除菜单
      *
-     * @param userId userId
-     * @return List<SysMenu>
+     * @param sysMenuId sysMenuId
      */
     @Override
-    public List<SysMenu> getUserMenuList(Integer userId) {
-        // 用户菜单列表
-        List<Integer> menuIdList = sysUserMapperService.queryAllMenuId(userId);
-        return getAllMenuList(menuIdList);
-    }
-
-    /**
-     * 删除
-     *
-     * @param menuId menuId
-     */
-    @Override
-    public void delete(Integer menuId) {
+    public void deleteSysMenuById(Long sysMenuId) {
+        //判断是否有子菜单或按钮
+        List<SysMenu> menuList = sysMenuMapperService.selectSysMenusByParentId(sysMenuId);
+        if(CollectionUtils.isNotEmpty(menuList)){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请先删除子菜单或按钮");
+        }
         // 删除菜单
-        baseMapper.deleteById(menuId);
+        sysMenuMapperService.deleteSysMenuById(sysMenuId);
         // 删除菜单与角色关联
-        sysRoleMenuMapperService.removeByMap(new MapUtils().put("menu_id",menuId));
+        sysRoleMenuMapperService.removeByMap(new MapUtils().put("sys_menu_id",sysMenuId));
+    }
+
+    /**
+     * 新增菜单
+     *
+     * @param sysMenu sysMenu
+     */
+    @Override
+    public void insertSysMenu(SysMenu sysMenu) {
+        sysMenuMapperService.insertSysMenu(sysMenu);
+    }
+
+    /**
+     * 根据sysMenuId更新菜单
+     *
+     * @param sysMenu sysMenu
+     */
+    @Override
+    public void updateSysMenuById(SysMenu sysMenu) {
+        sysMenuMapperService.updateSysMenuById(sysMenu);
     }
 
 }

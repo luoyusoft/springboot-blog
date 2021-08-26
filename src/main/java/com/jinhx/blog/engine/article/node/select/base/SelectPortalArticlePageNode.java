@@ -1,4 +1,4 @@
-package com.jinhx.blog.engine.article.node.query;
+package com.jinhx.blog.engine.article.node.select.base;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -7,21 +7,19 @@ import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.service.article.ArticleMapperService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 /**
- * PortalArticleIPageQueryNode
+ * SelectPortalArticlePageNode
  *
  * @author jinhx
  * @since 2021-08-06
  */
-@Slf4j
 @Component
-public class PortalArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
+public class SelectPortalArticlePageNode extends ArticleNode<BaseRequestDTO> {
 
     @Autowired
     private ArticleMapperService articleMapperService;
@@ -36,7 +34,7 @@ public class PortalArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        IPage<Article> articleIPage = articleMapperService.listArticles(context.getPage(), context.getLimit(), context.getCategoryId(), context.getLatest(), context.getLike(), context.getRead());
+        IPage<Article> articleIPage = articleMapperService.selectPortalPage(context.getPage(), context.getLimit(), context.getCategoryId(), context.getLatest(), context.getLike(), context.getRead());
         if (Objects.nonNull(articleIPage) && CollectionUtils.isNotEmpty(articleIPage.getRecords())){
             context.setArticles(articleIPage.getRecords());
         }
@@ -45,7 +43,7 @@ public class PortalArticleIPageQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public String getProcessorName() {
-        return "PortalArticleIPageQueryNode";
+        return "SelectPortalArticlePageNode";
     }
 
 }

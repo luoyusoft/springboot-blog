@@ -1,4 +1,4 @@
-package com.jinhx.blog.engine.article.node;
+package com.jinhx.blog.engine.article.node.select;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Maps;
@@ -10,7 +10,6 @@ import com.jinhx.blog.entity.operation.Tag;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.service.operation.TagLinkMapperService;
 import com.jinhx.blog.service.operation.TagMapperService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,14 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ArticleTagListMapQueryNode
+ * SelectArticleTagListMapNode
  *
  * @author jinhx
  * @since 2021-08-06
  */
-@Slf4j
 @Component
-public class ArticleTagListMapQueryNode extends ArticleNode<BaseRequestDTO> {
+public class SelectArticleTagListMapNode extends ArticleNode<BaseRequestDTO> {
 
     @Autowired
     private TagMapperService tagMapperService;
@@ -40,11 +38,11 @@ public class ArticleTagListMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        Map<Integer, List<Tag>> map = Maps.newHashMap();
+        Map<Long, List<Tag>> map = Maps.newHashMap();
         context.getArticles().forEach(item -> {
-            List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(item.getId(), ModuleTypeConstants.ARTICLE);
+            List<TagLink> tagLinks = tagLinkMapperService.selectTagLinksByLinkIdAndModule(item.getArticleId(), ModuleTypeConstants.ARTICLE);
             if (CollectionUtils.isNotEmpty(tagLinks)){
-                map.put(item.getId(), tagMapperService.listByLinkId(tagLinks));
+                map.put(item.getArticleId(), tagMapperService.listByLinkId(tagLinks));
             }
         });
         context.setArticleTagListMap(map);
@@ -52,7 +50,7 @@ public class ArticleTagListMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public String getProcessorName() {
-        return "ArticleTagListMapQueryNode";
+        return "SelectArticleTagListMapNode";
     }
 
 }

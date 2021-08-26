@@ -1,7 +1,5 @@
 package com.jinhx.blog.service.operation;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.entity.operation.RecommendAdaptorBuilder;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
@@ -15,116 +13,77 @@ import java.util.List;
  * @author jinhx
  * @since 2019-02-22
  */
-public interface RecommendService extends IService<Recommend> {
-
-    /**
-     * 将Recommend转换为RecommendVO
-     *
-     * @param recommendAdaptorBuilder recommendAdaptorBuilder
-     * @return RecommendVO
-     */
-    RecommendVO adaptorRecommendToRecommendVO(RecommendAdaptorBuilder<Recommend> recommendAdaptorBuilder);
-
-    /**
-     * 将Recommend列表按需转换为RecommendVO列表
-     *
-     * @param recommendAdaptorBuilder recommendAdaptorBuilder
-     * @return RecommendVO列表
-     */
-    List<RecommendVO> adaptorRecommendsToRecommendVOs(RecommendAdaptorBuilder<List<Recommend>> recommendAdaptorBuilder);
+public interface RecommendService {
 
     /**
      * 获取首页信息
      *
      * @return 首页信息
      */
-    HomeRecommendInfoVO getHomeRecommendInfoVO();
+    HomeRecommendInfoVO selectHomeRecommendInfoVO();
 
     /**
-     * 分页查询
+     * 分页查询推荐列表
      *
      * @param page 页码
      * @param limit 每页数量
      * @return 推荐列表
      */
-     PageData queryPage(Integer page, Integer limit);
+    PageData<RecommendVO> selectPage(Integer page, Integer limit);
 
     /**
-     * 获取推荐列表
+     * 根据模块，标题查询推荐列表
      *
      * @param module module
      * @param title title
      * @return 推荐列表
      */
-    List<RecommendVO> select(Integer module, String title);
+    List<RecommendVO> selectRecommendVOsByModuleAndTitle(Integer module, String title);
 
     /**
-     * 批量删除
+     * 根据recommendId查询推荐
      *
-     * @param linkIds linkIds
-     * @param module module
+     * @param recommendId recommendId
+     * @return 推荐
      */
-    void deleteRecommendsByLinkIdsAndType(List<Integer> linkIds, int module);
+    Recommend selectRecommendById(Long recommendId);
 
     /**
-     * 新增
+     * 新增推荐
      *
      * @param recommend recommend
      */
     void insertRecommend(Recommend recommend);
 
     /**
-     * 更新
+     * 根据linkId，模块更新推荐
      *
      * @param recommend recommend
      */
-    void updateRecommend(Recommend recommend);
+    void updateRecommendByLinkIdAndModule(Recommend recommend);
 
     /**
-     * 推荐置顶
+     * 根据recommendId更新推荐置顶
      *
-     * @param id id
+     * @param recommendId recommendId
      */
-    void updateRecommendTop(Integer id);
+    void updateRecommendToTopById(Long recommendId);
 
     /**
-     * 删除
+     * 批量根据friendLinkId删除推荐
      *
-     * @param ids ids
+     * @param recommendIds recommendIds
      */
-    void deleteRecommendsByIds(List<Integer> ids);
-
-    /**
-     * 查找
-     *
-     * @param linkId linkId
-     * @param module module
-     */
-    Recommend selectRecommendByLinkIdAndType(Integer linkId, Integer module);
-
-    /**
-     * 通过模块查询链接id列表
-     *
-     * @param module module
-     * @return List<Integer>
-     */
-    List<Integer> selectLinkIdsByModule(Integer module);
-
-    /**
-     * 查找最大顺序
-     *
-     * @return Integer
-     */
-    Integer selectRecommendMaxOrderNum();
+    void deleteRecommendsById(List<Long> recommendIds);
 
     /********************** portal ********************************/
 
     /**
-     * 获取推荐列表
+     * 根据模块查询推荐列表
      *
      * @param module 模块
      * @return 推荐列表
      */
-    List<RecommendVO> listRecommends(Integer module);
+    List<RecommendVO> selectPortalRecommendVOsByModule(Integer module);
 
 }

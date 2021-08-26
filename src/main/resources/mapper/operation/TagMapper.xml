@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.operation.Tag">
-        <id column="id" property="id" />
+        <id column="id" property="tagId" />
         <result column="name" property="name" />
         <result column="module" property="module" />
         <result column="creater_id" property="createrId" />
@@ -20,7 +20,7 @@
 
     <!-- *************************** portal ****************************** -->
 
-    <select id="listTagVOsByArticle" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
+    <select id="selectTagVOsByArticle" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
         select t.name, sum(t.num) as linkNum
         from (
                  select distinct t.module,
@@ -38,7 +38,7 @@
         order by linkNum desc
     </select>
 
-    <select id="listTagVOsByVideo" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
+    <select id="selectTagVOsByVideo" resultType="com.jinhx.blog.entity.operation.vo.TagVO">
         select t.name, sum(t.num) as linkNum
         from (
                  select distinct t.module,

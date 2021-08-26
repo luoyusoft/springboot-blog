@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * VideoEsServerImpl
@@ -76,7 +77,7 @@ public class VideoEsServerImpl implements VideoEsServer {
                     videos.forEach(x -> {
                         VideoVO videoVO = new VideoVO();
                         BeanUtils.copyProperties(x, videoVO);
-                        videoVO.setAuthor(sysUserMapperService.getNicknameByUserId(videoVO.getCreaterId()));
+                        videoVO.setAuthor(sysUserMapperService.selectNicknameBySysUserId(videoVO.getCreaterId()));
                         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_ADD_ROUTINGKEY, JsonUtils.objectToJson(videoVO));
                     });
                     return true;
@@ -97,10 +98,10 @@ public class VideoEsServerImpl implements VideoEsServer {
         try {
             //手动确认消息已经被消费
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            if(message.getBody() != null){
+            if(Objects.nonNull(message.getBody())){
                 VideoVO videoVO = JsonUtils.jsonToObject(new String(message.getBody()), VideoVO.class);
-                if (videoVO != null){
-                    elasticSearchUtils.addDocument(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, videoVO.getId().toString(), JsonUtils.objectToJson(videoVO));
+                if (Objects.nonNull(videoVO)){
+                    elasticSearchUtils.addDocument(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, videoVO.getVideoId().toString(), JsonUtils.objectToJson(videoVO));
                     log.info("新增视频，rabbitmq监听器，添加到es中成功：id:" + new String(message.getBody()));
                 }
             }else {
@@ -123,10 +124,10 @@ public class VideoEsServerImpl implements VideoEsServer {
         try {
             //手动确认消息已经被消费
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            if(message.getBody() != null){
+            if(Objects.nonNull(message.getBody())){
                 VideoVO videoVO = JsonUtils.jsonToObject(new String(message.getBody()), VideoVO.class);
-                if (videoVO != null){
-                    elasticSearchUtils.updateDocument(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, videoVO.getId().toString(), JsonUtils.objectToJson(videoVO));
+                if (Objects.nonNull(videoVO)){
+                    elasticSearchUtils.updateDocument(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, videoVO.getVideoId().toString(), JsonUtils.objectToJson(videoVO));
                     log.info("更新视频，rabbitmq监听器，更新到es成功：id:" + new String(message.getBody()));
                 }
             }else {
@@ -150,11 +151,13 @@ public class VideoEsServerImpl implements VideoEsServer {
             //手动确认消息已经被消费
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             StringBuffer videoIdsS = new StringBuffer();
-            if(message.getBody() != null){
-                Integer[] videoIds = JsonUtils.jsonToObject(new String(message.getBody()), Integer[].class);
-                for (int i = 0; i < videoIds.length; i++) {
-                    elasticSearchUtils.deleteDocument(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, videoIds[i].toString());
-                    videoIdsS.append(videoIds[i] + ",");
+            if(Objects.nonNull(message.getBody())){
+                List<Long> videoIds = JsonUtils.jsonToObject(new String(message.getBody()), ArrayList.class);
+                if (CollectionUtils.isNotEmpty(videoIds)){
+                    for (Long videoId : videoIds){
+                        elasticSearchUtils.deleteDocument(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX, videoId.toString());
+                        videoIdsS.append(videoId + ",");
+                    }
                 }
                 log.info("删除视频，rabbitmq监听器，从es中删除成功：id:" + videoIdsS);
             }else {
@@ -162,12 +165,14 @@ public class VideoEsServerImpl implements VideoEsServer {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            StringBuffer articleIdsS = null;
-            Integer[] articleIds = JsonUtils.jsonToObject(new String(message.getBody()), Integer[].class);
-            for (int i = 0; i < articleIds.length; i++) {
-                articleIdsS.append(i + ",");
+            StringBuffer videoIdsS = null;
+            List<Long> videoIds = JsonUtils.jsonToObject(new String(message.getBody()), ArrayList.class);
+            if (CollectionUtils.isNotEmpty(videoIds)){
+                for (Long videoId : videoIds){
+                    videoIdsS.append(videoId + ",");
+                }
             }
-            log.info("删除视频，rabbitmq监听器，手动确认消息已经被消费失败，video:" + articleIdsS);
+            log.info("删除视频，rabbitmq监听器，手动确认消息已经被消费失败，video:" + videoIdsS);
         }
     }
 
@@ -184,7 +189,7 @@ public class VideoEsServerImpl implements VideoEsServer {
         List<VideoVO> videoVOList = new ArrayList<>();
         for(Map<String, Object> x : searchRequests){
             VideoVO videoVO = new VideoVO();
-            videoVO.setId(Integer.valueOf(x.get("id").toString()));
+            videoVO.setVideoId(Long.valueOf(x.get("videoId").toString()));
             videoVO.setCover(x.get("cover").toString());
             videoVO.setVideoUrl(x.get("videoUrl").toString());
             videoVO.setAlternateName(x.get("alternateName").toString());
@@ -197,8 +202,8 @@ public class VideoEsServerImpl implements VideoEsServer {
             videoVO.setSynopsis(x.get("synopsis").toString());
             videoVO.setLikeNum(Long.valueOf(x.get("likeNum").toString()));
             videoVO.setTop(false);
-            List<TagLink> tagLinks = tagLinkMapperService.listTagLinks(videoVO.getId(), ModuleTypeConstants.VIDEO);
-            if (!CollectionUtils.isEmpty(tagLinks)){
+            List<TagLink> tagLinks = tagLinkMapperService.selectTagLinksByLinkIdAndModule(videoVO.getVideoId(), ModuleTypeConstants.VIDEO);
+            if (CollectionUtils.isNotEmpty(tagLinks)){
                 videoVO.setTagList(tagMapperService.listByLinkId(tagLinks));
             }
             videoVOList.add(videoVO);

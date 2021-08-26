@@ -87,7 +87,7 @@ public interface VideoService extends IService<Video> {
      * @param videoAdaptorBuilder videoAdaptorBuilder
      * @return VideoVO
      */
-    VideoVO getVideoVO(Integer videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder);
+    VideoVO getVideoVO(Long videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder);
 
     /**
      * 判断类别下是否有视频
@@ -95,7 +95,7 @@ public interface VideoService extends IService<Video> {
      * @param categoryId categoryId
      * @return 类别下是否有视频
      */
-    Boolean checkByCategoryId(Integer categoryId);
+    Boolean checkByCategoryId(Long categoryId);
 
     /**
      * 判断上传文件下是否有视频
@@ -108,9 +108,9 @@ public interface VideoService extends IService<Video> {
     /**
      * 批量删除
      *
-     * @param ids 视频id数组
+     * @param videoIds 视频id列表
      */
-    void deleteVideos(Integer[] ids);
+    void deleteVideos(List<Long> videoIds);
 
     /**
      * 查询所有已发布的视频
@@ -140,7 +140,7 @@ public interface VideoService extends IService<Video> {
      * @param watch 观看量排序
      * @return 视频列表
      */
-    PageData listVideos(Integer page, Integer limit, Boolean latest, Integer categoryId, Boolean like, Boolean watch);
+    PageData listVideos(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch);
 
     /**
      * 获取VideoVO
@@ -148,7 +148,7 @@ public interface VideoService extends IService<Video> {
      * @param id id
      * @return VideoVO
      */
-    VideoVO getVideoVO(Integer id);
+    VideoVO getVideoVO(Long id);
 
     /**
      * 获取热观榜
@@ -163,6 +163,6 @@ public interface VideoService extends IService<Video> {
      * @param id id
      * @return 点赞结果
      */
-    Boolean updateVideo(Integer id) throws Exception;
+    Boolean updateVideo(Long id) throws Exception;
 
 }

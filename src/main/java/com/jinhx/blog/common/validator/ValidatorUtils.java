@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class ValidatorUtils {
 
-    private static Validator validator;
+    private static final Validator validator;
 
     static {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -31,8 +31,7 @@ public class ValidatorUtils {
      * @param object        待校验对象
      * @param groups        待校验的组
      */
-    public static void validateEntity(Object object, Class<?>... groups)
-            throws MyException {
+    public static void validateEntity(Object object, Class<?>... groups) throws MyException {
         Set<ConstraintViolation<Object>> constraintViolations = validator.validate(object, groups);
         if (!constraintViolations.isEmpty()) {
             List<String> collect = constraintViolations.stream().map(ConstraintViolation::getMessage).collect(Collectors.toList());

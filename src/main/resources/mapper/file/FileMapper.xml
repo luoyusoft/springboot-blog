@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.file.File">
-        <id column="id" property="id" />
+        <id column="id" property="fillId" />
         <result column="file_name" property="fileName" />
         <result column="url" property="url" />
         <result column="storage_type" property="storageType" />

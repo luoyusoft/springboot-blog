@@ -1,9 +1,7 @@
 package com.jinhx.blog.entity.base;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -11,7 +9,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -28,26 +25,18 @@ import java.time.LocalDateTime;
 public class BaseEntity {
 
     /**
-     * 主键
-     */
-    @ApiModelProperty(value = "主键")
-    @TableId(value = "id", type = IdType.AUTO)
-    @Id
-    private Integer id;
-
-    /**
      * 创建者id
      */
     @ApiModelProperty(value = "创建者id")
     @TableField(fill = FieldFill.INSERT)
-    private Integer createrId;
+    private Long createrId;
 
     /**
      * 更新者id
      */
     @ApiModelProperty(value = "更新者id")
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer updaterId;
+    private Long updaterId;
 
     /**
      * 创建时间

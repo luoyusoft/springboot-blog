@@ -59,7 +59,7 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     /**
      * 文章id列表
      */
-    private List<Integer> articleIds;
+    private List<Long> articleIds;
 
     /**
      * 发布状态
@@ -69,7 +69,7 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     /**
      * 分类
      */
-    private Integer categoryId;
+    private Long categoryId;
 
     /**
      * 时间排序
@@ -104,27 +104,27 @@ public class ArticleQueryContextInfo<T extends BaseRequestDTO> implements Serial
     /**
      * k：文章id，value：文章所属分类，以逗号分
      */
-    private Map<Integer, String> articleCategoryListStrMap = Maps.newHashMap();
+    private Map<Long, String> articleCategoryListStrMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：所属标签
      */
-    private Map<Integer, List<Tag>> articleTagListMap = Maps.newHashMap();
+    private Map<Long, List<Tag>> articleTagListMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：推荐
      */
-    private Map<Integer, Boolean> articleRecommendMap = Maps.newHashMap();
+    private Map<Long, Boolean> articleRecommendMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：置顶
      */
-    private Map<Integer, Boolean> articleTopMap = Maps.newHashMap();
+    private Map<Long, Boolean> articleTopMap = Maps.newHashMap();
 
     /**
      * k：文章id，value：文章作者
      */
-    private Map<Integer, String> articleAuthorMap = Maps.newHashMap();
+    private Map<Long, String> articleAuthorMap = Maps.newHashMap();
 
     /**
      * 文章部分信息

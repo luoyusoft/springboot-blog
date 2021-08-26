@@ -1,6 +1,6 @@
 package com.jinhx.blog.entity.article.dto;
 
-import com.jinhx.blog.common.validator.group.QueryGroup;
+import com.jinhx.blog.common.validator.group.SelectGroup;
 import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import lombok.Data;
@@ -24,14 +24,14 @@ public class ArticleVOsQueryDTO extends BaseRequestDTO {
     /**
      * 配置需要查询的参数
      */
-    @NotNull(message = "articleBuilder不能为空", groups = {QueryGroup.class})
+    @NotNull(message = "articleBuilder不能为空", groups = {SelectGroup.class})
     private ArticleBuilder articleBuilder;
 
     /**
      * 文章id列表
      */
-    @NotNull(message = "文章id列表不能为空", groups = {QueryGroup.class})
-    private List<Integer> articleIds;
+    @NotNull(message = "文章id列表不能为空", groups = {SelectGroup.class})
+    private List<Long> articleIds;
 
     /**
      * 发布状态

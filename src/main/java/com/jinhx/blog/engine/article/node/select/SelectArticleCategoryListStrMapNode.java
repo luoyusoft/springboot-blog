@@ -1,47 +1,46 @@
-package com.jinhx.blog.engine.article.node;
+package com.jinhx.blog.engine.article.node.select;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Maps;
+import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.engine.article.ArticleNode;
 import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
-import com.jinhx.blog.service.sys.SysUserMapperService;
-import lombok.extern.slf4j.Slf4j;
+import com.jinhx.blog.service.operation.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 /**
- * ArticleAuthorMapQueryNode
+ * SelectArticleCategoryListStrMapNode
  *
  * @author jinhx
  * @since 2021-07-21
  */
-@Slf4j
 @Component
-public class ArticleAuthorMapQueryNode extends ArticleNode<BaseRequestDTO> {
+public class SelectArticleCategoryListStrMapNode extends ArticleNode<BaseRequestDTO> {
 
     @Autowired
-    private SysUserMapperService sysUserMapperService;
+    private CategoryService categoryService;
 
     @Override
     public boolean isSkip(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        return !context.getArticleBuilder().getAuthor() || CollectionUtils.isEmpty(context.getArticles());
+        return !context.getArticleBuilder().getCategoryListStr() || CollectionUtils.isEmpty(context.getArticles());
     }
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        Map<Integer, String> map = Maps.newHashMap();
+        Map<Long, String> map = Maps.newHashMap();
         context.getArticles().forEach(item -> {
-            map.put(item.getId(), sysUserMapperService.getNicknameByUserId(item.getCreaterId()));
+            map.put(item.getArticleId(), categoryService.adaptorcategoryIdsToCategoryNames(item.getCategoryId(), ModuleTypeConstants.ARTICLE));
         });
-        context.setArticleAuthorMap(map);
+        context.setArticleCategoryListStrMap(map);
     }
 
     @Override
     public String getProcessorName() {
-        return "ArticleAuthorMapQueryNode";
+        return "SelectArticleCategoryListStrMapNode";
     }
 
 }

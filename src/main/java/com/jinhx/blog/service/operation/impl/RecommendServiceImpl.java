@@ -1,11 +1,8 @@
 package com.jinhx.blog.service.operation.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
@@ -24,7 +21,6 @@ import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
 import com.jinhx.blog.entity.operation.vo.RecommendVO;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.VideoVO;
-import com.jinhx.blog.mapper.operation.RecommendMapper;
 import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.service.article.ArticleService;
 import com.jinhx.blog.service.cache.CacheServer;
@@ -32,7 +28,6 @@ import com.jinhx.blog.service.operation.RecommendMapperService;
 import com.jinhx.blog.service.operation.RecommendService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import com.jinhx.blog.service.video.VideoService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -44,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * RecommendServiceImpl
@@ -53,8 +47,7 @@ import java.util.stream.Collectors;
  * @since 2019-02-22
  */
 @Service
-@Slf4j
-public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend> implements RecommendService {
+public class RecommendServiceImpl implements RecommendService {
 
     @Autowired
     private RecommendMapperService recommendMapperService;
@@ -80,8 +73,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      * @param recommendAdaptorBuilder recommendAdaptorBuilder
      * @return RecommendVO
      */
-    @Override
-    public RecommendVO adaptorRecommendToRecommendVO(RecommendAdaptorBuilder<Recommend> recommendAdaptorBuilder){
+    private RecommendVO adaptorRecommendToRecommendVO(RecommendAdaptorBuilder<Recommend> recommendAdaptorBuilder){
         if(Objects.isNull(recommendAdaptorBuilder) || Objects.isNull(recommendAdaptorBuilder.getData())){
             return null;
         }
@@ -103,7 +95,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
                     .author(true)
                     .build());
 
-            List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
+            List<ArticleVO> articleVOs = articleService.selectArticleVOs(articleVOsQueryDTO);
 
             if (CollectionUtils.isNotEmpty(articleVOs) && Objects.nonNull(articleVOs.get(0))){
                 ArticleVO articleVO = articleVOs.get(0);
@@ -167,8 +159,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      * @param recommendAdaptorBuilder recommendAdaptorBuilder
      * @return RecommendVO列表
      */
-    @Override
-    public List<RecommendVO> adaptorRecommendsToRecommendVOs(RecommendAdaptorBuilder<List<Recommend>> recommendAdaptorBuilder){
+    private List<RecommendVO> adaptorRecommendsToRecommendVOs(RecommendAdaptorBuilder<List<Recommend>> recommendAdaptorBuilder){
         if(Objects.isNull(recommendAdaptorBuilder) || CollectionUtils.isEmpty(recommendAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
@@ -198,25 +189,23 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
      * @return 首页信息
      */
     @Override
-    public HomeRecommendInfoVO getHomeRecommendInfoVO() {
-        HomeRecommendInfoVO homeRecommendInfoVO = new HomeRecommendInfoVO();
-        homeRecommendInfoVO.setCount(baseMapper.selectCount(new LambdaQueryWrapper<>()));
-        return homeRecommendInfoVO;
+    public HomeRecommendInfoVO selectHomeRecommendInfoVO() {
+        return recommendMapperService.selectHomeRecommendInfoVO();
     }
 
     /**
-     * 分页查询
+     * 分页查询推荐列表
      *
      * @param page 页码
      * @param limit 每页数量
      * @return 推荐列表
      */
     @Override
-    public PageData queryPage(Integer page, Integer limit) {
-        IPage<Recommend> recommendIPage = recommendMapperService.queryPage(page, limit);
+    public PageData<RecommendVO> selectPage(Integer page, Integer limit) {
+        IPage<Recommend> recommendIPage = recommendMapperService.selectPage(page, limit);
 
         if (CollectionUtils.isEmpty(recommendIPage.getRecords())){
-            return new PageData(recommendIPage);
+            return new PageData<>();
         }
 
         List<RecommendVO> recommendVOs = adaptorRecommendsToRecommendVOs(new RecommendAdaptorBuilder.Builder<List<Recommend>>()
@@ -227,27 +216,27 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
         BeanUtils.copyProperties(recommendIPage, recommendVOIPage);
         recommendVOIPage.setRecords(recommendVOs);
 
-        return new PageData(recommendVOIPage);
+        return new PageData<>(recommendVOIPage);
     }
 
     /**
-     * 获取推荐列表
+     * 根据模块，标题查询推荐列表
      *
      * @param module module
      * @param title title
      * @return 推荐列表
      */
     @Override
-    public List<RecommendVO> select(Integer module, String title) {
+    public List<RecommendVO> selectRecommendVOsByModuleAndTitle(Integer module, String title) {
         List<RecommendVO> recommendVOList = new ArrayList<>();
 
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            List<Article> articles = articleMapperService.listArticlesByPublishAndTitle(title);
+            List<Article> articles = articleMapperService.selectArticlesByTitleAndPublish(title, Article.PUBLISH_TRUE);
             if (CollectionUtils.isNotEmpty(articles)){
                 articles.forEach(articlesItem -> {
                     RecommendVO recommendVO = new RecommendVO();
                     recommendVO.setTitle(articlesItem.getTitle());
-                    recommendVO.setLinkId(articlesItem.getId());
+                    recommendVO.setLinkId(articlesItem.getArticleId());
                     recommendVO.setModule(module);
                     recommendVOList.add(recommendVO);
                 });
@@ -260,7 +249,7 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
                 videoList.forEach(videoListItem -> {
                     RecommendVO recommendVO = new RecommendVO();
                     recommendVO.setTitle(videoListItem.getTitle());
-                    recommendVO.setLinkId(videoListItem.getId());
+                    recommendVO.setLinkId(videoListItem.getVideoId());
                     recommendVO.setModule(module);
                     recommendVOList.add(recommendVO);
                 });
@@ -271,201 +260,122 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
     }
 
     /**
-     * 批量删除
+     * 根据recommendId查询推荐
      *
-     * @param linkIds linkIds
-     * @param module module
+     * @param recommendId recommendId
+     * @return 推荐
      */
     @Override
-    public void deleteRecommendsByLinkIdsAndType(List<Integer> linkIds, int module) {
-        baseMapper.delete(new LambdaQueryWrapper<Recommend>()
-                .in(Recommend::getLinkId, linkIds)
-                .eq(Recommend::getModule, module));
-
-        cleanRecommendAllCache();
+    public Recommend selectRecommendById(Long recommendId) {
+        return recommendMapperService.selectRecommendById(recommendId);
     }
 
     /**
-     * 新增
+     * 新增推荐
      *
      * @param recommend recommend
      */
     @Override
     public void insertRecommend(Recommend recommend) {
-        if (baseMapper.selectCount(new LambdaQueryWrapper<Recommend>()
-                .eq(Recommend::getOrderNum, recommend.getOrderNum())) > 0){
+        if (recommendMapperService.selectRecommendCountByOrderNum(recommend.getOrderNum()) > 0){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
         }
-        if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
-            Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
-            if(Objects.isNull(article)) {
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
-            }
-            Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                    .eq(Recommend::getLinkId, recommend.getLinkId())
-                    .eq(Recommend::getModule, recommend.getModule()));
-            if(Objects.isNull(oldRecommend)){
-                baseMapper.insert(recommend);
-            }else {
-                baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
-                        .eq(Recommend::getLinkId, recommend.getLinkId())
-                        .eq(Recommend::getModule, recommend.getModule())
-                        .set(Recommend::getOrderNum, recommend.getOrderNum()));
-            }
-        }
 
-        if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
-            Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
-            if(Objects.isNull(video)) {
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
-            }
-            Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                    .eq(Recommend::getLinkId, recommend.getLinkId())
-                    .eq(Recommend::getModule, recommend.getModule()));
-            if(Objects.isNull(oldRecommend)){
-                baseMapper.insert(recommend);
-            }else {
-                baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
-                        .eq(Recommend::getLinkId, recommend.getLinkId())
-                        .eq(Recommend::getModule, recommend.getModule())
-                        .set(Recommend::getOrderNum, recommend.getOrderNum()));
-            }
-        }
-        cleanRecommendAllCache();
-    }
+        verifyExistByLinkIdAndModule(recommend.getLinkId(), recommend.getModule());
 
-    /**
-     * 更新
-     *
-     * @param recommend recommend
-     */
-    @Override
-    public void updateRecommend(Recommend recommend) {
-        Recommend existRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                .eq(Recommend::getOrderNum, recommend.getOrderNum()));
-        if (Objects.nonNull(existRecommend) && !existRecommend.getId().equals(recommend.getId())){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
-        }
-        if (ModuleTypeConstants.ARTICLE.equals(recommend.getModule())){
-            Article article = articleMapperService.getArticle(recommend.getLinkId(), Article.PUBLISH_TRUE);
-            if(Objects.isNull(article)) {
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
-            }
-            Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                    .eq(Recommend::getLinkId, recommend.getLinkId())
-                    .eq(Recommend::getModule, recommend.getModule()));
-            if(Objects.isNull(oldRecommend)){
-                baseMapper.insert(recommend);
-            }else {
-                baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
-                        .eq(Recommend::getLinkId, recommend.getLinkId())
-                        .eq(Recommend::getModule, recommend.getModule())
-                        .set(Recommend::getOrderNum, recommend.getOrderNum()));
-            }
-        }
-
-        if (ModuleTypeConstants.VIDEO.equals(recommend.getModule())){
-            Video video = videoMapperService.getVideo(recommend.getLinkId(), Video.PUBLISH_TRUE);
-            if(Objects.isNull(video)) {
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
-            }
-            Recommend oldRecommend = baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                    .eq(Recommend::getLinkId, recommend.getLinkId())
-                    .eq(Recommend::getModule, recommend.getModule()));
-            if(Objects.isNull(oldRecommend)){
-                baseMapper.insert(recommend);
-            }else {
-                baseMapper.update(recommend, new LambdaUpdateWrapper<Recommend>()
-                        .eq(Recommend::getLinkId, recommend.getLinkId())
-                        .eq(Recommend::getModule, recommend.getModule())
-                        .set(Recommend::getOrderNum, recommend.getOrderNum()));
-            }
-        }
-        cleanRecommendAllCache();
-    }
-
-    /**
-     * 推荐置顶
-     *
-     * @param id id
-     */
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void updateRecommendTop(Integer id) {
-        if (baseMapper.selectCount(new LambdaQueryWrapper<Recommend>()
-                .eq(Recommend::getOrderNum, Recommend.ORDER_NUM_TOP)) > 0) {
-            List<Recommend> recommends = baseMapper.selectList(new LambdaQueryWrapper<Recommend>()
-                    .orderByDesc(Recommend::getOrderNum));
-            recommends.forEach(recommendsItem -> {
-                recommendsItem.setOrderNum(recommendsItem.getOrderNum() + 1);
-                // 修改顺序，注意从大的开始，不然会有唯一索引冲突
-                baseMapper.update(recommendsItem, new LambdaUpdateWrapper<Recommend>()
-                        .eq(Recommend::getId, recommendsItem.getId())
-                        .set(Recommend::getOrderNum, recommendsItem.getOrderNum()));
-            });
-        }
-
-        if (baseMapper.update(null, new LambdaUpdateWrapper<Recommend>()
-                .eq(Recommend::getId, id)
-                .set(Recommend::getOrderNum, Recommend.ORDER_NUM_TOP)) < 1) {
-            throw new MyException(ResponseEnums.UPDATE_FAILR.getCode(), "更新数据失败");
+        Recommend oldRecommend = recommendMapperService.selectRecommendByLinkIdAndModule(recommend.getLinkId(), recommend.getModule());
+        if(Objects.isNull(oldRecommend)){
+            recommendMapperService.insertRecommend(recommend);
+        }else {
+            recommendMapperService.updateRecommendByLinkIdAndModule(recommend);
         }
 
         cleanRecommendAllCache();
     }
 
     /**
-     * 删除
-     *
-     * @param ids ids
-     */
-    @Override
-    public void deleteRecommendsByIds(List<Integer> ids) {
-        baseMapper.deleteBatchIds(ids);
-        cleanRecommendAllCache();
-    }
-
-    /**
-     * 查找
+     * 根据linkId，模块校验是否存在推荐内容
      *
      * @param linkId linkId
      * @param module module
      */
-    @Override
-    public Recommend selectRecommendByLinkIdAndType(Integer linkId, Integer module) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Recommend>()
-                .eq(Recommend::getLinkId, linkId)
-                .eq(Recommend::getModule, module));
-    }
-
-    /**
-     * 通过模块查询链接id列表
-     *
-     * @param module module
-     * @return List<Integer>
-     */
-    @Override
-    public List<Integer> selectLinkIdsByModule(Integer module) {
-        List<Recommend> recommends = baseMapper.selectList(new LambdaQueryWrapper<Recommend>()
-                .eq(Recommend::getModule, module));
-        if (CollectionUtils.isEmpty(recommends)){
-            return Collections.emptyList();
+    private void verifyExistByLinkIdAndModule(Long linkId, Integer module) {
+        if (ModuleTypeConstants.ARTICLE.equals(module)){
+            if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PUBLISH_TRUE))) {
+                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
+            }
         }
 
-        return recommends.stream().map(Recommend::getLinkId).distinct().collect(Collectors.toList());
+        if (ModuleTypeConstants.VIDEO.equals(module)){
+            if(Objects.isNull(videoMapperService.getVideo(linkId, Video.PUBLISH_TRUE))) {
+                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
+            }
+        }
+
+        throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐模块不存在");
     }
 
     /**
-     * 查找最大顺序
+     * 根据linkId，模块更新推荐
      *
-     * @return Integer
+     * @param recommend recommend
      */
     @Override
-    public Integer selectRecommendMaxOrderNum() {
-        return baseMapper.selectList(new LambdaQueryWrapper<Recommend>()
-                .select(Recommend::getOrderNum)
-                .orderByDesc(Recommend::getOrderNum)
-                .last("limit 1")).get(0).getOrderNum();
+    public void updateRecommendByLinkIdAndModule(Recommend recommend) {
+        Recommend existRecommend = recommendMapperService.selectRecommendByOrderNum(recommend.getOrderNum());
+        if (Objects.nonNull(existRecommend) && !existRecommend.getRecommendId().equals(recommend.getRecommendId())){
+            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该顺序已被占用");
+        }
+
+        verifyExistByLinkIdAndModule(recommend.getLinkId(), recommend.getModule());
+
+        Recommend oldRecommend = recommendMapperService.selectRecommendByLinkIdAndModule(recommend.getLinkId(), recommend.getModule());
+        if(Objects.isNull(oldRecommend)){
+            recommendMapperService.insertRecommend(recommend);
+        }else {
+            recommendMapperService.updateRecommendByLinkIdAndModule(recommend);
+        }
+
+        cleanRecommendAllCache();
+    }
+
+    /**
+     * 根据recommendId更新推荐置顶
+     *
+     * @param recommendId recommendId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateRecommendToTopById(Long recommendId) {
+        // 现将所有记录顺序加1，然后再置顶
+        if (recommendMapperService.selectRecommendCountByOrderNum(Recommend.ORDER_NUM_TOP) > 0) {
+            List<Recommend> recommends = recommendMapperService.selectRecommendsOrderByOrderNumDesc();
+
+            recommends.forEach(recommendsItem -> {
+                // 修改顺序，注意从大的开始，不然会有唯一索引冲突
+                recommendsItem.setOrderNum(recommendsItem.getOrderNum() + 1);
+            });
+
+            recommendMapperService.updateRecommendsById(recommends);
+        }
+
+        Recommend recommend = new Recommend();
+        recommend.setRecommendId(recommendId);
+        recommend.setOrderNum(Recommend.ORDER_NUM_TOP);
+        recommendMapperService.updateRecommendById(recommend);
+
+        cleanRecommendAllCache();
+    }
+
+    /**
+     * 批量根据friendLinkId删除推荐
+     *
+     * @param recommendIds recommendIds
+     */
+    @Override
+    public void deleteRecommendsById(List<Long> recommendIds) {
+        recommendMapperService.deleteRecommendsById(recommendIds);
+        cleanRecommendAllCache();
     }
 
     /**
@@ -480,15 +390,15 @@ public class RecommendServiceImpl extends ServiceImpl<RecommendMapper, Recommend
     /********************** portal ********************************/
 
     /**
-     * 获取推荐列表
+     * 根据模块查询推荐列表
      *
      * @param module 模块
      * @return 推荐列表
      */
     @Cacheable(value = RedisKeyConstants.RECOMMENDS, key = "#module")
     @Override
-    public List<RecommendVO> listRecommends(Integer module) {
-        List<Recommend> recommends = recommendMapperService.listRecommends(module);
+    public List<RecommendVO> selectPortalRecommendVOsByModule(Integer module) {
+        List<Recommend> recommends = recommendMapperService.selectPortalRecommendsByModule(module);
         if (CollectionUtils.isEmpty(recommends)){
             return Collections.emptyList();
         }

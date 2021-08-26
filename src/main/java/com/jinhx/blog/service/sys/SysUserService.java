@@ -1,9 +1,7 @@
 package com.jinhx.blog.service.sys;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
-import com.jinhx.blog.entity.sys.SysUser;
-import com.jinhx.blog.entity.sys.dto.SysUserDTO;
+import com.jinhx.blog.entity.sys.vo.SysUserVO;
 
 import java.util.List;
 
@@ -13,77 +11,48 @@ import java.util.List;
  * @author jinhx
  * @since 2018-10-22
  */
-public interface SysUserService extends IService<SysUser> {
+public interface SysUserService {
 
     /**
-     * 查询用户菜单列表
-     *
-     * @param userId 用户id
-     * @return 用户菜单列表
-     */
-    List<Integer> queryAllMenuId(Integer userId);
-
-    /**
-     * 分页查询用户信息列表
+     * 分页查询用户列表
      *
      * @param page 页码
      * @param limit 页数
      * @param username 用户名
-     * @param id 用户id
-     * @return 用户信息列表
+     * @param sysUserId 用户id
+     * @return 用户列表
      */
-    PageData queryPage(Integer page, Integer limit, String username, Integer id);
+    PageData<SysUserVO> selectPage(Integer page, Integer limit, String username, Long sysUserId);
 
     /**
-     * 更新密码
+     * 根据用户id重置密码
      *
-     * @param userId 用户id
-     * @param password 旧密码
-     * @param newPassword 新密码
-     * @return 更新结果
-     */
-    boolean updatePassword(Integer userId, String password, String newPassword);
-
-    /**
-     * 重置密码
-     *
-     * @param userId 用户id
+     * @param sysUserId 用户id
      * @param password 新密码
-     * @return 重置结果
      */
-    boolean resetPassword(Integer userId, String password);
+    void resetPasswordById(Long sysUserId, String password);
 
     /**
-     * 新增用户信息
+     * 新增用户
      *
-     * @param sysUserDTO 用户信息
-     * @return 密码
+     * @param sysUserVO 用户信息
+     * @return 初始密码
      */
-    String insertSysUser(SysUserDTO sysUserDTO);
+    String insertSysUser(SysUserVO sysUserVO);
 
     /**
-     * 根据用户id更新用户信息
+     * 根据sysUserId更新用户
      *
-     * @param sysUserDTO 用户信息
-     * @return 更新结果
+     * @param sysUserVO sysUserVO
      */
-    boolean updateSysUserById(SysUserDTO sysUserDTO);
+    void updateSysUserById(SysUserVO sysUserVO);
 
     /**
-     * 根据用户id列表批量删除用户
+     * 批量根据sysUserId删除用户
      *
-     * @param userIds 用户id列表
-     * @return 删除结果
+     * @param sysUserIds sysUserIds
      */
-    boolean deleteBatch(Integer[] userIds);
-
-    /**
-     * 根据用户id查询用户有权限所有菜单列表
-     *
-     * @param userId 用户id
-     * @return 用户有权限所有菜单列表
-     */
-    List<String> getAllPermsByUserId(Integer userId);
+    void deleteSysUsersById(List<Long> sysUserIds);
 
     /**
      * 根据用户名获取SysUserDTO
@@ -91,22 +60,14 @@ public interface SysUserService extends IService<SysUser> {
      * @param username 用户名
      * @return SysUserDTO
      */
-    SysUserDTO getSysUserDTOByUsername(String username);
+    SysUserVO selectSysUserVOByUsername(String username);
 
     /**
-     * 根据用户id获取SysUserDTO
+     * 根据用户id查询SysUserVO
      *
-     * @param userId 用户id
-     * @return SysUserDTO
+     * @param sysUserId 用户id
+     * @return SysUserVO
      */
-    SysUserDTO getSysUserDTOByUserId(Integer userId);
-
-    /**
-     * 根据用户id获取用户昵称
-     *
-     * @param userId 用户id
-     * @return 用户昵称
-     */
-    String getNicknameByUserId(Integer userId);
+    SysUserVO selectSysUserVOById(Long sysUserId);
 
 }

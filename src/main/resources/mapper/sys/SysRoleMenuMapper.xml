@@ -4,9 +4,9 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysRoleMenu">
-        <id column="id" property="id" />
-        <result column="role_id" property="roleId" />
-        <result column="menu_id" property="menuId" />
+        <id column="id" property="sysRoleMenuId" />
+        <result column="role_id" property="sysRoleId" />
+        <result column="menu_id" property="sysMenuId" />
         <result column="creater_id" property="createrId" />
         <result column="updater_id" property="updaterId" />
         <result column="create_time" property="createTime" />
@@ -17,9 +17,5 @@
     <sql id="AllColumn">
         id, role_id, menu_id, creater_id,updater_id,create_time,update_time
     </sql>
-
-    <select id="queryMenuIdList" resultType="java.lang.Integer">
-        select srm.menu_id from sys_role_menu srm where srm.role_id = #{roleId}
-    </select>
 
 </mapper>

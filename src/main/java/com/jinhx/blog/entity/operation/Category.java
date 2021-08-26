@@ -1,8 +1,10 @@
 package com.jinhx.blog.entity.operation;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,21 +29,28 @@ public class Category extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -8525248598661244699L;
 
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "类别id主键")
+    @TableId(type = IdType.INPUT)
+    private Long categoryId;
+
     @ApiModelProperty(value = "名称")
-    @NotBlank(message = "名称不能为空", groups = {AddGroup.class})
+    @NotBlank(message = "名称不能为空", groups = {InsertGroup.class})
     private String name;
 
     @ApiModelProperty(value = "模块")
-    @NotNull(message = "模块不能为空", groups = {AddGroup.class})
+    @NotNull(message = "模块不能为空", groups = {InsertGroup.class})
     private Integer module;
 
     @ApiModelProperty(value = "级别")
-    @NotNull(message = "级别不能为空", groups = {AddGroup.class})
+    @NotNull(message = "级别不能为空", groups = {InsertGroup.class})
     @TableField(value = "`rank`")
     private Integer rank;
 
-    @ApiModelProperty(value = "父主键")
-    @NotNull(message = "父主键不能为空", groups = {AddGroup.class})
-    private Integer parentId;
+    @ApiModelProperty(value = "父类别id")
+    @NotNull(message = "父类别id不能为空", groups = {InsertGroup.class})
+    private Long parentId;
 
 }

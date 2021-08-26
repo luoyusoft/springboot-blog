@@ -17,7 +17,7 @@ public class SysUserToken implements Serializable {
 
     private static final long serialVersionUID = 5186217260146502444L;
 
-    private Integer userId;
+    private Long sysUserId;
 
     private String token;
 

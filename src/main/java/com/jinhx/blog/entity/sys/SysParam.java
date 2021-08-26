@@ -1,8 +1,11 @@
 package com.jinhx.blog.entity.sys;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
-import com.jinhx.blog.common.validator.group.AddGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -26,19 +29,26 @@ public class SysParam extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -662497005424960310L;
 
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "系统参数id主键")
+    @TableId(type = IdType.INPUT)
+    private Long sysParamId;
+
     @ApiModelProperty(value = "参数键")
-    @NotNull(message = "参数键不能为空", groups = {AddGroup.class})
+    @NotNull(message = "参数键不能为空", groups = {InsertGroup.class, UpdateGroup.class})
     private Integer parKey;
 
     @ApiModelProperty(value = "参数值")
-    @NotBlank(message = "参数值不能为空", groups = {AddGroup.class})
+    @NotBlank(message = "参数值不能为空", groups = {InsertGroup.class, UpdateGroup.class})
     private String parValue;
 
     @ApiModelProperty(value = "参数url")
     private String menuUrl;
 
     @ApiModelProperty(value = "参数类型")
-    @NotBlank(message = "参数类型不能为空", groups = {AddGroup.class})
+    @NotBlank(message = "参数类型不能为空", groups = {InsertGroup.class, UpdateGroup.class})
     private String type;
 
 }

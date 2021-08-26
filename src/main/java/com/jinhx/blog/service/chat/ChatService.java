@@ -21,7 +21,7 @@ public interface ChatService {
      * @param id id
      * @return 用户信息
      */
-    Response insertUser(String id);
+    Response<UserVO> insertUser(String id);
 
     /**
      * 用户登录

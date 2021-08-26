@@ -1,11 +1,10 @@
 package com.jinhx.blog.controller.operation;
 
-import com.google.common.collect.Lists;
-import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.entity.base.PageData;
+import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.validator.ValidatorUtils;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.common.validator.group.UpdateGroup;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.operation.Recommend;
 import com.jinhx.blog.entity.operation.vo.HomeRecommendInfoVO;
@@ -35,13 +34,12 @@ public class RecommendController {
      * @return 首页信息
      */
     @GetMapping("/manage/operation/recommend/homeinfo")
-    public Response getHomeRecommendInfoVO() {
-        HomeRecommendInfoVO homeRecommendInfoVO = recommendService.getHomeRecommendInfoVO();
-        return Response.success(homeRecommendInfoVO);
+    public Response<HomeRecommendInfoVO> selectHomeRecommendInfoVO() {
+        return Response.success(recommendService.selectHomeRecommendInfoVO());
     }
 
     /**
-     * 分页查询
+     * 分页查询推荐列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -49,13 +47,12 @@ public class RecommendController {
      */
     @GetMapping("/manage/operation/recommend/list")
     @RequiresPermissions("operation:recommend:list")
-    public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit){
-        PageData recommendPage = recommendService.queryPage(page, limit);
-        return Response.success(recommendPage);
+    public Response<PageData<RecommendVO>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit){
+        return Response.success(recommendService.selectPage(page, limit));
     }
 
     /**
-     * 获取推荐列表
+     * 根据模块，标题查询推荐列表
      *
      * @param module module
      * @param title title
@@ -63,113 +60,91 @@ public class RecommendController {
      */
     @GetMapping("/manage/operation/recommend/select")
     @RequiresPermissions("operation:recommend:list")
-    public Response select(@RequestParam("module") Integer module, @RequestParam("title") String title) {
-        if(module == null){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "module不能为空");
-        }
-        List<RecommendVO> recommendList = recommendService.select(module, title);
-        return Response.success(recommendList);
+    public Response<List<RecommendVO>> selectRecommendVOsByModuleAndTitle(@RequestParam("module") Integer module, @RequestParam("title") String title) {
+        MyAssert.notNull(module, "module不能为空");
+        return Response.success(recommendService.selectRecommendVOsByModuleAndTitle(module, title));
     }
 
     /**
-     * 信息
+     * 根据recommendId查询推荐
      *
-     * @param id id
-     * @return 信息
+     * @param recommendId recommendId
+     * @return 推荐
      */
     @GetMapping("/manage/operation/recommend/info/{id}")
     @RequiresPermissions("operation:recommend:info")
-    public Response info(@PathVariable("id") String id){
-       Recommend recommend = recommendService.getById(id);
-        return Response.success(recommend);
+    public Response<Recommend> selectRecommendById(@PathVariable("id") Long recommendId){
+        return Response.success(recommendService.selectRecommendById(recommendId));
     }
 
     /**
-     * 新增
+     * 新增推荐
      *
      * @param recommend recommend
+     * @return 新增结果
      */
     @PostMapping("/manage/operation/recommend/save")
     @RequiresPermissions("operation:recommend:save")
-    public Response save(@RequestBody Recommend recommend){
-        if(recommend.getLinkId() == null || recommend.getModule() == null || recommend.getOrderNum() == null){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "linkId，module，orderNum不能为空");
-        }
-        ValidatorUtils.validateEntity(recommend, AddGroup.class);
+    public Response<Void> insertRecommend(@RequestBody Recommend recommend){
+        ValidatorUtils.validateEntity(recommend, InsertGroup.class);
         recommendService.insertRecommend(recommend);
-
         return Response.success();
     }
 
     /**
-     * 更新
+     * 根据linkId，模块更新推荐
      *
      * @param recommend recommend
+     * @return 更新结果
      */
     @PutMapping("/manage/operation/recommend/update")
     @RequiresPermissions("operation:recommend:update")
-    public Response update(@RequestBody Recommend recommend){
-        if(recommend.getId() == null || recommend.getLinkId() == null
-                || recommend.getModule() == null || recommend.getOrderNum() == null){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id，linkId，module，orderNum不能为空");
-        }
-        recommendService.updateRecommend(recommend);
-
+    public Response<Void> updateRecommendByLinkIdAndModule(@RequestBody Recommend recommend){
+        ValidatorUtils.validateEntity(recommend, UpdateGroup.class);
+        recommendService.updateRecommendByLinkIdAndModule(recommend);
         return Response.success();
     }
 
     /**
-     * 推荐置顶
+     * 根据recommendId更新推荐置顶
      *
-     * @param id id
+     * @param recommendId recommendId
+     * @return 更新结果
      */
     @PutMapping("/manage/operation/recommend/top/{id}")
     @RequiresPermissions("operation:recommend:update")
-    public Response updateTop(@PathVariable("id") Integer id){
-        if(id == null){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
-        }
-        recommendService.updateRecommendTop(id);
-
+    public Response<Void> updateRecommendToTopById(@PathVariable("id") Long recommendId){
+        MyAssert.notNull(recommendId, "recommendId不能为空");
+        recommendService.updateRecommendToTopById(recommendId);
         return Response.success();
     }
 
     /**
-     * 删除
+     * 批量根据friendLinkId删除推荐
      *
-     * @param ids ids
+     * @param recommendIds recommendIds
+     * @return 删除结果
      */
     @DeleteMapping("/manage/operation/recommend/delete")
     @RequiresPermissions("operation:recommend:delete")
-    public Response deleteRecommendsByIds(@RequestBody Integer[] ids){
-        if (ids == null || ids.length < 1){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能为空");
-        }
-
-        if (ids.length > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "ids不能超过100个");
-        }
-
-        recommendService.deleteRecommendsByIds(Lists.newArrayList(ids));
+    public Response<Void> deleteRecommendsById(@RequestBody List<Long> recommendIds){
+        MyAssert.sizeBetween(recommendIds, 1, 100, "recommendIds");
+        recommendService.deleteRecommendsById(recommendIds);
         return Response.success();
     }
 
     /********************** portal ********************************/
 
     /**
-     * 获取推荐列表
+     * 根据模块查询推荐列表
      *
      * @param module 模块
      * @return 推荐列表
      */
     @RequestMapping("/operation/listrecommends")
-    public Response listRecommends(@RequestParam("module") Integer module) {
-        if (module == null){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "module不能为空");
-        }
-
-        List<RecommendVO> recommendList = recommendService.listRecommends(module);
-        return Response.success(recommendList);
+    public Response<List<RecommendVO>> selectPortalRecommendVOsByModule(@RequestParam("module") Integer module) {
+        MyAssert.notNull(module, "module不能为空");
+        return Response.success(recommendService.selectPortalRecommendVOsByModule(module));
     }
 
 }

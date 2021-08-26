@@ -1,14 +1,14 @@
 package com.jinhx.blog.common.util;
 
-import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.config.MinioProperties;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.file.minio.MinioItem;
 import io.minio.*;
 import io.minio.http.Method;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;
-import org.apache.shiro.util.CollectionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,19 +22,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author top
+ * MinioUtils
+ *
+ * @author jinhx
+ * @since 2020-10-07
  */
 @Component
 public class MinioUtils {
-
-    @Autowired
-    private MinioProperties properties;
 
     @Autowired
     private MinioClient minioClient;
 
     /**
      * 检查存储桶是否存在
+     *
      * @param bucketName 存储桶名称
      * @return boolean
      */
@@ -52,6 +53,7 @@ public class MinioUtils {
 
     /**
      * 创建存储桶
+     *
      * @param bucketName 存储桶名称
      * @return boolean
      */
@@ -72,8 +74,9 @@ public class MinioUtils {
 
     /**
      * 根据存储桶名称获取信息
+     *
      * @param bucketName 存储桶名称
-     * @return
+     * @return Bucket
      */
     public Optional<Bucket> getBucket(String bucketName) {
         try {
@@ -85,6 +88,7 @@ public class MinioUtils {
 
     /**
      * 根据bucketName删除信息
+     *
      * @param bucketName bucket名称
      */
     public void removeBucket(String bucketName) {
@@ -101,6 +105,7 @@ public class MinioUtils {
 
     /**
      * 根据文件前缀查询文件
+     *
      * @param bucketName bucket名称
      * @param prefix     前缀
      * @param recursive  是否递归查询
@@ -127,6 +132,7 @@ public class MinioUtils {
 
     /**
      * 获取文件外链地址
+     *
      * @param bucketName 存储桶名称
      * @param objectName 文件名称
      * @param expiry 过期时间(秒) 最大为7天 超过7天则默认最大值
@@ -149,6 +155,7 @@ public class MinioUtils {
 
     /**
      * 获取文件
+     *
      * @param bucketName bucket名称
      * @param objectName 文件名称
      * @return 二进制流
@@ -168,6 +175,7 @@ public class MinioUtils {
 
     /**
      * 获取全部bucket
+     *
      * @return List<Bucket>
      */
     public List<Bucket> getBuckets() {
@@ -180,6 +188,7 @@ public class MinioUtils {
 
     /**
      * 上传文件
+     *
      * @param inputStream inputStream
      * @param objectName objectName
      * @param bucketName bucketName
@@ -206,9 +215,10 @@ public class MinioUtils {
     }
 
     /**
-     * 下载
+     * 下载文件
      *
      * @param response response
+     * @param bucketName bucketName
      * @param objectName objectName
      */
     public void download(HttpServletResponse response, String bucketName, String objectName) {
@@ -239,6 +249,8 @@ public class MinioUtils {
 
     /**
      * 获取文件url
+     *
+     * @param bucketName bucketName
      * @param objectName objectName
      * @return url
      */
@@ -257,6 +269,7 @@ public class MinioUtils {
 
     /**
      * 获取所有文件
+     *
      * @param bucketName bucketName
      */
     public List<MinioItem> list(String bucketName) {
@@ -281,6 +294,7 @@ public class MinioUtils {
 
     /**
      * 删除文件
+     *
      * @param bucketName bucketName
      * @param objectName 文件名
      */
@@ -299,6 +313,7 @@ public class MinioUtils {
 
     /**
      * 批量删除文件
+     *
      * @param bucketName bucketName
      * @param objectNames 文件名列表
      */
@@ -310,6 +325,7 @@ public class MinioUtils {
 
     /**
      * 创建上传文件对象的外链
+     *
      * @param bucketName 存储桶名称
      * @param objectName 欲上传文件对象的名称
      * @param expiry 过期时间(秒) 最大为7天 超过7天则默认最大值
@@ -332,16 +348,17 @@ public class MinioUtils {
 
     /**
      * 批量创建分片上传外链
+     *
      * @param bucketName 存储桶名称
      * @param objectMD5 欲上传分片文件主文件的MD5
      * @param chunkCount 分片数量
      * @param expiry 过期时间(秒) 最大为7天 超过7天则默认最大值
      * @return uploadChunkUrls
      */
-    public List<String> createUploadChunkUrlList(String bucketName, String objectMD5, Integer chunkCount, Integer expiry){
+    public List<String> createUploadChunkUrls(String bucketName, String objectMD5, Integer chunkCount, Integer expiry){
         objectMD5 += "/";
-        if(null == chunkCount || 0 == chunkCount){
-            return null;
+        if(Objects.isNull(chunkCount) || chunkCount < 1){
+            return Lists.newArrayList();
         }
         List<String> urlList = new ArrayList<>(chunkCount);
         for (int i = 1; i <= chunkCount; i++){
@@ -353,6 +370,7 @@ public class MinioUtils {
 
     /**
      * 创建指定序号的分片文件上传外链
+     *
      * @param bucketName 存储桶名称
      * @param objectMD5 欲上传分片文件主文件的MD5
      * @param partNumber 分片序号
@@ -366,12 +384,13 @@ public class MinioUtils {
 
     /**
      * 获取分片文件名称列表
+     *
      * @param bucketName 存储桶名称
      * @param prefix 对象名称前缀（ObjectMd5）
      * @param sort 是否排序(升序)
-     * @return objectNames
+     * @return 分片文件名称列表
      */
-    public List<String> listObjectNames(String bucketName, String prefix, Boolean sort){
+    public List<String> getObjectNames(String bucketName, String prefix, Boolean sort){
         try {
             ListObjectsArgs listObjectsArgs;
             if (null == prefix) {
@@ -402,12 +421,13 @@ public class MinioUtils {
 
     /**
      * 获取分片名称地址，HashMap：key=分片序号，value=分片文件地址
+     *
      * @param bucketName 存储桶名称
      * @param ObjectMd5 对象Md5
      * @return objectChunkNameMap
      */
     public Map<Integer, String> mapChunkObjectNames(String bucketName, String ObjectMd5, Boolean sort){
-        List<String> chunkPaths = listObjectNames(bucketName,ObjectMd5, sort);
+        List<String> chunkPaths = getObjectNames(bucketName,ObjectMd5, sort);
         if (CollectionUtils.isEmpty(chunkPaths)){
             return null;
         }
@@ -421,13 +441,13 @@ public class MinioUtils {
 
     /**
      * 合并分片文件成对象文件
+     *
      * @param chunkBucKetName 分片文件所在存储桶名称
      * @param composeBucketName 合并后的对象文件存储的存储桶名称
      * @param chunkNames 分片文件名称集合
      * @param objectName 合并后的对象文件名称
-     * @return true/false
      */
-    public boolean composeObject(String chunkBucKetName, String composeBucketName, List<String> chunkNames, String objectName){
+    public void composeChunkObject(String chunkBucKetName, String composeBucketName, List<String> chunkNames, String objectName){
         try {
             List<ComposeSource> sourceObjectList = new ArrayList<>(chunkNames.size());
             for (String chunk : chunkNames) {
@@ -445,7 +465,6 @@ public class MinioUtils {
                             .sources(sourceObjectList)
                             .build()
             );
-            return true;
         } catch (Exception e) {
             throw new MyException(ResponseEnums.MINIO_COMPOSE_FILE_ERROR.getCode(), e.getMessage());
         }

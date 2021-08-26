@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.sys;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.sys.SysMenu;
 
 import java.util.List;
@@ -11,53 +10,57 @@ import java.util.List;
  * @author jinhx
  * @since 2018-10-22
  */
-public interface SysMenuService extends IService<SysMenu> {
+public interface SysMenuService {
 
     /**
-     * 获取用户的所有菜单列表
+     * 根据用户id查询用户的所有菜单列表
      *
-     * @param userId 用户id
+     * @param sysUserId 用户id
      * @return 用户的所有菜单列表
      */
-    List<SysMenu> listUserMenu(Integer userId);
+    List<SysMenu> selectSysMenusBySysUserId(Long sysUserId);
 
     /**
-     * 根据父菜单，查询子菜单
+     * 根据sysMenuId查询菜单
      *
-     * @param parentId 父菜单ID
-     * @param menuIdList  用户菜单ID
-     * @return List<SysMenu>
+     * @param sysMenuId sysMenuId
+     * @return 菜单
      */
-    List<SysMenu> queryListParentId(Integer parentId, List<Integer> menuIdList);
+    SysMenu selectSysMenuById(Long sysMenuId);
 
     /**
-     * 根据父菜单，查询子菜单
+     * 查询不是按钮的菜单列表
      *
-     * @param parentId 父菜单ID
-     * @return List<SysMenu>
+     * @return 菜单列表
      */
-    List<SysMenu> queryListParentId(Integer parentId);
+    List<SysMenu> selectNotButtonSysMenus();
 
     /**
-     * 获取不包含按钮的菜单列表
+     * 查询所有菜单列表
      *
-     * @return List<SysMenu>
+     * @return 菜单列表
      */
-    List<SysMenu> queryNotButtonList();
+    List<SysMenu> selectAllSysRoles();
 
     /**
-     * 获取用户菜单列表
+     * 根据sysMenuId删除菜单
      *
-     * @param userId userId
-     * @return List<SysMenu>
+     * @param sysMenuId sysMenuId
      */
-    List<SysMenu> getUserMenuList(Integer userId);
+    void deleteSysMenuById(Long sysMenuId);
 
     /**
-     * 删除
+     * 新增菜单
      *
-     * @param menuId menuId
+     * @param sysMenu sysMenu
      */
-    void delete(Integer menuId);
+    void insertSysMenu(SysMenu sysMenu);
+
+    /**
+     * 根据sysMenuId更新菜单
+     *
+     * @param sysMenu sysMenu
+     */
+    void updateSysMenuById(SysMenu sysMenu);
 
 }

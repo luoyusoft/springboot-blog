@@ -5,6 +5,9 @@ import com.jinhx.blog.common.enums.MenuTypeEnum;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.SysAdminUtils;
+import com.jinhx.blog.common.validator.ValidatorUtils;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.sys.SysMenu;
 import com.jinhx.blog.entity.sys.vo.SysMenuVO;
@@ -16,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -39,9 +43,9 @@ public class SysMenuController {
      * @return 用户的所有菜单列表
      */
     @GetMapping("/manage/sys/menu/nav")
-    public Response nav(){
-        List<SysMenu> menuList = sysMenuService.listUserMenu(SysAdminUtils.getUserId());
-        Set<String> permissions = shiroService.getUserPermissions(SysAdminUtils.getUserId());
+    public Response<SysMenuVO> nav(){
+        List<SysMenu> menuList = sysMenuService.selectSysMenusBySysUserId(SysAdminUtils.getSysUserId());
+        Set<String> permissions = shiroService.getUserPermissions(SysAdminUtils.getSysUserId());
         SysMenuVO sysMenuVO = new SysMenuVO();
         sysMenuVO.setMenuList(menuList);
         sysMenuVO.setPermissions(permissions);
@@ -49,19 +53,14 @@ public class SysMenuController {
     }
 
     /**
-     * 所有菜单列表
+     * 查询所有菜单列表
+     *
+     * @return 菜单列表
      */
     @GetMapping("/manage/sys/menu/list")
     @RequiresPermissions("sys:menu:list")
-    public Response list(){
-        List<SysMenu> menuList = sysMenuService.list(null);
-        menuList.forEach(sysMenu -> {
-            SysMenu parentMenu = sysMenuService.getById(sysMenu.getParentId());
-            if(parentMenu != null){
-                sysMenu.setParentName(parentMenu.getName());
-            }
-        });
-        return Response.success(menuList);
+    public Response<List<SysMenu>> selectAllSysRoles(){
+        return Response.success(sysMenuService.selectAllSysRoles());
     }
 
     /**
@@ -69,15 +68,15 @@ public class SysMenuController {
      */
     @GetMapping("/manage/sys/menu/select")
     @RequiresPermissions("sys:menu:select")
-    public Response select(){
+    public Response<List<SysMenu>> selectNotButtonSysMenus(){
         //查询列表数据
-        List<SysMenu> menuList = sysMenuService.queryNotButtonList();
+        List<SysMenu> menuList = sysMenuService.selectNotButtonSysMenus();
 
         //添加顶级菜单
         SysMenu root = new SysMenu();
-        root.setId(0);
-        root.setName("一级菜单");
-        root.setParentId(-1);
+        root.setSysMenuId(SysMenu.ONE_SYS_MENU_ID);
+        root.setName(SysMenu.ONE_NAME);
+        root.setParentId(SysMenu.ONE_PARENT_ID);
         root.setOpen(true);
         menuList.add(root);
 
@@ -85,104 +84,94 @@ public class SysMenuController {
     }
 
     /**
-     * 获取单个菜单信息
+     * 根据sysMenuId查询菜单
      *
-     * @param menuId 菜单id
-     * @return 菜单信息
+     * @param sysMenuId sysMenuId
+     * @return 菜单
      */
     @GetMapping("/manage/sys/menu/info/{menuId}")
     @RequiresPermissions("sys:menu:info")
-    public Response update(@PathVariable("menuId") Integer menuId){
-        return Response.success(sysMenuService.getById(menuId));
+    public Response<SysMenu> selectSysMenuById(@PathVariable("menuId") Long sysMenuId){
+        return Response.success(sysMenuService.selectSysMenuById(sysMenuId));
     }
 
     /**
-     * 保存
+     * 新增菜单
      *
-     * @param menu menu
+     * @param sysMenu sysMenu
+     * @return 新增结果
      */
     @PostMapping("/manage/sys/menu/save")
     @RequiresPermissions("sys:menu:save")
-    public Response save(@RequestBody SysMenu menu){
+    public Response<Void> insertSysMenu(@RequestBody SysMenu sysMenu){
+        ValidatorUtils.validateEntity(sysMenu, InsertGroup.class);
         //数据校验
-        verifyForm(menu);
-        sysMenuService.save(menu);
-
+        verifyForm(sysMenu);
+        sysMenuService.insertSysMenu(sysMenu);
         return Response.success();
     }
 
     /**
-     * 更新
+     * 根据sysMenuId更新菜单
      *
-     * @param menu menu
+     * @param sysMenu sysMenu
+     * @return 更新结果
      */
     @SuperAdmin()
     @PutMapping("/manage/sys/menu/update")
     @RequiresPermissions("sys:menu:update")
-    public Response update(@RequestBody SysMenu menu){
-        //数据校验
-        verifyForm(menu);
-        sysMenuService.updateById(menu);
-
+    public Response<Void> updateSysMenuById(@RequestBody SysMenu sysMenu){
+        ValidatorUtils.validateEntity(sysMenu, UpdateGroup.class);
+        // 数据校验
+        verifyForm(sysMenu);
+        sysMenuService.updateSysMenuById(sysMenu);
         return Response.success();
     }
 
     /**
-     * 删除
+     * 根据sysMenuId删除菜单
      *
-     * @param menuId menuId
+     * @param sysMenuId sysMenuId
+     * @return 删除结果
      */
     @SuperAdmin()
     @DeleteMapping("/manage/sys/menu/delete/{menuId}")
     @RequiresPermissions("sys:menu:delete")
-    public Response delete(@PathVariable("menuId") Integer menuId){
-        //判断是否有子菜单或按钮
-        List<SysMenu> menuList = sysMenuService.queryListParentId(menuId);
-        if(menuList.size() > 0){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "请先删除子菜单或按钮");
-        }
-        sysMenuService.delete(menuId);
+    public Response<Void> deleteSysMenuById(@PathVariable("menuId") Long sysMenuId){
+        sysMenuService.deleteSysMenuById(sysMenuId);
         return Response.success();
     }
 
     /**
      * 验证参数是否正确
      *
-     * @param menu menu
+     * @param sysMenu sysMenu
      */
-    private void verifyForm(SysMenu menu) {
-        if (StringUtils.isBlank(menu.getName())) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "菜单名称不能为空");
-        }
-
-        if (menu.getParentId() == null) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "上级菜单不能为空");
-        }
-
+    private void verifyForm(SysMenu sysMenu) {
         //菜单
-        if (menu.getType() == MenuTypeEnum.MENU.getCode()) {
-            if (StringUtils.isBlank(menu.getUrl())) {
+        if (sysMenu.getType() == MenuTypeEnum.MENU.getCode()) {
+            if (StringUtils.isBlank(sysMenu.getUrl())) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "菜单URL不能为空");
             }
         }
 
         //上级菜单类型
         int parentType = MenuTypeEnum.CATALOG.getCode();
-        if (menu.getParentId() != 0) {
-            SysMenu parentMenu = sysMenuService.getById(menu.getParentId());
-            parentType = parentMenu.getType();
+        if (!Objects.equals(sysMenu.getParentId(), SysMenu.ONE_SYS_MENU_ID)) {
+            SysMenu parentSysMenu = sysMenuService.selectSysMenuById(sysMenu.getParentId());
+            parentType = parentSysMenu.getType();
         }
 
         //目录、菜单
-        if (menu.getType() == MenuTypeEnum.CATALOG.getCode() ||
-                menu.getType() == MenuTypeEnum.MENU.getCode()) {
+        if (sysMenu.getType() == MenuTypeEnum.CATALOG.getCode() ||
+                sysMenu.getType() == MenuTypeEnum.MENU.getCode()) {
             if (parentType != MenuTypeEnum.CATALOG.getCode()) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "上级菜单只能为目录类型");
             }
         }
 
         //按钮
-        if (menu.getType() == MenuTypeEnum.BUTTON.getCode()) {
+        if (sysMenu.getType() == MenuTypeEnum.BUTTON.getCode()) {
             if (parentType != MenuTypeEnum.MENU.getCode()) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "上级菜单只能为菜单类型");
             }

@@ -42,23 +42,23 @@ public class BuildArticleVOsNode extends ArticleNode<BaseRequestDTO> {
             }
 
             if (articleBuilder.getCategoryListStr()){
-                articleVO.setCategoryListStr(context.getArticleCategoryListStrMap().get(articleVO.getId()));
+                articleVO.setCategoryListStr(context.getArticleCategoryListStrMap().get(articleVO.getArticleId()));
             }
 
             if (articleBuilder.getTagList()){
-                articleVO.setTagList(context.getArticleTagListMap().get(articleVO.getId()));
+                articleVO.setTagList(context.getArticleTagListMap().get(articleVO.getArticleId()));
             }
 
             if (articleBuilder.getRecommend()){
-                articleVO.setRecommend(context.getArticleRecommendMap().get(articleVO.getId()));
+                articleVO.setRecommend(context.getArticleRecommendMap().get(articleVO.getArticleId()));
             }
 
             if (articleBuilder.getTop()){
-                articleVO.setTop(context.getArticleTopMap().get(articleVO.getId()));
+                articleVO.setTop(context.getArticleTopMap().get(articleVO.getArticleId()));
             }
 
             if (articleBuilder.getAuthor()){
-                articleVO.setAuthor(context.getArticleAuthorMap().get(articleVO.getId()));
+                articleVO.setAuthor(context.getArticleAuthorMap().get(articleVO.getArticleId()));
             }
 
             articleVOs.add(articleVO);

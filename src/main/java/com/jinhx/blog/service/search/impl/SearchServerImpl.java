@@ -1,5 +1,6 @@
 package com.jinhx.blog.service.search.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
@@ -10,8 +11,6 @@ import com.jinhx.blog.service.operation.TopMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.search.SearchServer;
 import com.jinhx.blog.service.search.VideoEsServer;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import java.util.*;
  * @author jinhx
  * @since 2019-04-11
  */
-@Slf4j
 @Service
 public class SearchServerImpl implements SearchServer {
 
@@ -48,27 +46,27 @@ public class SearchServerImpl implements SearchServer {
     public SearchListVO search(String keyword) throws Exception {
         // 处理文章
         List<ArticleVO> articleVOList = articleEsServer.searchArticleList(keyword);
-        List<Top> articleTops = topMapperService.listTops(ModuleTypeConstants.ARTICLE);
+        List<Top> articleTops = topMapperService.selectPortalTopsByModule(ModuleTypeConstants.ARTICLE);
         ArticleVO[] articleVOTopArray = new ArticleVO[articleVOList.size()];
         Queue<ArticleVO> articleVONoTopQueue = new LinkedList<>();
         List<ArticleVO> articleVOResultList = new ArrayList<>();
 
-        Set<Integer> articleVOTopSet = new HashSet<>();
-        Set<Integer> articleVONoToSet = new HashSet<>();
+        Set<Long> articleVOTopSet = new HashSet<>();
+        Set<Long> articleVONoToSet = new HashSet<>();
 
-        if (!CollectionUtils.isEmpty(articleTops)){
+        if (CollectionUtils.isNotEmpty(articleTops)){
             articleVOList.forEach(articleDTOListItem -> {
                 articleTops.forEach(topsItem -> {
-                    if(topsItem.getLinkId().equals(articleDTOListItem.getId())){
-                        if (!articleVOTopSet.contains(articleDTOListItem.getId()) && !articleVONoToSet.contains(articleDTOListItem.getId())) {
+                    if(topsItem.getLinkId().equals(articleDTOListItem.getArticleId())){
+                        if (!articleVOTopSet.contains(articleDTOListItem.getArticleId()) && !articleVONoToSet.contains(articleDTOListItem.getArticleId())) {
                             articleDTOListItem.setTop(true);
                             articleVOTopArray[topsItem.getOrderNum()-1] = articleDTOListItem;
-                            articleVOTopSet.add(articleDTOListItem.getId());
+                            articleVOTopSet.add(articleDTOListItem.getArticleId());
                         }
                     }else {
-                        if (!articleVOTopSet.contains(articleDTOListItem.getId()) && !articleVONoToSet.contains(articleDTOListItem.getId())) {
+                        if (!articleVOTopSet.contains(articleDTOListItem.getArticleId()) && !articleVONoToSet.contains(articleDTOListItem.getArticleId())) {
                             articleVONoTopQueue.add(articleDTOListItem);
-                            articleVONoToSet.add(articleDTOListItem.getId());
+                            articleVONoToSet.add(articleDTOListItem.getArticleId());
                         }
                     }
                 });

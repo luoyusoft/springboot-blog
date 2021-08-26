@@ -3,10 +3,9 @@ package com.jinhx.blog.controller.article;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.aop.annotation.LogView;
-import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.validator.ValidatorUtils;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
@@ -18,11 +17,10 @@ import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.service.article.ArticleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * ArticleController
@@ -33,7 +31,7 @@ import java.util.Objects;
 @RestController
 public class ArticleController {
 
-    @Resource
+    @Autowired
     private ArticleService articleService;
 
     /**
@@ -43,8 +41,8 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/homeinfo")
     @RequiresPermissions("article:list")
-    public Response<HomeArticleInfoVO> getHomeArticleInfoVO() {
-        return Response.success(articleService.getHomeArticleInfoVO());
+    public Response<HomeArticleInfoVO> selectHomeArticleInfoVO() {
+        return Response.success(articleService.selectHomeArticleInfoVO());
     }
 
     /**
@@ -57,13 +55,12 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/list")
     @RequiresPermissions("article:list")
-    public Response<PageData<ArticleVO>> listArticle(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
-        if (Objects.isNull(page) || Objects.isNull(limit)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
-        }
+    public Response<PageData<ArticleVO>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
+        MyAssert.notNull(page, "page不能为空");
+        MyAssert.notNull(limit, "limit不能为空");
 
         ArticleVOIPageQueryDTO articleVOIPageQueryDTO = new ArticleVOIPageQueryDTO();
-        articleVOIPageQueryDTO.setLogStr("con=listArticle");
+        articleVOIPageQueryDTO.setLogStr("con=selectPage");
         articleVOIPageQueryDTO.setPage(page);
         articleVOIPageQueryDTO.setLimit(limit);
         articleVOIPageQueryDTO.setTitle(title);
@@ -75,24 +72,22 @@ public class ArticleController {
                 .author(true)
                 .build());
 
-        return Response.success(articleService.queryPage(articleVOIPageQueryDTO));
+        return Response.success(articleService.selectPage(articleVOIPageQueryDTO));
     }
 
     /**
-     * 信息
+     * 根据articleId查询文章信息
      *
      * @param articleId 文章id
      * @return 文章信息
      */
     @GetMapping("/manage/article/info/{articleId}")
     @RequiresPermissions("article:list")
-    public Response<ArticleVO> info(@PathVariable("articleId") Integer articleId) {
-        if (Objects.isNull(articleId)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleId不能为空");
-        }
+    public Response<ArticleVO> selectArticleVOById(@PathVariable("articleId") Long articleId) {
+        MyAssert.notNull(articleId, "articleId不能为空");
 
         ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
-        articleVOsQueryDTO.setLogStr("con=info");
+        articleVOsQueryDTO.setLogStr("con=selectArticleVOById");
         articleVOsQueryDTO.setArticleIds(Lists.newArrayList(articleId));
         articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
                 .categoryListStr(true)
@@ -102,7 +97,7 @@ public class ArticleController {
                 .author(true)
                 .build());
 
-        List<ArticleVO> articleVOs = articleService.getArticleVOs(articleVOsQueryDTO);
+        List<ArticleVO> articleVOs = articleService.selectArticleVOs(articleVOsQueryDTO);
         if (CollectionUtils.isEmpty(articleVOs)){
             return Response.success();
         }
@@ -111,16 +106,16 @@ public class ArticleController {
     }
 
     /**
-     * 保存文章
+     * 新增文章
      *
      * @param articleVO 文章信息
+     * @return 新增结果
      */
     @PostMapping("/manage/article/save")
     @RequiresPermissions("article:save")
-    public Response<Void> saveArticle(@RequestBody ArticleVO articleVO){
-        ValidatorUtils.validateEntity(articleVO, AddGroup.class);
-        articleService.saveArticle(articleVO);
-
+    public Response<Void> insertArticleVO(@RequestBody ArticleVO articleVO){
+        ValidatorUtils.validateEntity(articleVO, InsertGroup.class);
+        articleService.insertArticleVO(articleVO);
         return Response.success();
     }
 
@@ -128,11 +123,12 @@ public class ArticleController {
      * 更新文章
      *
      * @param articleVO 文章信息
+     * @return 更新结果
      */
     @PutMapping("/manage/article/update")
     @RequiresPermissions("article:update")
-    public Response<Void> updateArticle(@RequestBody ArticleVO articleVO){
-        articleService.updateArticle(articleVO);
+    public Response<Void> updateArticleVO(@RequestBody ArticleVO articleVO){
+        articleService.updateArticleVO(articleVO);
         return Response.success();
     }
 
@@ -140,6 +136,7 @@ public class ArticleController {
      * 更新文章状态
      *
      * @param articleVO 文章信息
+     * @return 更新结果
      */
     @PutMapping("/manage/article/update/status")
     @RequiresPermissions("article:update")
@@ -149,29 +146,23 @@ public class ArticleController {
     }
 
     /**
-     * 批量删除
+     * 批量删除文章
      *
      * @param articleIds 文章id列表
+     * @return 删除结果
      */
     @DeleteMapping("/manage/article/delete")
     @RequiresPermissions("article:delete")
-    public Response deleteArticles(@RequestBody List<Integer> articleIds) {
-        if (CollectionUtils.isEmpty(articleIds)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleIds不能为空");
-        }
-
-        if (articleIds.size() > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "articleIds不能超过100个");
-        }
-
-        articleService.deleteArticles(articleIds);
+    public Response<Void> deleteArticlesById(@RequestBody List<Long> articleIds) {
+        MyAssert.sizeBetween(articleIds, 1, 100, "articleIds");
+        articleService.deleteArticlesById(articleIds);
         return Response.success();
     }
 
     /********************** portal ********************************/
 
     /**
-     * 分页获取文章列表
+     * 分页查询文章列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -183,15 +174,14 @@ public class ArticleController {
      */
     @GetMapping("/article/listarticles")
     @LogView(module = 0)
-    public Response<PageData<ArticleVO>> listArticleVOs(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
-                                 @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Integer categoryId,
+    public Response<PageData<ArticleVO>> selectPortalPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+                                 @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Long categoryId,
                                  @RequestParam("like") Boolean like, @RequestParam("read") Boolean read) {
-        if (Objects.isNull(page) || Objects.isNull(limit)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "page，limit不能为空");
-        }
+        MyAssert.notNull(page, "page不能为空");
+        MyAssert.notNull(limit, "limit不能为空");
 
         PortalArticleVOIPageQueryDTO portalArticleVOIPageQueryDTO = new PortalArticleVOIPageQueryDTO();
-        portalArticleVOIPageQueryDTO.setLogStr("con=listArticleVOs");
+        portalArticleVOIPageQueryDTO.setLogStr("con=selectPortalPage");
         portalArticleVOIPageQueryDTO.setPage(page);
         portalArticleVOIPageQueryDTO.setLimit(limit);
         portalArticleVOIPageQueryDTO.setCategoryId(categoryId);
@@ -203,11 +193,11 @@ public class ArticleController {
                 .author(true)
                 .build());
 
-        return Response.success(articleService.listArticleVOs(portalArticleVOIPageQueryDTO));
+        return Response.success(articleService.selectPortalPage(portalArticleVOIPageQueryDTO));
     }
 
     /**
-     * 分页获取首页文章列表
+     * 分页查询首页文章列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -215,65 +205,63 @@ public class ArticleController {
      */
     @GetMapping("/article/listhomearticles")
     @LogView(module = 0)
-    public Response listHomeArticles(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit) {
-        return Response.success(articleService.listHomeArticles(page, limit));
+    public Response<PageData<ArticleVO>> selectPortalHomePage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit) {
+        MyAssert.notNull(page, "page不能为空");
+        MyAssert.notNull(limit, "limit不能为空");
+        return Response.success(articleService.selectPortalHomePage(page, limit));
     }
 
     /**
-     * 获取ArticleVO对象
+     * 查询ArticleVO对象
      *
-     * @param id id
+     * @param articleId articleId
      * @param password password
      * @return ArticleVO
      */
     @GetMapping("/article/{id}")
     @LogView(module = 0)
-    public Response<ArticleVO> getArticle(@PathVariable Integer id, @RequestParam(value = "password", required = false, defaultValue = "") String password){
-        return Response.success(articleService.getArticleVOByPassword(id, password));
+    public Response<ArticleVO> selectArticleVOByPassword(@PathVariable Long articleId, @RequestParam(value = "password", required = false, defaultValue = "") String password){
+        return Response.success(articleService.selectArticleVOByPassword(articleId, password));
     }
 
     /**
      * 文章点赞
      *
-     * @param id articleId
-     * @return Response
+     * @param articleId articleId
+     * @return 点赞结果
      */
-    @PutMapping("/article/{id}")
+    @PutMapping("/article/{articleId}")
     @LogView(module = 0)
-    public Response<Void> updateArticle(@PathVariable Integer id) throws Exception {
-        if (Objects.isNull(id)) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
-        }
-
-        articleService.updateArticle(id);
-
+    public Response<Void> addArticleLikeNum(@PathVariable Long articleId) throws Exception {
+        MyAssert.notNull(articleId, "articleId不能为空");
+        articleService.addArticleLikeNum(articleId);
         return Response.success();
     }
 
     /**
-     * 获取热读榜
+     * 查询热读文章列表
      *
      * @return 热读文章列表
      */
     @GetMapping("/article/listhotreadarticles")
     @LogView(module = 0)
-    public Response<List<ArticleVO>> listHotReadArticles(){
+    public Response<List<ArticleVO>> selectHotReadArticleVOs(){
         BaseRequestDTO baseRequestDTO = new BaseRequestDTO();
-        baseRequestDTO.setLogStr("con=listHotReadArticles");
-
-        return Response.success(articleService.listHotReadArticles(baseRequestDTO, ArticleBuilder.builder().build()));
+        baseRequestDTO.setLogStr("con=selectHotReadArticleVOs");
+        return Response.success(articleService.selectHotReadArticleVOs(baseRequestDTO, ArticleBuilder.builder().build()));
     }
 
     /**
-     * 根据文章id获取公开状态
+     * 根据文章id查询公开状态
      *
-     * @param id 文章id
+     * @param articleId 文章id
      * @return 公开状态
      */
     @GetMapping("/article/open")
     @LogView(module = 0)
-    public Response getArticleOpenById(@RequestParam("id") Integer id){
-        return Response.success(articleService.getArticleOpenById(id));
+    public Response<Boolean> selectArticleOpenById(@RequestParam("articleId") Long articleId){
+        MyAssert.notNull(articleId, "articleId不能为空");
+        return Response.success(articleService.selectArticleOpenById(articleId));
     }
 
 }

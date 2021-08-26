@@ -11,9 +11,8 @@ import java.util.Date;
 /**
  * DateUtils
  *
- * @author luoyu
- * @date 2018/10/20 13:26
- * @description 日期工具类
+ * @author jinhx
+ * @since 2018-10-07
  */
 public class DateUtils {
 
@@ -31,7 +30,7 @@ public class DateUtils {
 
     /**
      * 格式化日期
-     * @param date
+     * @param date date
      * @param pattern
      * @return
      */
@@ -43,7 +42,7 @@ public class DateUtils {
     /**
      * 获取当前时间
      */
-    public static String getNowTimeString() {
+    public static String getNowDateTimeString() {
         return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
     }
 
@@ -52,6 +51,13 @@ public class DateUtils {
      */
     public static Long getNowTimeLong() {
         return Instant.now().toEpochMilli();
+    }
+
+    /**
+     * 获取当前时间
+     */
+    public static String getNowDateString(String format) {
+        return DateTimeFormatter.ofPattern(format).format(LocalDate.now());
     }
 
     /**

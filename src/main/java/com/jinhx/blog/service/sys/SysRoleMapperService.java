@@ -2,17 +2,15 @@ package com.jinhx.blog.service.sys;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
-import com.jinhx.blog.common.util.SysAdminUtils;
-import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.sys.SysRole;
 import com.jinhx.blog.mapper.sys.SysRoleMapper;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,87 +25,129 @@ import java.util.List;
 @Service
 public class SysRoleMapperService extends ServiceImpl<SysRoleMapper, SysRole> {
 
-    @Autowired
-    private SysRoleMenuMapperService sysRoleMenuMapperService;
-
-    @Autowired
-    private SysUserRoleMapperService sysUserRoleMapperService;
-
     /**
-     * 获取角色列表
+     * 分别查询角色列表
      *
      * @param page 页码
      * @param limit 页数
      * @param roleName 角色名
      * @return 角色列表
      */
-    public PageData queryPage(Integer page, Integer limit, String roleName) {
-        IPage<SysRole> roleIPage = baseMapper.selectPage(new QueryPage<SysRole>(page, limit).getPage(),
+    public IPage<SysRole> selectPage(Integer page, Integer limit, String roleName) {
+        return baseMapper.selectPage(new QueryPage<SysRole>(page, limit).getPage(),
                 new LambdaQueryWrapper<SysRole>()
-                        .like(StringUtils.isNotBlank(roleName), SysRole::getRoleName,roleName)
+                        .like(StringUtils.isNotBlank(roleName), SysRole::getRoleName, roleName)
         );
-
-        return new PageData(roleIPage);
     }
 
     /**
-     * 根据角色id列表批量删除角色
+     * 查询所有角色列表
      *
-     * @param roleIds 角色id列表
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteBatch(Integer[] roleIds) {
-        if (SysAdminUtils.isHaveSuperAdmin(Lists.newArrayList(roleIds))){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "超级管理员角色不可以删除");
-        }
-        // 删除角色
-        this.removeByIds(Lists.newArrayList(roleIds));
-
-        // 删除角色与菜单关联
-        sysRoleMenuMapperService.deleteBatchByRoleId(roleIds);
-
-        // 删除角色与用户关联
-        sysUserRoleMapperService.deleteBatchByRoleId(roleIds);
-    }
-
-    /**
-     * 查询角色列表
-     *
-     * @param createrId 创建者id
      * @return 角色列表
      */
-    public List<Integer> queryRoleIdList(Integer createrId) {
-        return baseMapper.queryRoleIdList(createrId) ;
+    public List<SysRole> selectAllSysRoles() {
+        return baseMapper.selectList(new LambdaQueryWrapper<>());
     }
 
     /**
-     * 新增角色信息
+     * 根据sysRoleId查询角色
      *
-     * @param sysRole 角色信息
-     * @return 新增结果
+     * @param sysRoleId sysRoleId
+     * @return 角色
      */
-    @Transactional(rollbackFor = Exception.class)
-    public boolean insertSysRole(SysRole sysRole) {
-        baseMapper.insert(sysRole);
+    public SysRole selectSysRoleById(Long sysRoleId) {
+        List<SysRole> sysRoles = selectSysRolesById(Lists.newArrayList(sysRoleId));
+        if (CollectionUtils.isEmpty(sysRoles)){
+            return null;
+        }
 
-        // 保存角色与菜单关系
-        sysRoleMenuMapperService.saveOrUpdate(sysRole.getId(), sysRole.getMenuIdList());
-        return true;
+        return sysRoles.get(0);
     }
 
     /**
-     * 更新角色信息
+     * 根据sysRoleId查询角色列表
      *
-     * @param sysRole 角色信息
-     * @return 更新结果
+     * @param sysRoleIds sysRoleIds
+     * @return 角色列表
+     */
+    public List<SysRole> selectSysRolesById(List<Long> sysRoleIds) {
+        if (CollectionUtils.isEmpty(sysRoleIds)){
+            return Lists.newArrayList();
+        }
+
+        return baseMapper.selectList(new LambdaQueryWrapper<SysRole>().in(SysRole::getSysRoleId, sysRoleIds));
+    }
+
+    /**
+     * 根据sysRoleId删除角色
+     *
+     * @param sysRoleId sysRoleId
      */
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateSysRoleById(SysRole sysRole){
-        baseMapper.updateById(sysRole);
+    public void deleteSysRoleById(Long sysRoleId) {
+        deleteSysRolesById(Lists.newArrayList(sysRoleId));
+    }
 
-        // 保存角色与菜单关系
-        sysRoleMenuMapperService.saveOrUpdate(sysRole.getId(), sysRole.getMenuIdList());
-        return true;
+    /**
+     * 批量根据sysRoleId删除角色
+     *
+     * @param sysRoleIds sysRoleIds
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteSysRolesById(List<Long> sysRoleIds) {
+        if (CollectionUtils.isNotEmpty(sysRoleIds)){
+            if (baseMapper.deleteBatchIds(sysRoleIds) != sysRoleIds.size()){
+                throw new MyException(ResponseEnums.DELETE_FAIL);
+            }
+        }
+    }
+
+    /**
+     * 新增角色
+     *
+     * @param sysRole sysRole
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertSysRole(SysRole sysRole) {
+        insertSysRoles(Lists.newArrayList(sysRole));
+    }
+
+    /**
+     * 批量新增角色
+     *
+     * @param sysRoles sysRoles
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertSysRoles(List<SysRole> sysRoles) {
+        if (CollectionUtils.isNotEmpty(sysRoles)){
+            if (sysRoles.stream().mapToInt(item -> baseMapper.insert(item)).sum() != sysRoles.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
+        }
+    }
+
+    /**
+     * 根据sysRoleId更新角色
+     *
+     * @param sysRole sysRole
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateSysRoleById(SysRole sysRole) {
+        updateSysRolesById(Lists.newArrayList(sysRole));
+    }
+
+    /**
+     * 批量根据sysRoleId更新角色
+     *
+     * @param sysRoles sysRoles
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateSysRolesById(List<SysRole> sysRoles) {
+        if (CollectionUtils.isNotEmpty(sysRoles)){
+            if (sysRoles.stream().mapToInt(item -> baseMapper.updateById(item)).sum() != sysRoles.size()){
+                throw new MyException(ResponseEnums.UPDATE_FAILR);
+            }
+        }
     }
 
 }

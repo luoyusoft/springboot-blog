@@ -14,10 +14,13 @@ import java.io.Serializable;
  */
 @Data
 @Configuration
-public class CloudStorageProperties implements Serializable {
+public class QiNiuProperties implements Serializable {
 
     private static final long serialVersionUID = -1397713143362376338L;
 
+    /**
+     * qiniuDomain
+     */
     @Value("${oss.qiniu.domain}")
     private String qiniuDomain;
 

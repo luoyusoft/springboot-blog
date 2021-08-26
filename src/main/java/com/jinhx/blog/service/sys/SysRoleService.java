@@ -1,8 +1,8 @@
 package com.jinhx.blog.service.sys;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.sys.SysRole;
+import com.jinhx.blog.entity.sys.vo.SysRoleVO;
 
 import java.util.List;
 
@@ -12,47 +12,52 @@ import java.util.List;
  * @author jinhx
  * @since 2018-10-22
  */
-public interface SysRoleService extends IService<SysRole> {
+public interface SysRoleService {
 
     /**
-     * 获取角色列表
+     * 分别查询角色列表
      *
      * @param page 页码
      * @param limit 页数
      * @param roleName 角色名
      * @return 角色列表
      */
-    PageData queryPage(Integer page, Integer limit, String roleName);
+    PageData<SysRole> selectPage(Integer page, Integer limit, String roleName);
 
     /**
-     * 根据角色id列表批量删除角色
+     * 查询所有角色列表，如果不是超级管理员，则不展示超级管理员
      *
-     * @param roleIds 角色id列表
-     */
-    void deleteBatch(Integer[] roleIds);
-
-    /**
-     * 查询角色列表
-     *
-     * @param createrId 创建者id
      * @return 角色列表
      */
-    List<Integer> queryRoleIdList(Integer createrId);
+    List<SysRole> selectAllSysRoles();
 
     /**
-     * 新增角色信息
+     * 根据sysRoleId查询角色
      *
-     * @param sysRole 角色信息
-     * @return 新增结果
+     * @param sysRoleId sysRoleId
+     * @return 角色
      */
-    boolean insertSysRole(SysRole sysRole);
+    SysRoleVO selectSysRoleVOById(Long sysRoleId);
 
     /**
-     * 更新角色信息
+     * 批量根据sysRoleId删除角色
      *
-     * @param sysRole 角色信息
-     * @return 更新结果
+     * @param sysRoleIds sysRoleIds
      */
-    boolean updateSysRoleById(SysRole sysRole);
+    void deleteSysRolesById(List<Long> sysRoleIds);
+
+    /**
+     * 新增角色
+     *
+     * @param sysRoleVO sysRoleVO
+     */
+    void insertSysRole(SysRoleVO sysRoleVO);
+
+    /**
+     * 根据sysRoleId更新角色
+     *
+     * @param sysRoleVO sysRoleVO
+     */
+    void updateSysRoleById(SysRoleVO sysRoleVO);
 
 }

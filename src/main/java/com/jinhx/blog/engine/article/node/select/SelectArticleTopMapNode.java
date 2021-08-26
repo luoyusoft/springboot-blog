@@ -1,4 +1,4 @@
-package com.jinhx.blog.engine.article.node;
+package com.jinhx.blog.engine.article.node.select;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.google.common.collect.Maps;
@@ -7,21 +7,19 @@ import com.jinhx.blog.engine.article.ArticleNode;
 import com.jinhx.blog.engine.article.ArticleQueryContextInfo;
 import com.jinhx.blog.entity.base.BaseRequestDTO;
 import com.jinhx.blog.service.operation.TopMapperService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 /**
- * ArticleTopMapQueryNode
+ * SelectArticleTopMapNode
  *
  * @author jinhx
  * @since 2021-08-06
  */
-@Slf4j
 @Component
-public class ArticleTopMapQueryNode extends ArticleNode<BaseRequestDTO> {
+public class SelectArticleTopMapNode extends ArticleNode<BaseRequestDTO> {
 
     @Autowired
     private TopMapperService topMapperService;
@@ -33,16 +31,16 @@ public class ArticleTopMapQueryNode extends ArticleNode<BaseRequestDTO> {
 
     @Override
     public void process(ArticleQueryContextInfo<BaseRequestDTO> context) {
-        Map<Integer, Boolean> map = Maps.newHashMap();
+        Map<Long, Boolean> map = Maps.newHashMap();
         context.getArticles().forEach(item -> {
-            map.put(item.getId(), topMapperService.isTopByModuleAndLinkId(ModuleTypeConstants.ARTICLE, item.getId()));
+            map.put(item.getArticleId(), topMapperService.selectTopCountByOrderNum(ModuleTypeConstants.ARTICLE, item.getArticleId()) > 0);
         });
         context.setArticleTopMap(map);
     }
 
     @Override
     public String getProcessorName() {
-        return "ArticleTopMapQueryNode";
+        return "SelectArticleTopMapNode";
     }
 
 }

@@ -1,5 +1,7 @@
 package com.jinhx.blog.entity.file;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -37,9 +39,16 @@ public class File extends BaseEntity implements Serializable {
 
     public static final Integer UPLOAD_STATUS_1 = 1;
 
-    public static final Integer IS_CHUNK_0 = 0;
+    public static final Boolean IS_CHUNK_FALSE = false;
 
-    public static final Integer IS_CHUNK_1 = 1;
+    public static final Boolean IS_CHUNK_TRUE = true;
+
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "文件id主键")
+    @TableId(type = IdType.INPUT)
+    private Long fillId;
 
     @ApiModelProperty(value = "文件名称")
     private String fileName;
@@ -66,7 +75,7 @@ public class File extends BaseEntity implements Serializable {
     private String suffix;
 
     @ApiModelProperty(value = "是否分片（0：否，1：是）")
-    private Integer isChunk;
+    private Boolean isChunk;
 
     @ApiModelProperty(value = "分片总数量")
     private Integer chunkCount;

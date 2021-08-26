@@ -30,14 +30,14 @@ public class TimelineServiceImpl implements TimelineService {
     private TimelineMapper timelineMapper;
 
     /**
-     * 获取时间线列表
+     * 查询时间线列表
      *
      * @return 时间线列表
      */
     @Cacheable
     @Override
-    public List<Timeline> listTimelines() {
-        List<Timeline> timelineList = timelineMapper.listTimeline();
+    public List<Timeline> selectTimelines() {
+        List<Timeline> timelineList = timelineMapper.selectTimelines();
         genTimelineMonth(timelineList);
         return timelineList;
     }
@@ -51,7 +51,7 @@ public class TimelineServiceImpl implements TimelineService {
         for(Timeline timeline : timelineList) {
             List<TimelineMonth> timelineMonthList = new ArrayList<>();
            for (int i = Calendar.DECEMBER + 1; i > 0; i--) {
-               List<TimelinePost> postList = timelineMapper.listTimelinePost(timeline.getYear(), i);
+               List<TimelinePost> postList = timelineMapper.selectTimelinePosts(timeline.getYear(), i);
                if(CollectionUtils.isEmpty(postList)) {
                    continue;
                }

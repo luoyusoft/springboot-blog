@@ -1,7 +1,5 @@
 package com.jinhx.blog.service.operation;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.jinhx.blog.entity.operation.CategoryAdaptorBuilder;
 import com.jinhx.blog.entity.operation.Category;
 import com.jinhx.blog.entity.operation.vo.CategoryVO;
 
@@ -13,103 +11,71 @@ import java.util.List;
  * @author jinhx
  * @since 2018-12-17
  */
-public interface CategoryService extends IService<Category> {
+public interface CategoryService {
 
     /**
-     * 将Category转换为CategoryVO
-     *
-     * @param categoryAdaptorBuilder categoryAdaptorBuilder
-     * @return CategoryVO
-     */
-    CategoryVO adaptorCategoryToCategoryVO(CategoryAdaptorBuilder<Category> categoryAdaptorBuilder);
-
-    /**
-     * 将Category列表按需转换为CategoryVO列表
-     *
-     * @param categoryAdaptorBuilder categoryAdaptorBuilder
-     * @return CategoryVO列表
-     */
-    List<CategoryVO> adaptorCategorysToCategoryVOs(CategoryAdaptorBuilder<List<Category>> categoryAdaptorBuilder);
-
-    /**
-     * 树状列表
-     *
-     * @param module module
-     * @return 分类列表
-     */
-    List<Category> select(Integer module);
-
-    /**
-     * 信息
-     *
-     * @param id id
-     * @return Category
-     */
-    Category info(Integer id);
-
-    /**
-     * 保存
-     *
-     * @param category category
-     */
-    void add(Category category);
-
-    /**
-     * 修改
-     *
-     * @param category category
-     */
-    void update(Category category);
-
-    /**
-     * 删除
-     *
-     * @param id id
-     */
-    void delete(Integer id);
-
-    /**
-     * 查询所有菜单
+     * 根据父主键名称，模块查询类别列表
      *
      * @param name name
      * @param module module
-     * @return List<Category>
+     * @return 类别列表
      */
-    List<CategoryVO> queryWithParentName(String name, Integer module);
+    List<CategoryVO> selectCategoryVOsByParentNameAndModule(String name, Integer module);
 
     /**
-     * 根据父级别查询子级别
+     * 根据模块查询类别列表
      *
-     * @param id id
-     * @return List<Category>
+     * @param module module
+     * @return 类别列表
      */
-    List<Category> queryListByParentId(Integer id);
+    List<Category> selectCategorysByModule(Integer module);
 
     /**
-     * 根据id查询
+     * 根据categoryId查询类别
      *
-     * @param id id
-     * @return Category
+     * @param categoryId categoryId
+     * @return 类别
      */
-    Category getById(Integer id);
+    Category selectCategoryById(Long categoryId);
+
+    /**
+     * 新增类别
+     *
+     * @param category category
+     */
+    void insertCategory(Category category);
+
+    /**
+     * 根据categoryId更新类别
+     *
+     * @param category category
+     */
+    void updateCategoryById(Category category);
+
+    /**
+     * 根据categoryId删除类别
+     *
+     * @param categoryId categoryId
+     */
+    void deleteCategoryById(Long categoryId);
 
     /**
      * 根据类别Id数组查询类别数组
      *
      * @param categoryIds categoryIds
-     * @param categoryList categoryList
+     * @param module module
      * @return String
      */
-    String renderCategoryArr(String categoryIds, List<Category> categoryList);
+    String adaptorcategoryIdsToCategoryNames(String categoryIds, Integer module);
 
     /********************** portal ********************************/
 
     /**
-     * 获取分类列表
+     * 根据模块查询类别列表
      *
      * @param module 模块
-     * @return 分类列表
+     * @return 类别列表
      */
-    List<Category> listCategories(String module);
+    List<Category> selectPortalCategorysByModule(Integer module);
 
 }

@@ -141,7 +141,7 @@ public class WebsocketServerEndpoint {
     private String getData(String toId, String message) {
         Message entity = new Message();
         entity.setMessage(message);
-        entity.setCreateTime(DateUtils.getNowTimeString());
+        entity.setCreateTime(DateUtils.getNowDateTimeString());
         entity.setFrom(chatService.getUser(fromId));
         entity.setTo(chatService.getUser(toId));
         return JsonUtils.objectToJson(Response.success(entity));

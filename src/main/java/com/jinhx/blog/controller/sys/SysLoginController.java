@@ -4,8 +4,8 @@ import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.entity.base.Response;
-import com.jinhx.blog.entity.sys.dto.SysUserDTO;
 import com.jinhx.blog.entity.sys.vo.SysLoginVO;
+import com.jinhx.blog.entity.sys.vo.SysUserVO;
 import com.jinhx.blog.service.sys.SysCaptchaService;
 import com.jinhx.blog.service.sys.SysUserService;
 import com.jinhx.blog.service.sys.SysUserTokenService;
@@ -22,6 +22,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * SysLoginController
@@ -47,7 +48,7 @@ public class SysLoginController {
      * @param uuid uuid
      */
     @GetMapping("captcha.jpg")
-    public void captcha(HttpServletResponse response, String uuid) throws IOException {
+    public void getCaptcha(HttpServletResponse response, String uuid) throws IOException {
         response.setHeader("Cache-Control", "no-store, no-cache");
         response.setContentType("image/jpeg");
 
@@ -66,7 +67,7 @@ public class SysLoginController {
      * @return token
      */
     @PostMapping("/manage/sys/login")
-    public Response login(@RequestBody SysLoginVO sysLoginVO) {
+    public Response<String> login(@RequestBody SysLoginVO sysLoginVO) {
         boolean captcha = sysCaptchaService.validate(sysLoginVO.getUuid(),sysLoginVO.getCaptcha());
         if(!captcha){
             // 验证码不正确
@@ -74,25 +75,27 @@ public class SysLoginController {
         }
 
         // 用户信息
-        SysUserDTO sysUserDTO = sysUserService.getSysUserDTOByUsername(sysLoginVO.getUsername());
-        if(sysUserDTO == null || !sysUserDTO.getPassword().equals(new Sha256Hash(sysLoginVO.getPassword(),sysUserDTO.getSalt()).toHex())){
+        SysUserVO sysUserVO = sysUserService.selectSysUserVOByUsername(sysLoginVO.getUsername());
+        if(Objects.isNull(sysUserVO) || !sysUserVO.getPassword().equals(new Sha256Hash(sysLoginVO.getPassword(), sysUserVO.getSalt()).toHex())){
             // 用户名或密码错误
             throw new MyException(ResponseEnums.USERNAME_OR_PASSWORD_WRONG);
         }
-        if(sysUserDTO.getStatus() == 0){
+        if(sysUserVO.getStatus() == 0){
             throw new MyException(ResponseEnums.ACCOUNT_LOCK);
         }
 
         //生成token，并保存到redis
-        return Response.success(sysUserTokenService.createToken(sysUserDTO.getId()));
+        return Response.success(sysUserTokenService.createToken(sysUserVO.getSysUserId()));
     }
 
     /**
-     * 退出
+     * 退出登录
+     *
+     * @return 退出结果
      */
     @PostMapping("/manage/sys/logout")
-    public Response logout() {
-        sysUserTokenService.logout(SysAdminUtils.getUserId());
+    public Response<Void> logout() {
+        sysUserTokenService.logout(SysAdminUtils.getSysUserId());
         return Response.success();
     }
 

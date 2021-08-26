@@ -1,5 +1,7 @@
 package com.jinhx.blog.entity.file;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -26,6 +28,13 @@ public class FileChunk extends BaseEntity implements Serializable {
     public static final Integer UPLOAD_STATUS_0 = 0;
 
     public static final Integer UPLOAD_STATUS_1 = 1;
+
+    /**
+     * 主键
+     */
+    @ApiModelProperty(value = "文件分片id主键")
+    @TableId(type = IdType.INPUT)
+    private Long fillChunkId;
 
     @ApiModelProperty(value = "上传url地址")
     private String uploadUrl;

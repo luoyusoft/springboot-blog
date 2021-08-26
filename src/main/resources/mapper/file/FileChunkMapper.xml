@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.file.FileChunk">
-        <id column="id" property="id" />
+        <id column="id" property="fillChunkId" />
         <result column="file_md5" property="fileMd5" />
         <result column="upload_url" property="uploadUrl" />
         <result column="upload_status" property="uploadStatus" />

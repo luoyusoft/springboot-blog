@@ -10,7 +10,7 @@ import com.jinhx.blog.common.config.NacosConfigService;
  */
 public class NacosUtils {
 
-    private static NacosConfigService nacosConfigService;
+    private static final NacosConfigService nacosConfigService;
 
     static {
         nacosConfigService = SpringUtils.getBean(NacosConfigService.class);

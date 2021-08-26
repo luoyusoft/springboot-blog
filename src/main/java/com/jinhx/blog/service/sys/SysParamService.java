@@ -14,50 +14,50 @@ import java.util.List;
 public interface SysParamService {
 
     /**
-     * 分页查询
+     * 分页查询系统参数列表
      *
      * @param page page
      * @param limit limit
      * @param menuUrl menuUrl
      * @param type type
-     * @return PageUtils
+     * @return 系统参数列表
      */
-     PageData queryPage(Integer page, Integer limit, String menuUrl, String type);
+    PageData<SysParam> selectPage(Integer page, Integer limit, String menuUrl, String type);
 
     /**
-     * 获取所有参数列表
+     * 查询所有参数列表
      *
-     * @return 所有参数列表
+     * @return 参数列表
      */
-    List<SysParam> list();
+    List<SysParam> selectAllSysParams();
 
     /**
-     * 信息
+     * 根据sysParamId查询参数
      *
-     * @param id id
-     * @return 信息
+     * @param sysParamId sysParamId
+     * @return 参数
      */
-    SysParam getById(Integer id);
+    SysParam selectSysParamById(Long sysParamId);
 
     /**
-     * 保存
-     *
-     * @param sysParam sysParam
-     */
-    void save(SysParam sysParam);
-
-    /**
-     * 修改
+     * 新增参数
      *
      * @param sysParam sysParam
      */
-    void updateById(SysParam sysParam);
+    void insertSysParam(SysParam sysParam);
 
     /**
-     * 根据角色id列表批量删除角色
+     * 根据sysParamId更新参数
      *
-     * @param roleIds 角色id列表
+     * @param sysParam sysParam
      */
-    void deleteBatch(List<Integer> roleIds);
+    void updateSysParamById(SysParam sysParam);
+
+    /**
+     * 批量根据sysParamId删除参数
+     *
+     * @param sysParamIds sysParamIds
+     */
+    void deleteSysParamsById(List<Long> sysParamIds);
 
 }

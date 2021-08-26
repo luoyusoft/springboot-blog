@@ -1,24 +1,21 @@
 package com.jinhx.blog.controller.sys;
 
 import com.jinhx.blog.common.aop.annotation.SuperAdmin;
-import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.util.SysAdminUtils;
 import com.jinhx.blog.common.validator.ValidatorUtils;
-import com.jinhx.blog.common.validator.group.AddGroup;
+import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.common.validator.group.UpdateGroup;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.sys.SysRole;
-import com.jinhx.blog.service.sys.SysRoleMenuService;
+import com.jinhx.blog.entity.sys.vo.SysRoleVO;
 import com.jinhx.blog.service.sys.SysRoleService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * SysRoleController
@@ -32,11 +29,8 @@ public class SysRoleController {
     @Autowired
     private SysRoleService sysRoleService;
 
-    @Autowired
-    private SysRoleMenuService sysRoleMenuService;
-
     /**
-     * 获取角色列表
+     * 分别查询角色列表
      *
      * @param page 页码
      * @param limit 页数
@@ -45,100 +39,79 @@ public class SysRoleController {
      */
     @GetMapping("/manage/sys/role/list")
     @RequiresPermissions("sys:role:list")
-    public Response list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("roleName") String roleName){
-        return Response.success(sysRoleService.queryPage(page, limit, roleName));
+    public Response<PageData<SysRole>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("roleName") String roleName){
+        MyAssert.notNull(page, "page不能为空");
+        MyAssert.notNull(limit, "limit不能为空");
+        return Response.success(sysRoleService.selectPage(page, limit, roleName));
     }
 
     /**
-     * 角色列表
+     * 查询所有角色列表，如果不是超级管理员，则不展示超级管理员
      *
      * @return 角色列表
      */
     @GetMapping("/manage/sys/role/select")
     @RequiresPermissions("sys:role:select")
-    public Response select(){
-        Map<String, Object> map = new HashMap<>();
-
-        Collection<SysRole> list = sysRoleService.listByMap(map);
-
-        // 如果不是超级管理员，则不展示超级管理员
-        if(!SysAdminUtils.isSuperAdmin()){
-            return Response.success(list.stream().filter(item -> !item.getId().equals(SysAdminUtils.sysSuperAdminRoleId)).collect(Collectors.toList()));
-        }
-
-        return Response.success(list);
+    public Response<List<SysRole>> selectAllSysRoles(){
+        return Response.success(sysRoleService.selectAllSysRoles());
     }
 
     /**
-     * 新增角色信息
+     * 新增角色
      *
-     * @param sysRole 角色信息
+     * @param sysRoleVO sysRoleVO
      * @return 新增结果
      */
     @SuperAdmin()
     @PostMapping("/manage/sys/role/save")
     @RequiresPermissions("sys:role:save")
-    public Response insertSysRole(@RequestBody SysRole sysRole){
-        ValidatorUtils.validateEntity(sysRole, AddGroup.class);
-        sysRole.setCreaterId(SysAdminUtils.getUserId());
-
-        sysRoleService.insertSysRole(sysRole);
-
+    public Response<Void> insertSysRole(@RequestBody SysRoleVO sysRoleVO){
+        ValidatorUtils.validateEntity(sysRoleVO, InsertGroup.class);
+        sysRoleVO.setCreaterId(SysAdminUtils.getSysUserId());
+        sysRoleService.insertSysRole(sysRoleVO);
         return Response.success();
     }
 
     /**
-     * 更新角色信息
+     * 根据sysRoleId更新角色
      *
-     * @param sysRole 角色信息
+     * @param sysRoleVO sysRoleVO
      * @return 更新结果
      */
     @SuperAdmin()
     @PutMapping("/manage/sys/role/update")
     @RequiresPermissions("sys:role:update")
-    public Response updateSysRoleById(@RequestBody SysRole sysRole){
-        ValidatorUtils.validateEntity(sysRole, AddGroup.class);
-        sysRole.setCreaterId(SysAdminUtils.getUserId());
-
-        sysRoleService.updateSysRoleById(sysRole);
-
+    public Response<Void> updateSysRoleById(@RequestBody SysRoleVO sysRoleVO){
+        ValidatorUtils.validateEntity(sysRoleVO, UpdateGroup.class);
+        sysRoleVO.setCreaterId(SysAdminUtils.getSysUserId());
+        sysRoleService.updateSysRoleById(sysRoleVO);
         return Response.success();
     }
 
     /**
-     * 获取角色菜单列表
+     * 根据sysRoleId查询角色
      *
-     * @param roleId 角色id
-     * @return 角色菜单列表
+     * @param sysRoleId sysRoleId
+     * @return 角色
      */
     @GetMapping("/manage/sys/role/info/{roleId}")
     @RequiresPermissions("sys:role:info")
-    public Response getSysRoleById(@PathVariable("roleId") Integer roleId){
-        SysRole role = sysRoleService.getById(roleId);
-        List<Integer> menuIdList=sysRoleMenuService.queryMenuIdList(roleId);
-        role.setMenuIdList(menuIdList);
-
-        return Response.success(role);
+    public Response<SysRoleVO> selectSysRoleVOById(@PathVariable("roleId") Long sysRoleId){
+        return Response.success(sysRoleService.selectSysRoleVOById(sysRoleId));
     }
 
     /**
-     * 根据角色id列表批量删除角色
+     * 批量根据sysRoleId删除角色
      *
-     * @param roleIds 角色id列表
+     * @param sysRoleIds sysRoleIds
+     * @return 删除结果
      */
     @SuperAdmin()
     @DeleteMapping("/manage/sys/role/delete")
     @RequiresPermissions("sys:role:delete")
-    public Response delete(@RequestBody Integer[] roleIds){
-        if (roleIds == null || roleIds.length < 1){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "roleIds不能为空");
-        }
-
-        if (roleIds.length > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "roleIds不能超过100个");
-        }
-
-        sysRoleService.deleteBatch(roleIds);
+    public Response<Void> deleteSysRolesById(@RequestBody List<Long> sysRoleIds){
+        MyAssert.sizeBetween(sysRoleIds, 1, 100, "sysRoleIds");
+        sysRoleService.deleteSysRolesById(sysRoleIds);
         return Response.success();
     }
 

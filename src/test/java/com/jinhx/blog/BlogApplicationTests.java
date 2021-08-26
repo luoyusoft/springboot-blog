@@ -1,14 +1,14 @@
 package com.jinhx.blog;
 
+import com.jinhx.blog.common.api.IPApi;
 import com.jinhx.blog.common.constants.ElasticSearchConstants;
 import com.jinhx.blog.common.constants.RedisKeyConstants;
-import com.jinhx.blog.common.util.MinioUtils;
-import com.jinhx.blog.common.api.IPApi;
 import com.jinhx.blog.common.util.ElasticSearchUtils;
+import com.jinhx.blog.common.util.MinioUtils;
 import com.jinhx.blog.common.util.SnowFlakeUtils;
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.sys.IPInfo;
-import com.jinhx.blog.service.log.LogViewService;
+import com.jinhx.blog.service.log.LogViewMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.jinhx.blog.service.search.VideoEsServer;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +40,7 @@ class BlogApplicationTests {
     private IPApi ipApi;
 
     @Autowired
-    private LogViewService logViewService;
-
-    @Autowired
-    private SnowFlakeUtils snowFlakeUtils;
+    private LogViewMapperService logViewMapperService;
 
     @Autowired
     private MinioUtils minioUtils;
@@ -89,11 +86,6 @@ class BlogApplicationTests {
     }
 
     @Test
-    void testCleanCityInfo() throws Exception {
-        logViewService.cleanCityInfo();
-    }
-
-    @Test
     void testString() throws Exception {
         String str = RedisKeyConstants.CHAT_USER_PREFIX + "123";
         int pos = str.lastIndexOf(":");
@@ -103,8 +95,8 @@ class BlogApplicationTests {
 
     @Test
     void testId() throws Exception {
-        long s = snowFlakeUtils.snowflakeId(1, 1);
-        long s1 = snowFlakeUtils.snowflakeId();
+        long s = SnowFlakeUtils.getId(1, 1);
+        long s1 = SnowFlakeUtils.getId();
         System.out.println(s);
         System.out.println(s1);
     }
@@ -117,9 +109,9 @@ class BlogApplicationTests {
     @Test
     void testESBulkRequest() throws Exception {
         List<Article> libs = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (long i = 0; i < 10; i++) {
             Article article = new Article();
-            article.setId(i);
+            article.setArticleId(i);
             article.setTitle("测试落雨文章标题" + i);
             article.setContent("测试文章内容，哈哈哈" + i);
             libs.add(article);
