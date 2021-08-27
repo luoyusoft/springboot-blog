@@ -59,8 +59,8 @@ public class SysMenuController {
      */
     @GetMapping("/manage/sys/menu/list")
     @RequiresPermissions("sys:menu:list")
-    public Response<List<SysMenu>> selectAllSysRoles(){
-        return Response.success(sysMenuService.selectAllSysRoles());
+    public Response<List<SysMenu>> selectAllSysMenus(){
+        return Response.success(sysMenuService.selectAllSysMenus());
     }
 
     /**
@@ -89,9 +89,9 @@ public class SysMenuController {
      * @param sysMenuId sysMenuId
      * @return 菜单
      */
-    @GetMapping("/manage/sys/menu/info/{menuId}")
+    @GetMapping("/manage/sys/menu/info/{sysMenuId}")
     @RequiresPermissions("sys:menu:info")
-    public Response<SysMenu> selectSysMenuById(@PathVariable("menuId") Long sysMenuId){
+    public Response<SysMenu> selectSysMenuById(@PathVariable Long sysMenuId){
         return Response.success(sysMenuService.selectSysMenuById(sysMenuId));
     }
 
@@ -135,9 +135,9 @@ public class SysMenuController {
      * @return 删除结果
      */
     @SuperAdmin()
-    @DeleteMapping("/manage/sys/menu/delete/{menuId}")
+    @DeleteMapping("/manage/sys/menu/delete/{sysMenuId}")
     @RequiresPermissions("sys:menu:delete")
-    public Response<Void> deleteSysMenuById(@PathVariable("menuId") Long sysMenuId){
+    public Response<Void> deleteSysMenuById(@PathVariable Long sysMenuId){
         sysMenuService.deleteSysMenuById(sysMenuId);
         return Response.success();
     }

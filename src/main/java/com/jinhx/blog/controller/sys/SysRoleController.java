@@ -94,9 +94,9 @@ public class SysRoleController {
      * @param sysRoleId sysRoleId
      * @return 角色
      */
-    @GetMapping("/manage/sys/role/info/{roleId}")
+    @GetMapping("/manage/sys/role/info/{sysRoleId}")
     @RequiresPermissions("sys:role:info")
-    public Response<SysRoleVO> selectSysRoleVOById(@PathVariable("roleId") Long sysRoleId){
+    public Response<SysRoleVO> selectSysRoleVOById(@PathVariable Long sysRoleId){
         return Response.success(sysRoleService.selectSysRoleVOById(sysRoleId));
     }
 

@@ -266,8 +266,16 @@ public class RecommendServiceImpl implements RecommendService {
      * @return 推荐
      */
     @Override
-    public Recommend selectRecommendById(Long recommendId) {
-        return recommendMapperService.selectRecommendById(recommendId);
+    public RecommendVO selectRecommendVOById(Long recommendId) {
+        Recommend recommend = recommendMapperService.selectRecommendById(recommendId);
+
+        if (Objects.isNull(recommend)){
+            return null;
+        }
+
+        return adaptorRecommendToRecommendVO(new RecommendAdaptorBuilder.Builder<Recommend>()
+                .setTitle()
+                .build(recommend));
     }
 
     /**
@@ -304,12 +312,14 @@ public class RecommendServiceImpl implements RecommendService {
             if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PUBLISH_TRUE))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
+            return;
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
             if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PUBLISH_TRUE))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
+            return;
         }
 
         throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐模块不存在");

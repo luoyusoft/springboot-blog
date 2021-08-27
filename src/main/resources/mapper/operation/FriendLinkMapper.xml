@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.operation.FriendLink">
-        <id column="id" property="friendLinkId" />
+        <id column="friend_link_id" property="friendLinkId" />
         <result column="title" property="title" />
         <result column="url" property="url" />
         <result column="avatar" property="avatar" />

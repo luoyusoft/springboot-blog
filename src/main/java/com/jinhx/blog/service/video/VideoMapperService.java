@@ -13,6 +13,7 @@ import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.mapper.video.VideoMapper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -199,10 +200,10 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
     public List<Video> selectVideosByPublishAndTitle(String title, Boolean publish) {
         return baseMapper.selectList(new LambdaQueryWrapper<Video>()
                 .eq(Video::getPublish, publish)
-                .and(qw ->
-                        qw.like(ObjectUtil.isNotEmpty(title), Video::getTitle, title)
+                .and(StringUtils.isNotEmpty(title), qw ->
+                        qw.like(Video::getTitle, title)
                                 .or()
-                                .like(ObjectUtil.isNotEmpty(title), Video::getAlternateName, title))
+                                .like(Video::getAlternateName, title))
                 .orderByDesc(Video::getVideoId));
     }
 

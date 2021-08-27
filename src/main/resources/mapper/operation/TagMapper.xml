@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.operation.Tag">
-        <id column="id" property="tagId" />
+        <id column="tag_id" property="tagId" />
         <result column="name" property="name" />
         <result column="module" property="module" />
         <result column="creater_id" property="createrId" />

@@ -79,10 +79,10 @@ public class SysUserServiceImpl implements SysUserService {
      * 根据用户id重置密码
      *
      * @param sysUserId 用户id
-     * @param password 新密码
+     * @param newPassword 新密码
      */
     @Override
-    public void resetPasswordById(Long sysUserId, String password) {
+    public void resetPasswordById(Long sysUserId, String newPassword) {
         // 如果不是本人操作，且操作用户为超级管理员，则需要当前用户拥有超级管理员权限
         if (!sysUserId.equals(SysAdminUtils.getSysUserId())){
             List<Long> roleIdList = sysUserRoleMapperService.selectSysRoleIdsBySysUserId(sysUserId);
@@ -98,7 +98,7 @@ public class SysUserServiceImpl implements SysUserService {
 
         SysUser sysUser = new SysUser();
         sysUser.setSysUserId(sysUserId);
-        sysUser.setPassword(new Sha256Hash(password, oldSysUser.getSalt()).toHex());
+        sysUser.setPassword(new Sha256Hash(newPassword, oldSysUser.getSalt()).toHex());
         sysUserMapperService.updateSysUserById(sysUser);
     }
 

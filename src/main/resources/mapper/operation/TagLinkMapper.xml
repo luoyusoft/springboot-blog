@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.operation.TagLink">
-        <id column="id" property="tagLinkId" />
+        <id column="tag_link_id" property="tagLinkId" />
         <result column="tag_id" property="tagId" />
         <result column="link_id" property="linkId" />
         <result column="module" property="module" />

@@ -60,9 +60,9 @@ public class TagController {
      * @param tagId tagId
      * @return 标签
      */
-    @GetMapping("/manage/operation/tag/info/{id}")
+    @GetMapping("/manage/operation/tag/info/{tagId}")
     @RequiresPermissions("operation:tag:info")
-    public Response<Tag> selectTagById(@PathVariable("id") Long tagId){
+    public Response<Tag> selectTagById(@PathVariable Long tagId){
         return Response.success(tagService.selectTagById(tagId));
     }
 

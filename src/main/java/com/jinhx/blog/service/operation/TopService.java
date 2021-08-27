@@ -38,7 +38,7 @@ public interface TopService {
      * @param topId topId
      * @return 置顶
      */
-    Top selectTopById(Long topId);
+    TopVO selectTopVOById(Long topId);
 
     /**
      * 新增置顶

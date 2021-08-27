@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.operation.Top">
-        <id column="id" property="topId" />
+        <id column="top_id" property="topId" />
         <result column="link_id" property="linkId" />
         <result column="module" property="module" />
         <result column="order_num" property="orderNum" />

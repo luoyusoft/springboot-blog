@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysUser">
-        <id column="id" property="sysUserId" />
+        <id column="sys_user_id" property="sysUserId" />
         <result column="username" property="username" />
         <result column="password" property="password" />
         <result column="status" property="status" />

@@ -45,7 +45,7 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
     @Transactional(rollbackFor = Exception.class)
     public void insertFiles(List<File> files) {
         if (CollectionUtils.isNotEmpty(files)){
-            if (files.stream().mapToInt(item -> baseMapper.insert(item)).sum() == files.size()){
+            if (files.stream().mapToInt(item -> baseMapper.insert(item)).sum() != files.size()){
                 throw new MyException(ResponseEnums.INSERT_FAIL);
             }
         }
@@ -153,7 +153,7 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
             return Lists.newArrayList();
         }
 
-        return baseMapper.selectList(new LambdaQueryWrapper<File>().in(File::getFillId, fileIds));
+        return baseMapper.selectList(new LambdaQueryWrapper<File>().in(File::getFileId, fileIds));
     }
 
     /**

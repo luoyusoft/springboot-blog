@@ -109,7 +109,7 @@ public class FileServiceImpl implements FileService {
             String bucketName;
             if (suffix.equals(".mp4")){
                 bucketName = File.BUCKET_NAME_VIDEO;
-            }else if (suffix.equals(".gif") || suffix.equals(".jpg") || suffix.equals(".png")){
+            }else if (suffix.equals(".gif") || suffix.equals(".jpg") || suffix.equals(".png") || suffix.equals(".jpeg")){
                 bucketName = File.BUCKET_NAME_IMG;
             }else {
                 bucketName = File.BUCKET_NAME_OTHER;
@@ -384,20 +384,20 @@ public class FileServiceImpl implements FileService {
         for (File filesItem : files) {
             // 检测文章
             if (articleMapperService.existByCover(filesItem.getUrl())){
-                failList.add(filesItem.getFillId());
+                failList.add(filesItem.getFileId());
                 continue;
             }
 
             // 检测视频
             if (videoMapperService.existByFile(filesItem.getUrl())){
-                failList.add(filesItem.getFillId());
+                failList.add(filesItem.getFileId());
                 continue;
             }
 
             String[] urls = filesItem.getUrl().split("/");
             fileStorageServiceFactory.getFileStorageService(File.STORAGE_TYPE_MINIO).deleteObjectNames(filesItem.getBucketName(),
                     Lists.newArrayList(DateTimeFormatter.ofPattern("yyyyMMdd").format(filesItem.getUpdateTime()) + "/" + urls[urls.length - 1]));
-            fileMapperService.deleteFileById(filesItem.getFillId());
+            fileMapperService.deleteFileById(filesItem.getFileId());
         }
 
         if (CollectionUtils.isNotEmpty(failList)){

@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @description:
- * @author: luoyu
- * @date: 2020/7/8 4:23 下午
- * @version: 1.0.0
+ * ElasticSearchConfig
+ *
+ * @author jinhx
+ * @since 2020-10-07
  */
 @Configuration
 public class ElasticSearchConfig {

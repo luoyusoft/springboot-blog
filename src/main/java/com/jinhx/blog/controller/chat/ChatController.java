@@ -142,7 +142,7 @@ public class ChatController {
      * @return 当前窗口用户信息
      */
     @GetMapping("/user/{id}")
-    public Response<UserVO> getUser(@PathVariable("id") String id) {
+    public Response<UserVO> getUser(@PathVariable String id) {
         User user = chatService.getUser(id);
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
@@ -156,7 +156,7 @@ public class ChatController {
      * @param message 消息对象
      */
     @PostMapping("/message/{toId}")
-    public Response<Void> insertMessage(@PathVariable("toId") String toId, @RequestBody Message message) {
+    public Response<Void> insertMessage(@PathVariable String toId, @RequestBody Message message) {
         WebsocketServerEndpoint endpoint = new WebsocketServerEndpoint();
         endpoint.sendTo(toId, message);
         return Response.success();

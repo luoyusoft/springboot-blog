@@ -1,8 +1,8 @@
 package com.jinhx.blog.service.sys;
 
 import com.jinhx.blog.common.constants.RedisKeyConstants;
-import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.SysUserToken;
+import com.jinhx.blog.entity.sys.vo.SysUserVO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +26,9 @@ public class ShiroService {
 
     @Autowired
     private SysUserTokenService sysUserTokenService;
+
+    @Autowired
+    private SysUserService sysUserService;
 
     /**
      * 获取用户的所有权限
@@ -61,8 +64,8 @@ public class ShiroService {
      * @param sysUserId 用户id
      * @return SysUser
      */
-    public SysUser getSysUserBySysUserId(Long sysUserId) {
-        return sysUserMapperService.selectSysUserById(sysUserId);
+    public SysUserVO getSysUserVOBySysUserId(Long sysUserId) {
+        return sysUserService.selectSysUserVOById(sysUserId);
     }
 
     /**

@@ -135,8 +135,8 @@ public class SysMenuServiceImpl implements SysMenuService {
      * @return 菜单列表
      */
     @Override
-    public List<SysMenu> selectAllSysRoles() {
-        List<SysMenu> sysMenus = sysMenuMapperService.selectAllSysRoles();
+    public List<SysMenu> selectAllSysMenus() {
+        List<SysMenu> sysMenus = sysMenuMapperService.selectAllSysMenus();
         if (CollectionUtils.isEmpty(sysMenus)){
             return Lists.newArrayList();
         }
@@ -147,7 +147,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                 sysMenu.setParentName(parentSysMenu.getName());
             }
         });
-        return sysMenuMapperService.selectAllSysRoles();
+        return sysMenus;
     }
 
     /**

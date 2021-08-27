@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.bill.BillType">
-        <id column="id" property="billTypeId" />
+        <id column="bill_type_id" property="billTypeId" />
         <result column="title" property="title" />
         <result column="income_expenditure_type" property="incomeExpenditureType" />
         <result column="remarks" property="remarks" />

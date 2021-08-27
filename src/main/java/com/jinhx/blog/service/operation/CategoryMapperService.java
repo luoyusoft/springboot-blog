@@ -2,6 +2,7 @@ package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.enums.ResponseEnums;
@@ -32,8 +33,8 @@ public class CategoryMapperService extends ServiceImpl<CategoryMapper, Category>
      */
     public List<Category> selectCategoryVOsByParentNameAndModule(String name, Integer module) {
         return baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(Category::getModule, module)
-                .like(Category::getName, name));
+                .eq(StringUtils.isNotBlank(name), Category::getModule, module)
+                .like(Objects.nonNull(module), Category::getName, name));
     }
 
     /**

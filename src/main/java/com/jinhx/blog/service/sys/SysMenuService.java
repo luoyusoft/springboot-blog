@@ -40,7 +40,7 @@ public interface SysMenuService {
      *
      * @return 菜单列表
      */
-    List<SysMenu> selectAllSysRoles();
+    List<SysMenu> selectAllSysMenus();
 
     /**
      * 根据sysMenuId删除菜单

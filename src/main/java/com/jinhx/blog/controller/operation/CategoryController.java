@@ -55,9 +55,9 @@ public class CategoryController {
      * @param categoryId categoryId
      * @return 类别
      */
-    @GetMapping("/manage/operation/category/info/{id}")
+    @GetMapping("/manage/operation/category/info/{categoryId}")
     @RequiresPermissions("operation:category:info")
-    public Response<Category> selectCategoryById(@PathVariable("id") Long categoryId){
+    public Response<Category> selectCategoryById(@PathVariable Long categoryId){
         return Response.success(categoryService.selectCategoryById(categoryId));
     }
 
@@ -94,9 +94,9 @@ public class CategoryController {
      * @param categoryId categoryId
      * @return 删除结果
      */
-    @DeleteMapping("/manage/operation/category/delete/{id}")
+    @DeleteMapping("/manage/operation/category/delete/{categoryId}")
     @RequiresPermissions("operation:category:delete")
-    public Response<Void> deleteCategoryById(@PathVariable("id") Long categoryId){
+    public Response<Void> deleteCategoryById(@PathVariable Long categoryId){
         categoryService.deleteCategoryById(categoryId);
         return Response.success();
     }

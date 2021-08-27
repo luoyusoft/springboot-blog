@@ -18,10 +18,10 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
- * @version 1.0
- * @author luoyu
- * @date 2019-08-09
- * @description Knife4j配置
+ * Knife4jConfig
+ *
+ * @author jinhx
+ * @since 2019-10-07
  */
 @Configuration
 @EnableSwagger2WebMvc

@@ -33,7 +33,7 @@ public class BillController {
      */
     @GetMapping("/manage/bill/{billId}")
     @RequiresPermissions("bill:info")
-    public Response<Bill> selectBillById(@PathVariable("billId") Long billId) {
+    public Response<Bill> selectBillById(@PathVariable Long billId) {
         return Response.success(billService.selectBillById(billId));
     }
 

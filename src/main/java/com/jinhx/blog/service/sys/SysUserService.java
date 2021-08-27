@@ -28,9 +28,9 @@ public interface SysUserService {
      * 根据用户id重置密码
      *
      * @param sysUserId 用户id
-     * @param password 新密码
+     * @param newPassword 新密码
      */
-    void resetPasswordById(Long sysUserId, String password);
+    void resetPasswordById(Long sysUserId, String newPassword);
 
     /**
      * 新增用户

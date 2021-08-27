@@ -60,10 +60,10 @@ public class TopController {
      * @param topId topId
      * @return 置顶
      */
-    @GetMapping("/manage/operation/top/info/{id}")
+    @GetMapping("/manage/operation/top/info/{topId}")
     @RequiresPermissions("operation:top:info")
-    public Response<Top> selectTopById(@PathVariable("id") Long topId){
-        return Response.success(topService.selectTopById(topId));
+    public Response<TopVO> selectTopVOById(@PathVariable Long topId){
+        return Response.success(topService.selectTopVOById(topId));
     }
 
     /**
@@ -100,9 +100,9 @@ public class TopController {
      * @param topId topId
      * @return 置顶结果
      */
-    @PutMapping("/manage/operation/top/top/{id}")
+    @PutMapping("/manage/operation/top/top/{topId}")
     @RequiresPermissions("operation:top:update")
-    public Response<Void> updateTopToTopById(@PathVariable("id") Long topId){
+    public Response<Void> updateTopToTopById(@PathVariable Long topId){
         MyAssert.notNull(topId, "topId不能为空");
         topService.updateTopToTopById(topId);
         return Response.success();

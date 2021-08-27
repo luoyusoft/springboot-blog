@@ -1,6 +1,5 @@
 package com.jinhx.blog.common.auth;
 
-import com.jinhx.blog.entity.sys.SysUser;
 import com.jinhx.blog.entity.sys.SysUserToken;
 import com.jinhx.blog.entity.sys.vo.SysUserVO;
 import com.jinhx.blog.service.sys.ShiroService;
@@ -12,6 +11,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -57,21 +57,21 @@ public class OAuth2Realm extends AuthorizingRealm {
         // 根据accessToken，查询用户信息
         SysUserToken sysUserToken = shiroService.getSysUserTokenByToken(accessToken);
         // token失效
-        if(sysUserToken == null){
+        if(Objects.isNull(sysUserToken)){
             throw new IncorrectCredentialsException("token失效，请重新登录");
         }
 
         // 查询用户信息
-        SysUser sysUser = shiroService.getSysUserBySysUserId(sysUserToken.getSysUserId());
+        SysUserVO sysUserVO = shiroService.getSysUserVOBySysUserId(sysUserToken.getSysUserId());
         // 账号锁定
-        if(sysUser.getStatus() == 0){
+        if(sysUserVO.getStatus() == 0){
             throw new LockedAccountException("账号已被锁定,请联系管理员");
         }
 
         // 续期token
         shiroService.refreshToken(sysUserToken.getSysUserId(),accessToken);
 
-        return new SimpleAuthenticationInfo(sysUser, accessToken, getName());
+        return new SimpleAuthenticationInfo(sysUserVO, accessToken, getName());
     }
 
 }

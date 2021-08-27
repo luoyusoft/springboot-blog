@@ -31,8 +31,8 @@ public class SysUserTokenService {
         // 生成一个token
         String token = TokenGenerator.generateValue();
 
-        String tokenKey= RedisKeyConstants.MANAGE_SYS_USER_TOKEN+token;
-        String userIdKey= RedisKeyConstants.MANAGE_SYS_USER_TOKEN+userId;
+        String tokenKey = RedisKeyConstants.MANAGE_SYS_USER_TOKEN + token;
+        String userIdKey = RedisKeyConstants.MANAGE_SYS_USER_TOKEN + userId;
 
         // 判断是否生成过token
         String tokenInRedis = RedisUtils.get(userIdKey);
@@ -58,7 +58,7 @@ public class SysUserTokenService {
         if(StringUtils.isEmpty(userId)){
             return null;
         }
-        SysUserToken sysUserToken=new SysUserToken();
+        SysUserToken sysUserToken = new SysUserToken();
         sysUserToken.setToken(token);
         sysUserToken.setSysUserId(Long.parseLong(userId));
         return sysUserToken;

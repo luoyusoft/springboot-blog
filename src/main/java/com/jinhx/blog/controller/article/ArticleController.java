@@ -83,7 +83,7 @@ public class ArticleController {
      */
     @GetMapping("/manage/article/info/{articleId}")
     @RequiresPermissions("article:list")
-    public Response<ArticleVO> selectArticleVOById(@PathVariable("articleId") Long articleId) {
+    public Response<ArticleVO> selectArticleVOById(@PathVariable Long articleId) {
         MyAssert.notNull(articleId, "articleId不能为空");
 
         ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
@@ -218,7 +218,7 @@ public class ArticleController {
      * @param password password
      * @return ArticleVO
      */
-    @GetMapping("/article/{id}")
+    @GetMapping("/article/{articleId}")
     @LogView(module = 0)
     public Response<ArticleVO> selectArticleVOByPassword(@PathVariable Long articleId, @RequestParam(value = "password", required = false, defaultValue = "") String password){
         return Response.success(articleService.selectArticleVOByPassword(articleId, password));

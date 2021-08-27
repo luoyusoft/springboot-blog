@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.sys.SysRole">
-        <id column="id" property="sysRoleId" />
+        <id column="sys_role_id" property="sysRoleId" />
         <result column="role_name" property="roleName" />
         <result column="remark" property="remark" />
         <result column="creater_id" property="createrId" />

@@ -60,9 +60,9 @@ public class FriendLinkController {
      * @param friendLinkId friendLinkId
      * @return 友链
      */
-    @GetMapping("/manage/operation/friendlink/info/{id}")
+    @GetMapping("/manage/operation/friendlink/info/{friendLinkId}")
     @RequiresPermissions("operation:friendlink:info")
-    public Response<FriendLink> selectFriendLinkById(@PathVariable("id") Long friendLinkId){
+    public Response<FriendLink> selectFriendLinkById(@PathVariable Long friendLinkId){
         return Response.success(friendLinkService.selectFriendLinkById(friendLinkId));
     }
 

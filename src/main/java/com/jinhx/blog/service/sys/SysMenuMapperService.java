@@ -52,7 +52,7 @@ public class SysMenuMapperService extends ServiceImpl<SysMenuMapper, SysMenu> {
      *
      * @return 菜单列表
      */
-    public List<SysMenu> selectAllSysRoles() {
+    public List<SysMenu> selectAllSysMenus() {
         return baseMapper.selectList(new LambdaQueryWrapper<>());
     }
 

@@ -5,9 +5,9 @@ import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.common.util.FormatUtils;
 import com.jinhx.blog.common.util.MyAssert;
-import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.messagewall.MessageWall;
 import com.jinhx.blog.entity.messagewall.vo.HomeMessageWallInfoVO;
@@ -18,7 +18,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -71,7 +70,6 @@ public class MessageWallController {
     @PostMapping("/manage/messagewall")
     @RequiresPermissions("messagewall:add")
     public Response<Void> insertMessageWall(@RequestBody MessageWall messageWall){
-        ValidatorUtils.validateEntity(messageWall, InsertGroup.class);
         messageWallService.insertMessageWall(messageWall);
         return Response.success();
     }

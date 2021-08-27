@@ -71,10 +71,10 @@ public class RecommendController {
      * @param recommendId recommendId
      * @return 推荐
      */
-    @GetMapping("/manage/operation/recommend/info/{id}")
+    @GetMapping("/manage/operation/recommend/info/{recommendId}")
     @RequiresPermissions("operation:recommend:info")
-    public Response<Recommend> selectRecommendById(@PathVariable("id") Long recommendId){
-        return Response.success(recommendService.selectRecommendById(recommendId));
+    public Response<RecommendVO> selectRecommendVOById(@PathVariable Long recommendId){
+        return Response.success(recommendService.selectRecommendVOById(recommendId));
     }
 
     /**
@@ -111,9 +111,9 @@ public class RecommendController {
      * @param recommendId recommendId
      * @return 更新结果
      */
-    @PutMapping("/manage/operation/recommend/top/{id}")
+    @PutMapping("/manage/operation/recommend/top/{recommendId}")
     @RequiresPermissions("operation:recommend:update")
-    public Response<Void> updateRecommendToTopById(@PathVariable("id") Long recommendId){
+    public Response<Void> updateRecommendToTopById(@PathVariable Long recommendId){
         MyAssert.notNull(recommendId, "recommendId不能为空");
         recommendService.updateRecommendToTopById(recommendId);
         return Response.success();

@@ -63,7 +63,7 @@ public class VideoController {
      */
     @GetMapping("/manage/video/info/{videoId}")
     @RequiresPermissions("video:list")
-    public Response<VideoVO> selectVideoVOByIdAndPublish(@PathVariable("videoId") Long videoId) {
+    public Response<VideoVO> selectVideoVOByIdAndPublish(@PathVariable Long videoId) {
         return Response.success(videoService.selectVideoVOByIdAndPublish(videoId, null, new VideoAdaptorBuilder.Builder<Video>().setAll().build()));
     }
 
@@ -149,7 +149,7 @@ public class VideoController {
      * @param videoId videoId
      * @return 视频
      */
-    @GetMapping("/video/{id}")
+    @GetMapping("/video/{videoId}")
     @LogView(module = 1)
     public Response<VideoVO> selectPortalVideoVOById(@PathVariable Long videoId){
         return Response.success(videoService.selectPortalVideoVOById(videoId));
@@ -172,7 +172,7 @@ public class VideoController {
      * @param videoId videoId
      * @return 点赞结果
      */
-    @PutMapping("/video/{id}")
+    @PutMapping("/video/{videoId}")
     @LogView(module = 1)
     public Response<Video> addVideoLikeNum(@PathVariable Long videoId) throws Exception{
         MyAssert.notNull(videoId, "videoId不能为空");

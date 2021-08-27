@@ -44,7 +44,7 @@ public class SysUserController {
     @GetMapping("/manage/sys/user/list")
     @RequiresPermissions("sys:user:list")
     public Response<PageData<SysUserVO>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
-                                                    @RequestParam("username") String username, @RequestParam("id") Long sysUserId){
+                                                    @RequestParam("username") String username, @RequestParam("sysUserId") Long sysUserId){
         return Response.success(sysUserService.selectPage(page, limit, username, sysUserId));
     }
 
@@ -67,7 +67,7 @@ public class SysUserController {
     @PutMapping("/manage/sys/user/resetPassword")
     public Response<Void> resetPasswordById(@RequestBody PasswordVO passwordVO){
         ValidatorUtils.validateEntity(passwordVO, UpdateGroup.class);
-        sysUserService.resetPasswordById(passwordVO.getSysUserId(), passwordVO.getPassword());
+        sysUserService.resetPasswordById(passwordVO.getSysUserId(), passwordVO.getNewPassword());
         return Response.success();
     }
 
@@ -126,9 +126,9 @@ public class SysUserController {
      * @param sysUserId 用户id
      * @return SysUserVO
      */
-    @GetMapping("/manage/sys/user/info/{userId}")
+    @GetMapping("/manage/sys/user/info/{sysUserId}")
     @RequiresPermissions("sys:user:info")
-    public Response<SysUserVO> selectSysUserVOById(@PathVariable("userId") Long sysUserId){
+    public Response<SysUserVO> selectSysUserVOById(@PathVariable Long sysUserId){
         return Response.success(sysUserService.selectSysUserVOById(sysUserId));
     }
 

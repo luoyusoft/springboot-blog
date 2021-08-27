@@ -13,9 +13,7 @@ import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.base.PageData;
-import com.jinhx.blog.entity.operation.Top;
-import com.jinhx.blog.entity.operation.TopAdaptorBuilder;
-import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
+import com.jinhx.blog.entity.operation.*;
 import com.jinhx.blog.entity.operation.vo.TopVO;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.VideoVO;
@@ -252,8 +250,16 @@ public class TopServiceImpl implements TopService {
      * @return 置顶
      */
     @Override
-    public Top selectTopById(Long topId) {
-        return topMapperService.selectTopById(topId);
+    public TopVO selectTopVOById(Long topId) {
+        Top top = topMapperService.selectTopById(topId);
+
+        if (Objects.isNull(top)){
+            return null;
+        }
+
+        return adaptorTopToTopVO(new TopAdaptorBuilder.Builder<Top>()
+                .setTitle()
+                .build(top));
     }
 
     /**
@@ -290,12 +296,14 @@ public class TopServiceImpl implements TopService {
             if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PUBLISH_TRUE))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
+            return;
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
             if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PUBLISH_TRUE))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
+            return;
         }
 
         throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶模块不存在");

@@ -49,7 +49,7 @@ public class SysMenu extends BaseEntity implements Serializable {
     /**
      * 按钮类型
      */
-    public static final Integer TYPE_BUTTON = 1;
+    public static final Integer TYPE_BUTTON = 2;
 
     /**
      * 主键

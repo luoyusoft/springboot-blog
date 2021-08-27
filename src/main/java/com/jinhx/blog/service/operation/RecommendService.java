@@ -46,7 +46,7 @@ public interface RecommendService {
      * @param recommendId recommendId
      * @return 推荐
      */
-    Recommend selectRecommendById(Long recommendId);
+    RecommendVO selectRecommendVOById(Long recommendId);
 
     /**
      * 新增推荐

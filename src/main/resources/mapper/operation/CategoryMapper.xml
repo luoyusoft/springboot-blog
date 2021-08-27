@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.operation.Category">
-        <id column="id" property="categoryId" />
+        <id column="category_id" property="categoryId" />
         <result column="name" property="name" />
         <result column="module" property="module" />
         <result column="rank" property="rank" />

@@ -48,7 +48,7 @@ public class File extends BaseEntity implements Serializable {
      */
     @ApiModelProperty(value = "文件id主键")
     @TableId(type = IdType.INPUT)
-    private Long fillId;
+    private Long fileId;
 
     @ApiModelProperty(value = "文件名称")
     private String fileName;

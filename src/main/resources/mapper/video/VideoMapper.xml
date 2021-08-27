@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.video.Video">
-        <id column="id" property="videoId" />
+        <id column="video_id" property="videoId" />
         <result column="title" property="title" />
         <result column="alternate_name" property="alternateName" />
         <result column="cover" property="cover" />

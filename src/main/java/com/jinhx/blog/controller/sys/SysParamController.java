@@ -58,9 +58,9 @@ public class SysParamController {
      * @param sysParamId sysParamId
      * @return 参数
      */
-    @GetMapping("/manage/sys/param/info/{id}")
+    @GetMapping("/manage/sys/param/info/{sysParamId}")
     @RequiresPermissions("sys:param:info")
-    public Response<SysParam> selectSysParamById(@PathVariable("id") Long sysParamId){
+    public Response<SysParam> selectSysParamById(@PathVariable Long sysParamId){
        return Response.success(sysParamService.selectSysParamById(sysParamId));
     }
 

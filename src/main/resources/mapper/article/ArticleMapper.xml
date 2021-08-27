@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.jinhx.blog.entity.article.Article">
-        <id column="id" property="articleId" />
+        <id column="article_id" property="articleId" />
         <result column="title" property="title" />
         <result column="description" property="description" />
         <result column="content" property="content" />

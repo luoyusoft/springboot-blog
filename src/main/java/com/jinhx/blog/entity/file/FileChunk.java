@@ -34,7 +34,7 @@ public class FileChunk extends BaseEntity implements Serializable {
      */
     @ApiModelProperty(value = "文件分片id主键")
     @TableId(type = IdType.INPUT)
-    private Long fillChunkId;
+    private Long fileChunkId;
 
     @ApiModelProperty(value = "上传url地址")
     private String uploadUrl;

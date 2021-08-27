@@ -23,7 +23,6 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
     private final String LOG_TIME  = " time=";
     private final String TRUE  = "true";
     private final String FALSE  = "false";
-    private final String LOG_STR_ENTER = "\r\n";
 
     /**
      * 节点执行方法
@@ -60,7 +59,7 @@ public abstract class ArticleNode<T extends BaseRequestDTO> {
             stopWatch.stop();
             long time = stopWatch.getTime();
 
-            buildLogInfo(logInfo, Lists.newArrayList(LOG_TIME, time, LOG_STR_ENTER));
+            buildLogInfo(logInfo, Lists.newArrayList(LOG_TIME, time));
 
             log.info(logInfo.toString());
         } catch (Exception e) {

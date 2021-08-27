@@ -31,9 +31,9 @@ public class BillTypeController {
      * @param billTypeId billTypeId
      * @return 账单类型
      */
-    @GetMapping("/manage/bill_type/{billId}")
+    @GetMapping("/manage/bill_type/{billTypeId}")
     @RequiresPermissions("billType:info")
-    public Response<BillType> selectBillTypesById(@PathVariable("billTypeId") Long billTypeId) {
+    public Response<BillType> selectBillTypesById(@PathVariable Long billTypeId) {
         return Response.success(billTypeService.selectBillTypeById(billTypeId));
     }
 

@@ -11,9 +11,8 @@ import javax.annotation.Resource;
 /**
  * InitialConfig
  *
- * @author luoyu
- * @date 2019/03/16 23:04
- * @description
+ * @author jinhx
+ * @since 2020-10-07
  */
 @Configuration
 @ConditionalOnBean(ElasticsearchClient.class)
