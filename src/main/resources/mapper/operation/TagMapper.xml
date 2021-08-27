@@ -27,12 +27,12 @@
                                  t.name,
                                  (select count(*)
                                   from tag_link tl2
-                                           inner join article a on a.id = tl2.link_id
+                                           inner join article a on a.article_id = tl2.link_id
                                   where a.publish = true
                                     and tl2.module = #{module}
-                                    and tl2.tag_id = t.id) as num
+                                    and tl2.tag_id = t.tag_id) as num
                  from tag t
-                          left join tag_link tl on t.id = tl.tag_id and t.module = tl.module
+                          left join tag_link tl on t.tag_id = tl.tag_id and t.module = tl.module
                  where t.module = #{module}) t
         group by t.name
         order by linkNum desc
@@ -45,12 +45,12 @@
                                  t.name,
                                  (select count(*)
                                   from tag_link tl2
-                                           inner join video a on a.id = tl2.link_id
+                                           inner join video a on a.video_id = tl2.link_id
                                   where a.publish = true
                                     and tl2.module = #{module}
-                                    and tl2.tag_id = t.id) as num
+                                    and tl2.tag_id = t.tag_id) as num
                  from tag t
-                          left join tag_link tl on t.id = tl.tag_id and t.module = tl.module
+                          left join tag_link tl on t.tag_id = tl.tag_id and t.module = tl.module
                  where t.module = #{module}) t
         group by t.name
         order by linkNum desc

@@ -8,6 +8,8 @@ import com.jinhx.blog.common.constants.RabbitMQConstants;
 import com.jinhx.blog.common.util.ElasticSearchUtils;
 import com.jinhx.blog.common.util.JsonUtils;
 import com.jinhx.blog.common.util.RabbitMQUtils;
+import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.vo.ArticleVO;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.service.article.ArticleMapperService;
@@ -16,6 +18,7 @@ import com.jinhx.blog.service.operation.TagLinkMapperService;
 import com.jinhx.blog.service.operation.TagMapperService;
 import com.jinhx.blog.service.search.ArticleEsServer;
 import com.rabbitmq.client.Channel;
+import com.xxl.job.core.log.XxlJobLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -65,23 +68,23 @@ public class ArticleEsServerImpl implements ArticleEsServer {
      */
     @Override
     public boolean initArticleList() throws Exception {
-//        if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
-//            if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
-//                List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PUBLISH_TRUE);
-//                XxlJobLogger.log("初始化es文章数据，查到个数：{}", articles.size());
-//                log.info("初始化es文章数据，查到个数：{}", articles.size());
-//                if(CollectionUtils.isNotEmpty(articles)){
-//                    articles.forEach(x -> {
-//                        ArticleVO articleVO = articleService.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
-//                                .setAuthor()
-//                                .build(x));
-//
-//                        rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY, JsonUtils.objectToJson(articleVO));
-//                    });
-//                    return true;
-//                }
-//            }
-//        }
+        if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
+            if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
+                List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PUBLISH_TRUE);
+                XxlJobLogger.log("初始化es文章数据，查到个数：{}", articles.size());
+                log.info("初始化es文章数据，查到个数：{}", articles.size());
+                if(CollectionUtils.isNotEmpty(articles)){
+                    articles.forEach(x -> {
+                        ArticleVO articleVO = articleService.adaptorArticleToArticleVO(new ArticleAdaptorBuilder.Builder<Article>()
+                                .setAuthor()
+                                .build(x));
+
+                        rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY, JsonUtils.objectToJson(articleVO));
+                    });
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

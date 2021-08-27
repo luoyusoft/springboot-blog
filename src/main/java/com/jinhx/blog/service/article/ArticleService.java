@@ -1,5 +1,7 @@
 package com.jinhx.blog.service.article;
 
+import com.jinhx.blog.entity.article.Article;
+import com.jinhx.blog.entity.article.ArticleAdaptorBuilder;
 import com.jinhx.blog.entity.article.ArticleBuilder;
 import com.jinhx.blog.entity.article.dto.ArticleVOIPageQueryDTO;
 import com.jinhx.blog.entity.article.dto.ArticleVOsQueryDTO;
@@ -18,6 +20,14 @@ import java.util.List;
  * @since 2018-11-21
  */
 public interface ArticleService {
+
+    /**
+     * 将Article按需转换为ArticleVO
+     *
+     * @param articleAdaptorBuilder articleAdaptorBuilder
+     * @return ArticleVO
+     */
+    ArticleVO adaptorArticleToArticleVO(ArticleAdaptorBuilder<Article> articleAdaptorBuilder);
 
     /**
      * 获取首页信息
