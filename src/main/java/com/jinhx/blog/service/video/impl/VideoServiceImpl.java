@@ -1,10 +1,8 @@
 package com.jinhx.blog.service.video.impl;
 
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.jinhx.blog.common.constants.GitalkConstants;
 import com.jinhx.blog.common.constants.ModuleTypeConstants;
@@ -23,7 +21,6 @@ import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
-import com.jinhx.blog.mapper.video.VideoMapper;
 import com.jinhx.blog.service.cache.CacheServer;
 import com.jinhx.blog.service.operation.*;
 import com.jinhx.blog.service.sys.SysUserMapperService;
@@ -47,9 +44,11 @@ import java.util.Objects;
  * @since 2018-11-22
  */
 @Service
-public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements VideoService {
+public class VideoServiceImpl implements VideoService {
 
-    // 每天重新计算点赞，key
+    /**
+     * 每天重新计算点赞，key
+     */
     private static final String BLOG_VIDEO_LIKE_LOCK_KEY = "blog:video:like:lock:";
 
     @Autowired
@@ -85,8 +84,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @param videoAdaptorBuilder videoAdaptorBuilder
      * @return VideoVO
      */
-    @Override
-    public VideoVO adaptorVideoToVideoVO(VideoAdaptorBuilder<Video> videoAdaptorBuilder){
+    private VideoVO adaptorVideoToVideoVO(VideoAdaptorBuilder<Video> videoAdaptorBuilder){
         if(Objects.isNull(videoAdaptorBuilder) || Objects.isNull(videoAdaptorBuilder.getData())){
             return null;
         }
@@ -127,8 +125,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @param videoAdaptorBuilder videoAdaptorBuilder
      * @return Video
      */
-    @Override
-    public Video adaptorVideoVOToVideo(VideoAdaptorBuilder<VideoVO> videoAdaptorBuilder){
+    private Video adaptorVideoVOToVideo(VideoAdaptorBuilder<VideoVO> videoAdaptorBuilder){
         if(Objects.isNull(videoAdaptorBuilder) || Objects.isNull(videoAdaptorBuilder.getData())){
             return null;
         }
@@ -144,8 +141,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @param videoAdaptorBuilder videoAdaptorBuilder
      * @return VideoVO列表
      */
-    @Override
-    public List<VideoVO> adaptorVideosToVideoVOs(VideoAdaptorBuilder<List<Video>> videoAdaptorBuilder){
+    private List<VideoVO> adaptorVideosToVideoVOs(VideoAdaptorBuilder<List<Video>> videoAdaptorBuilder){
         if(Objects.isNull(videoAdaptorBuilder) || CollectionUtils.isEmpty(videoAdaptorBuilder.getData())){
             return Collections.emptyList();
         }
@@ -168,13 +164,13 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     /**
-     * 获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
     @Override
-    public HomeVideoInfoVO getHommeVideoInfoVO() {
-        return videoMapperService.getHommeVideoInfoVO();
+    public HomeVideoInfoVO selectHommeVideoInfoVO() {
+        return videoMapperService.selectHommeVideoInfoVO();
     }
 
     /**
@@ -186,11 +182,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      * @return 视频列表
      */
     @Override
-    public PageData queryPage(Integer page, Integer limit, String title) {
-        IPage<Video> videoIPage = videoMapperService.queryPage(page, limit, title);
+    public PageData<VideoVO> selectPage(Integer page, Integer limit, String title) {
+        IPage<Video> videoIPage = videoMapperService.selectPage(page, limit, title);
 
         if (CollectionUtils.isEmpty(videoIPage.getRecords())){
-            return new PageData(videoIPage);
+            return new PageData<>();
         }
 
         List<VideoVO> videoVOs = adaptorVideosToVideoVOs(new VideoAdaptorBuilder.Builder<List<Video>>()
@@ -202,18 +198,18 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         IPage<VideoVO> videoVOIPage = new Page<>();
         BeanUtils.copyProperties(videoIPage, videoVOIPage);
         videoVOIPage.setRecords(videoVOs);
-        return new PageData(videoVOIPage);
+        return new PageData<>(videoVOIPage);
     }
 
     /**
-     * 保存视频
+     * 新增视频
      *
-     * @param videoVO videoVO
+     * @param videoVO 视频
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void saveVideo(VideoVO videoVO) {
-        videoMapperService.saveVideo(videoVO);
+    public void insertVideo(VideoVO videoVO) {
+        videoMapperService.insertVideo(videoVO);
 
         videoVO.getTagList().forEach(item -> {
             tagMapperService.saveTagAndNew(item);
@@ -221,7 +217,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             tagLink.setLinkId(videoVO.getVideoId());
             tagLink.setTagId(item.getTagId());
             tagLink.setModule(ModuleTypeConstants.VIDEO);
-            tagLinkMapperService.save(tagLink);
+            tagLinkMapperService.insertTagLink(tagLink);
         });
 
         InitGitalkRequest initGitalkRequest = new InitGitalkRequest();
@@ -230,7 +226,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_ADD_ROUTINGKEY,
-                JsonUtils.objectToJson(videoMapperService.getVideo(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
+                JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
 
         cleanVideosCache(Lists.newArrayList());
     }
@@ -243,7 +239,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateVideo(VideoVO videoVO) {
-        Video video = videoMapperService.getVideo(videoVO.getVideoId(), null);
+        Video video = videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), null);
         if (Objects.isNull(video)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "视频不存在");
         }
@@ -257,11 +253,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             tagLink.setLinkId(videoVO.getVideoId());
             tagLink.setTagId(item.getTagId());
             tagLink.setModule(ModuleTypeConstants.VIDEO);
-            tagLinkMapperService.save(tagLink);
+            tagLinkMapperService.insertTagLink(tagLink);
         });
 
         // 更新视频
-        videoMapperService.updateVideo(adaptorVideoVOToVideo(new VideoAdaptorBuilder.Builder<VideoVO>().build(videoVO)));
+        videoMapperService.updateVideoById(adaptorVideoVOToVideo(new VideoAdaptorBuilder.Builder<VideoVO>().build(videoVO)));
 
         if (videoVO.getRecommend() != null){
             if (videoVO.getRecommend()){
@@ -287,7 +283,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_UPDATE_ROUTINGKEY,
-                JsonUtils.objectToJson(videoMapperService.getVideo(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
+                JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
 
         cleanVideosCache(Lists.newArrayList(videoVO.getVideoId()));
     }
@@ -300,7 +296,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateVideoStatus(VideoVO videoVO) {
-        Video video = videoMapperService.getVideo(videoVO.getVideoId(), null);
+        Video video = videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), null);
         if (Objects.isNull(video)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "视频不存在");
         }
@@ -311,7 +307,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
             if (videoVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_ADD_ROUTINGKEY,
-                        JsonUtils.objectToJson(videoMapperService.getVideo(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
+                        JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
             }else {
                 List<Long> videoIds = Lists.newArrayList(videoVO.getVideoId());
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_DELETE_ROUTINGKEY, JsonUtils.objectToJson(videoIds));
@@ -340,16 +336,16 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     /**
-     * 获取视频对象
+     * 查询视频
      *
      * @param videoId videoId
      * @param publish publish
      * @param videoAdaptorBuilder videoAdaptorBuilder
-     * @return VideoVO
+     * @return 视频
      */
     @Override
-    public VideoVO getVideoVO(Long videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder) {
-        Video video = videoMapperService.getVideo(videoId, publish);
+    public VideoVO selectVideoVOByIdAndPublish(Long videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder) {
+        Video video = videoMapperService.selectVideoByIdAndPublish(videoId, publish);
         if (Objects.isNull(video)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "视频不存在");
         }
@@ -358,37 +354,15 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     }
 
     /**
-     * 判断类别下是否有视频
+     * 批量根据videoId删除视频
      *
-     * @param categoryId categoryId
-     * @return 类别下是否有视频
-     */
-    @Override
-    public Boolean checkByCategoryId(Long categoryId) {
-        return videoMapperService.checkByCategoryId(categoryId);
-    }
-
-    /**
-     * 判断上传文件下是否有视频
-     *
-     * @param url url
-     * @return 上传文件下是否有视频
-     */
-    @Override
-    public Boolean checkByFile(String url) {
-        return videoMapperService.checkByFile(url);
-    }
-
-    /**
-     * 批量删除
-     *
-     * @param videoIds 视频id列表
+     * @param videoIds videoIds
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteVideos(List<Long> videoIds) {
+    public void deleteVideosById(List<Long> videoIds) {
         videoIds.forEach(videoId -> {
-            Video video = videoMapperService.getVideo(videoId, null);
+            Video video = videoMapperService.selectVideoByIdAndPublish(videoId, null);
             if (Objects.isNull(video)){
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "视频不存在");
             }
@@ -396,7 +370,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
             //先删除视频标签多对多关联
             tagLinkMapperService.deleteTagLinksByLinkIdAndModule(videoId, ModuleTypeConstants.VIDEO);
 
-            videoMapperService.deleteVideos(Lists.newArrayList(videoId));
+            videoMapperService.deleteVideosById(Lists.newArrayList(videoId));
 
             recommendMapperService.deleteRecommendsByLinkIdAndModule(Lists.newArrayList(videoId), ModuleTypeConstants.VIDEO);
         });
@@ -405,27 +379,6 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_DELETE_ROUTINGKEY, JsonUtils.objectToJson(videoIds));
 
         cleanVideosCache(videoIds);
-    }
-
-    /**
-     * 查询所有已发布的视频
-     *
-     * @return 所有已发布的视频
-     */
-    @Override
-    public List<Video> listVideosByPublish() {
-        return videoMapperService.listVideosByPublish();
-    }
-
-    /**
-     * 根据标题查询所有已发布的视频
-     *
-     * @param title 标题
-     * @return 所有已发布的视频
-     */
-    @Override
-    public List<Video> listVideosByPublishAndTitle(String title) {
-        return videoMapperService.listVideosByPublishAndTitle(title);
     }
 
     /**
@@ -442,7 +395,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     /********************** portal ********************************/
 
     /**
-     * 分页获取视频列表
+     * 分页查询视频列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -454,11 +407,11 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
      */
     @Cacheable(value = RedisKeyConstants.VIDEOS)
     @Override
-    public PageData listVideos(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch) {
-        IPage<Video> videoIPage = videoMapperService.listVideos(page, limit, latest, categoryId, like, watch);
+    public PageData<VideoVO> selectPortalPage(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch) {
+        IPage<Video> videoIPage = videoMapperService.selectPortalPage(page, limit, latest, categoryId, like, watch);
 
         if (CollectionUtils.isEmpty(videoIPage.getRecords())){
-            return new PageData(videoIPage);
+            return new PageData<>();
         }
 
         List<VideoVO> videoVOs = adaptorVideosToVideoVOs(new VideoAdaptorBuilder.Builder<List<Video>>()
@@ -468,45 +421,42 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         IPage<VideoVO> videoVOIPage = new Page<>();
         BeanUtils.copyProperties(videoIPage, videoVOIPage);
         videoVOIPage.setRecords(videoVOs);
-        return new PageData(videoVOIPage);
+        return new PageData<>(videoVOIPage);
     }
 
     /**
-     * 获取VideoVO
+     * 根据videoId查询视频
      *
-     * @param id id
-     * @return VideoVO
+     * @param videoId videoId
+     * @return 视频
      */
-    @Cacheable(value = RedisKeyConstants.VIDEO, key = "#id")
+    @Cacheable(value = RedisKeyConstants.VIDEO, key = "#videoId")
     @Override
-    public VideoVO getVideoVO(Long id) {
-        Video video = videoMapperService.getVideo(id, Video.PUBLISH_TRUE);
+    public VideoVO selectPortalVideoVOById(Long videoId) {
+        Video video = videoMapperService.selectVideoByIdAndPublish(videoId, Video.PUBLISH_TRUE);
         if (Objects.isNull(video)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "视频不存在");
         }
-
 
         VideoVO videoVO = adaptorVideoToVideoVO(new VideoAdaptorBuilder.Builder<Video>()
                 .setTagList()
                 .setAuthor()
                 .build(video));
         // 浏览数量
-        baseMapper.update(null, new LambdaUpdateWrapper<Video>()
-                .eq(Video::getVideoId, video.getVideoId())
-                .setSql("watch_num = watch_num + 1"));
+        videoMapperService.addVideoWatchNum(videoId);
 
         return videoVO;
     }
 
     /**
-     * 获取热观榜
+     * 查询热观视频列表
      *
      * @return 热观视频列表
      */
     @Cacheable(value = RedisKeyConstants.VIDEOS, key = "'hotwatch'")
     @Override
-    public List<VideoVO> listHotWatchVideos() {
-        List<Video> videos = videoMapperService.listHotWatchVideos();
+    public List<VideoVO> selectHotReadVideoVOs() {
+        List<Video> videos = videoMapperService.selectHotReadVideoVOs();
 
         return adaptorVideosToVideoVOs(new VideoAdaptorBuilder.Builder<List<Video>>()
                 .build(videos));
@@ -515,24 +465,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     /**
      * 视频点赞
      *
-     * @param id id
-     * @return 点赞结果
+     * @param videoId videoId
      */
     @Override
-    public Boolean updateVideo(Long id) throws Exception {
+    public void addVideoLikeNum(Long videoId) throws Exception {
         //获取request
         ParamsHttpServletRequestWrapper request = (ParamsHttpServletRequestWrapper) HttpContextUtils.getHttpServletRequest();
         String userId = EncodeUtils.encoderByMD5(IPUtils.getIpAddr(request) + UserAgentUtils.getBrowserName(request) +
                 UserAgentUtils.getBrowserVersion(request) + UserAgentUtils.getDeviceManufacturer(request) +
                 UserAgentUtils.getDeviceType(request) + UserAgentUtils.getOsVersion(request));
         // 每天重新计算点赞
-        if (!RedisUtils.setIfAbsent(BLOG_VIDEO_LIKE_LOCK_KEY + userId + ":" + id, "1", DateUtils.getRemainMilliSecondsOneDay())){
+        if (!RedisUtils.setIfAbsent(BLOG_VIDEO_LIKE_LOCK_KEY + userId + ":" + videoId, "1", DateUtils.getRemainMilliSecondsOneDay())){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "1天只能点赞1次，请明天再来点赞");
         }
 
-        return baseMapper.update(null, new LambdaUpdateWrapper<Video>()
-                .eq(Video::getVideoId, id)
-                .setSql("like_num = like_num + 1")) > 0;
+        videoMapperService.addVideoLikeNum(videoId);
     }
 
 }

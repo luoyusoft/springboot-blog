@@ -389,7 +389,7 @@ public class FileServiceImpl implements FileService {
             }
 
             // 检测视频
-            if (videoMapperService.checkByFile(filesItem.getUrl())){
+            if (videoMapperService.existByFile(filesItem.getUrl())){
                 failList.add(filesItem.getFillId());
                 continue;
             }

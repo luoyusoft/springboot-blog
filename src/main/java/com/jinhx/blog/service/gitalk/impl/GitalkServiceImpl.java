@@ -79,7 +79,7 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initVideoList(){
-        List<Video> videos = videoMapperService.listVideosByPublish();
+        List<Video> videos = videoMapperService.selectVideosByPublish(Video.PUBLISH_TRUE);
         XxlJobLogger.log("初始化gitalk视频数据，查到个数：{}", videos.size());
         log.info("初始化gitalk视频数据，查到个数：{}", videos.size());
         if (CollectionUtils.isNotEmpty(videos)){

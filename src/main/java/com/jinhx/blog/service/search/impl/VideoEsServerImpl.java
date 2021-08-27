@@ -70,7 +70,7 @@ public class VideoEsServerImpl implements VideoEsServer {
     public boolean initVideoList() throws Exception {
         if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX)){
             if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_VIDEO_INDEX)){
-                List<Video> videos = videoMapperService.listVideosByPublish();
+                List<Video> videos = videoMapperService.selectVideosByPublish(Video.PUBLISH_TRUE);
                 XxlJobLogger.log("初始化es视频数据，查到个数：{}", videos.size());
                 log.info("初始化es视频数据，查到个数：{}", videos.size());
                 if(CollectionUtils.isNotEmpty(videos)){

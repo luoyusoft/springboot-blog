@@ -1,6 +1,5 @@
 package com.jinhx.blog.service.video;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
 import com.jinhx.blog.entity.video.Video;
@@ -15,38 +14,14 @@ import java.util.List;
  * @author jinhx
  * @since 2018-11-22
  */
-public interface VideoService extends IService<Video> {
+public interface VideoService {
 
     /**
-     * 将Video按需转换为VideoVO
-     *
-     * @param videoAdaptorBuilder videoAdaptorBuilder
-     * @return VideoVO
-     */
-    VideoVO adaptorVideoToVideoVO(VideoAdaptorBuilder<Video> videoAdaptorBuilder);
-
-    /**
-     * 将VideoVO转换为Video
-     *
-     * @param videoAdaptorBuilder videoAdaptorBuilder
-     * @return Video
-     */
-    Video adaptorVideoVOToVideo(VideoAdaptorBuilder<VideoVO> videoAdaptorBuilder);
-
-    /**
-     * 将Video列表按需转换为VideoVO列表
-     *
-     * @param videoAdaptorBuilder videoAdaptorBuilder
-     * @return VideoVO列表
-     */
-    List<VideoVO> adaptorVideosToVideoVOs(VideoAdaptorBuilder<List<Video>> videoAdaptorBuilder);
-
-    /**
-     * 获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
-    HomeVideoInfoVO getHommeVideoInfoVO();
+    HomeVideoInfoVO selectHommeVideoInfoVO();
 
     /**
      * 分页查询视频列表
@@ -56,14 +31,14 @@ public interface VideoService extends IService<Video> {
      * @param title 标题
      * @return 视频列表
      */
-    PageData queryPage(Integer page, Integer limit, String title);
+    PageData<VideoVO> selectPage(Integer page, Integer limit, String title);
 
     /**
-     * 保存视频
+     * 新增视频
      *
-     * @param videoVO videoVO
+     * @param videoVO 视频
      */
-    void saveVideo(VideoVO videoVO);
+    void insertVideo(VideoVO videoVO);
 
     /**
      * 更新视频
@@ -80,57 +55,26 @@ public interface VideoService extends IService<Video> {
     void updateVideoStatus(VideoVO videoVO);
 
     /**
-     * 获取视频对象
+     * 查询视频
      *
      * @param videoId videoId
      * @param publish publish
      * @param videoAdaptorBuilder videoAdaptorBuilder
-     * @return VideoVO
+     * @return 视频
      */
-    VideoVO getVideoVO(Long videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder);
+    VideoVO selectVideoVOByIdAndPublish(Long videoId, Boolean publish, VideoAdaptorBuilder<Video> videoAdaptorBuilder);
 
     /**
-     * 判断类别下是否有视频
+     * 批量根据videoId删除视频
      *
-     * @param categoryId categoryId
-     * @return 类别下是否有视频
+     * @param videoIds videoIds
      */
-    Boolean checkByCategoryId(Long categoryId);
-
-    /**
-     * 判断上传文件下是否有视频
-     *
-     * @param url url
-     * @return 上传文件下是否有视频
-     */
-    Boolean checkByFile(String url);
-
-    /**
-     * 批量删除
-     *
-     * @param videoIds 视频id列表
-     */
-    void deleteVideos(List<Long> videoIds);
-
-    /**
-     * 查询所有已发布的视频
-     *
-     * @return 所有已发布的视频
-     */
-    List<Video> listVideosByPublish();
-
-    /**
-     * 根据标题查询所有已发布的视频
-     *
-     * @param title 标题
-     * @return 所有已发布的视频
-     */
-    List<Video> listVideosByPublishAndTitle(String title);
+    void deleteVideosById(List<Long> videoIds);
 
     /********************** portal ********************************/
 
     /**
-     * 分页获取视频列表
+     * 分页查询视频列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -140,29 +84,28 @@ public interface VideoService extends IService<Video> {
      * @param watch 观看量排序
      * @return 视频列表
      */
-    PageData listVideos(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch);
+    PageData<VideoVO> selectPortalPage(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch);
 
     /**
-     * 获取VideoVO
+     * 根据videoId查询视频
      *
-     * @param id id
-     * @return VideoVO
+     * @param videoId videoId
+     * @return 视频
      */
-    VideoVO getVideoVO(Long id);
+    VideoVO selectPortalVideoVOById(Long videoId);
 
     /**
-     * 获取热观榜
+     * 查询热观视频列表
      *
      * @return 热观视频列表
      */
-    List<VideoVO> listHotWatchVideos();
+    List<VideoVO> selectHotReadVideoVOs();
 
     /**
      * 视频点赞
      *
-     * @param id id
-     * @return 点赞结果
+     * @param videoId videoId
      */
-    Boolean updateVideo(Long id) throws Exception;
+    void addVideoLikeNum(Long videoId) throws Exception;
 
 }

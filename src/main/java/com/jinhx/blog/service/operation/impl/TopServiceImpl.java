@@ -122,7 +122,7 @@ public class TopServiceImpl implements TopService {
         }
 
         if(ModuleTypeConstants.VIDEO.equals(topVO.getModule())){
-            VideoVO videoVO = videoService.getVideoVO(topVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
+            VideoVO videoVO = videoService.selectVideoVOByIdAndPublish(topVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
             if (Objects.nonNull(videoVO)){
                 if (topAdaptorBuilder.getWatchNum()){
                     topVO.setWatchNum(videoVO.getWatchNum());
@@ -230,7 +230,7 @@ public class TopServiceImpl implements TopService {
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            List<Video> videoList = videoMapperService.listVideosByPublishAndTitle(title);
+            List<Video> videoList = videoMapperService.selectVideosByPublishAndTitle(title, Video.PUBLISH_TRUE);
             if (videoList != null && videoList.size() > 0){
                 videoList.forEach(videoListItem -> {
                     TopVO TopVO = new TopVO();
@@ -293,7 +293,7 @@ public class TopServiceImpl implements TopService {
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            if(Objects.isNull(videoMapperService.getVideo(linkId, Video.PUBLISH_TRUE))) {
+            if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PUBLISH_TRUE))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
         }

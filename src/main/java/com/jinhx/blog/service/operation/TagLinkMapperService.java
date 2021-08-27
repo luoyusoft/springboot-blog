@@ -1,7 +1,11 @@
 package com.jinhx.blog.service.operation;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.operation.TagLink;
 import com.jinhx.blog.mapper.operation.TagLinkMapper;
 import org.springframework.stereotype.Service;
@@ -52,6 +56,30 @@ public class TagLinkMapperService extends ServiceImpl<TagLinkMapper, TagLink> {
         baseMapper.delete(new LambdaQueryWrapper<TagLink>()
                 .eq(TagLink::getLinkId, linkId)
                 .eq(TagLink::getModule, module));
+    }
+
+    /**
+     * 新增标签链接
+     *
+     * @param tagLink 标签链接
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertTagLink(TagLink tagLink) {
+        insertTagLinks(Lists.newArrayList(tagLink));
+    }
+
+    /**
+     * 批量新增标签链接
+     *
+     * @param tagLinks 标签链接列表
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertTagLinks(List<TagLink> tagLinks) {
+        if (CollectionUtils.isNotEmpty(tagLinks)){
+            if (tagLinks.stream().mapToInt(item -> baseMapper.insert(item)).sum() != tagLinks.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
+        }
     }
 
     /********************** portal ********************************/

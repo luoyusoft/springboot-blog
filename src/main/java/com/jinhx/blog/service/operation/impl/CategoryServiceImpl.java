@@ -3,7 +3,6 @@ package com.jinhx.blog.service.operation.impl;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.google.common.collect.Lists;
-import com.jinhx.blog.common.constants.RedisKeyConstants;
 import com.jinhx.blog.common.enums.CategoryRankEnum;
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;
@@ -19,7 +18,6 @@ import com.jinhx.blog.service.video.VideoMapperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -228,7 +226,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         // 判断是否有视频
-        if(videoMapperService.checkByCategoryId(categoryId)) {
+        if(videoMapperService.existByCategoryId(categoryId)) {
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该类别下有视频，无法删除");
         }
 

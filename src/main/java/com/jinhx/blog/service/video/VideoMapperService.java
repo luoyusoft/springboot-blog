@@ -2,8 +2,13 @@ package com.jinhx.blog.service.video;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
+import com.jinhx.blog.common.enums.ResponseEnums;
+import com.jinhx.blog.common.exception.MyException;
 import com.jinhx.blog.entity.base.QueryPage;
 import com.jinhx.blog.entity.video.Video;
 import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
@@ -12,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * VideoMapperService
@@ -23,11 +29,11 @@ import java.util.List;
 public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
 
     /**
-     * 获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
-    public HomeVideoInfoVO getHommeVideoInfoVO() {
+    public HomeVideoInfoVO selectHommeVideoInfoVO() {
         Integer publishCount = baseMapper.selectCount(new LambdaQueryWrapper<Video>()
                 .eq(Video::getPublish, Video.PUBLISH_TRUE));
         Integer allCount = baseMapper.selectCount(new LambdaQueryWrapper<>());
@@ -46,7 +52,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      * @param title 标题
      * @return 视频列表
      */
-    public IPage<Video> queryPage(Integer page, Integer limit, String title) {
+    public IPage<Video> selectPage(Integer page, Integer limit, String title) {
         return baseMapper.selectPage(new QueryPage<Video>(page, limit).getPage(), new LambdaQueryWrapper<Video>()
                 .like(ObjectUtil.isNotEmpty(title), Video::getTitle, title)
                 .like(ObjectUtil.isNotEmpty(title), Video::getAlternateName, title)
@@ -54,63 +60,104 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
     }
 
     /**
-     * 保存视频
+     * 新增视频
      *
-     * @param video video
+     * @param video 视频
      */
-    public void saveVideo(Video video) {
-        baseMapper.insert(video);
+    @Transactional(rollbackFor = Exception.class)
+    public void insertVideo(Video video) {
+        insertVideos(Lists.newArrayList(video));
     }
 
     /**
-     * 更新视频
+     * 批量新增视频
      *
-     * @param video video
+     * @param videos 视频列表
      */
-    public void updateVideo(Video video) {
-        baseMapper.updateById(video);
+    @Transactional(rollbackFor = Exception.class)
+    public void insertVideos(List<Video> videos) {
+        if (CollectionUtils.isNotEmpty(videos)){
+            if (videos.stream().mapToInt(item -> baseMapper.insert(item)).sum() != videos.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
+        }
     }
 
     /**
-     * 更新视频
+     * 根据videoId更新视频
      *
      * @param video video
      */
+    @Transactional(rollbackFor = Exception.class)
     public void updateVideoById(Video video) {
-        baseMapper.updateById(video);
+        updateVideosById(Lists.newArrayList(video));
     }
 
     /**
-     * 获取视频对象
+     * 批量根据videoId更新视频
+     *
+     * @param videos videos
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateVideosById(List<Video> videos) {
+        if (CollectionUtils.isNotEmpty(videos)){
+            if (videos.stream().mapToInt(item -> baseMapper.updateById(item)).sum() != videos.size()){
+                throw new MyException(ResponseEnums.UPDATE_FAILR);
+            }
+        }
+    }
+
+    /**
+     * 根据视频id，发布状态查询视频
      *
      * @param videoId videoId
      * @param publish publish
-     * @return Video
+     * @return 视频
      */
-    public Video getVideo(Long videoId, Boolean publish) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<Video>()
-                .eq(Video::getVideoId, videoId)
-                .eq(publish != null, Video::getPublish, publish));
+    public Video selectVideoByIdAndPublish(Long videoId, Boolean publish) {
+        List<Video> videos = selectVideosByIdAndPublish(Lists.newArrayList(videoId), publish);
+        if (CollectionUtils.isEmpty(videos)){
+            return null;
+        }
+
+        return videos.get(0);
     }
 
     /**
-     * 判断类别下是否有视频
+     * 根据视频id列表，发布状态查询视频列表
+     *
+     * @param videoIds videoIds
+     * @param publish publish
+     * @return 视频列表
+     */
+    public List<Video> selectVideosByIdAndPublish(List<Long> videoIds, Boolean publish) {
+        if (CollectionUtils.isEmpty(videoIds)){
+            return Lists.newArrayList();
+        }
+
+        return baseMapper.selectList(new LambdaQueryWrapper<Video>()
+                .in(CollectionUtils.isNotEmpty(videoIds), Video::getVideoId, videoIds)
+                .eq(Objects.nonNull(publish), Video::getPublish, publish));
+    }
+
+    /**
+     * 查询类别下是否有视频
      *
      * @param categoryId categoryId
      * @return 类别下是否有视频
      */
-    public Boolean checkByCategoryId(Long categoryId) {
+    public Boolean existByCategoryId(Long categoryId) {
         return baseMapper.selectCount(new LambdaQueryWrapper<Video>()
-                .like(categoryId != null, Video::getCategoryId, categoryId)) > 0;
+                .like(Objects.nonNull(categoryId), Video::getCategoryId, categoryId)) > 0;
     }
 
     /**
-     * 判断上传文件下是否有视频
+     * 查询上传文件是否有视频封面或视频内容占用
      *
      * @param url url
-     * @return 上传文件下是否有视频
+     * @return 上传文件是否有视频封面或视频内容占用
      */
-    public Boolean checkByFile(String url) {
+    public Boolean existByFile(String url) {
         return baseMapper.selectCount(new LambdaQueryWrapper<Video>()
                 .eq(ObjectUtil.isNotEmpty(url), Video::getCover, url)
                 .or()
@@ -118,35 +165,40 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
     }
 
     /**
-     * 批量删除
+     * 批量根据videoId删除视频
      *
-     * @param ids 视频id数组
+     * @param videoIds videoIds
      */
     @Transactional(rollbackFor = Exception.class)
-    public void deleteVideos(List<Long> ids) {
-        baseMapper.deleteBatchIds(ids);
+    public void deleteVideosById(List<Long> videoIds) {
+        if (CollectionUtils.isNotEmpty(videoIds)){
+            if (baseMapper.deleteBatchIds(videoIds) != videoIds.size()){
+                throw new MyException(ResponseEnums.DELETE_FAIL);
+            }
+        }
     }
 
     /**
-     * 查询所有已发布的视频
+     * 根据发布状态查询视频列表
      *
-     * @return 所有已发布的视频
+     * @param publish publish
+     * @return 视频列表
      */
-    public List<Video> listVideosByPublish() {
+    public List<Video> selectVideosByPublish(Boolean publish) {
         return baseMapper.selectList(new LambdaQueryWrapper<Video>()
-                .eq(Video::getPublish, Video.PUBLISH_TRUE)
-                .orderByDesc(Video::getVideoId));
+                .eq(Objects.nonNull(publish), Video::getPublish, publish));
     }
 
     /**
-     * 根据标题查询所有已发布的视频
+     * 根据标题，发布状态查询视频列表
      *
      * @param title 标题
-     * @return 所有已发布的视频
+     * @param publish publish
+     * @return 视频列表
      */
-    public List<Video> listVideosByPublishAndTitle(String title) {
+    public List<Video> selectVideosByPublishAndTitle(String title, Boolean publish) {
         return baseMapper.selectList(new LambdaQueryWrapper<Video>()
-                .eq(Video::getPublish, Video.PUBLISH_TRUE)
+                .eq(Video::getPublish, publish)
                 .and(qw ->
                         qw.like(ObjectUtil.isNotEmpty(title), Video::getTitle, title)
                                 .or()
@@ -157,7 +209,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
     /********************** portal ********************************/
 
     /**
-     * 分页获取视频列表
+     * 分页查询视频列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -167,7 +219,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      * @param watch 观看量排序
      * @return 视频列表
      */
-    public IPage<Video> listVideos(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch) {
+    public IPage<Video> selectPortalPage(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch) {
         return baseMapper.selectPage(new QueryPage<Video>(page, limit).getPage(), new LambdaQueryWrapper<Video>()
                 .eq(Video::getPublish, Video.PUBLISH_TRUE)
                 .like(categoryId != null, Video::getCategoryId, categoryId)
@@ -177,16 +229,44 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
     }
 
     /**
-     * 获取热观榜
+     * 查询热观视频列表
      *
      * @return 热观视频列表
      */
-    public List<Video> listHotWatchVideos() {
+    public List<Video> selectHotReadVideoVOs() {
         return baseMapper.selectList(new LambdaQueryWrapper<Video>()
                 .eq(Video::getPublish, Video.PUBLISH_TRUE)
                 // 只能调用一次,多次调用以最后一次为准 有sql注入的风险,请谨慎使用
                 .last("limit 5")
                 .orderByDesc(Video::getWatchNum));
+    }
+
+    /**
+     * 视频观看
+     *
+     * @param videoId videoId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void addVideoWatchNum(Long videoId) {
+        if (baseMapper.update(null, new LambdaUpdateWrapper<Video>()
+                .eq(Video::getVideoId, videoId)
+                .setSql("watch_num = watch_num + 1")) != 1) {
+            throw new MyException(ResponseEnums.UPDATE_FAILR);
+        }
+    }
+
+    /**
+     * 视频点赞
+     *
+     * @param videoId videoId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void addVideoLikeNum(Long videoId) {
+        if (baseMapper.update(null, new LambdaUpdateWrapper<Video>()
+                .eq(Video::getVideoId, videoId)
+                .setSql("like_num = like_num + 1")) != 1) {
+            throw new MyException(ResponseEnums.UPDATE_FAILR);
+        }
     }
 
 }

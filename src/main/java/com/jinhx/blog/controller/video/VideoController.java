@@ -1,11 +1,10 @@
 package com.jinhx.blog.controller.video;
 
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.jinhx.blog.common.aop.annotation.LogView;
-import com.jinhx.blog.common.enums.ResponseEnums;
-import com.jinhx.blog.common.exception.MyException;
+import com.jinhx.blog.common.util.MyAssert;
 import com.jinhx.blog.common.validator.ValidatorUtils;
 import com.jinhx.blog.common.validator.group.InsertGroup;
+import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.base.Response;
 import com.jinhx.blog.entity.operation.VideoAdaptorBuilder;
@@ -14,9 +13,9 @@ import com.jinhx.blog.entity.video.vo.HomeVideoInfoVO;
 import com.jinhx.blog.entity.video.vo.VideoVO;
 import com.jinhx.blog.service.video.VideoService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -28,19 +27,18 @@ import java.util.List;
 @RestController
 public class VideoController {
 
-    @Resource
+    @Autowired
     private VideoService videoService;
 
     /**
-     * 获取首页信息
+     * 查询首页信息
      *
      * @return 首页信息
      */
     @GetMapping("/manage/video/homeinfo")
     @RequiresPermissions("video:list")
-    public Response getHommeVideoInfoVO() {
-        HomeVideoInfoVO homeVideoInfoVO = videoService.getHommeVideoInfoVO();
-        return Response.success(homeVideoInfoVO);
+    public Response<HomeVideoInfoVO> selectHommeVideoInfoVO() {
+        return Response.success(videoService.selectHommeVideoInfoVO());
     }
 
     /**
@@ -53,34 +51,33 @@ public class VideoController {
      */
     @GetMapping("/manage/video/list")
     @RequiresPermissions("video:list")
-    public Response listVideo(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
-        PageData videoPage = videoService.queryPage(page, limit, title);
-        return Response.success(videoPage);
+    public Response<PageData<VideoVO>> selectPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit, @RequestParam("title") String title) {
+        return Response.success(videoService.selectPage(page, limit, title));
     }
 
     /**
-     * 获取视频对象
+     * 查询视频
      *
      * @param videoId videoId
-     * @return VideoVO
+     * @return 视频
      */
     @GetMapping("/manage/video/info/{videoId}")
     @RequiresPermissions("video:list")
-    public Response info(@PathVariable("videoId") Long videoId) {
-        return Response.success(videoService.getVideoVO(videoId, null, new VideoAdaptorBuilder.Builder<Video>().setAll().build()));
+    public Response<VideoVO> selectVideoVOByIdAndPublish(@PathVariable("videoId") Long videoId) {
+        return Response.success(videoService.selectVideoVOByIdAndPublish(videoId, null, new VideoAdaptorBuilder.Builder<Video>().setAll().build()));
     }
 
     /**
-     * 保存视频
+     * 新增视频
      *
-     * @param videoVO videoVO
+     * @param videoVO 视频
+     * @return 新增结果
      */
     @PostMapping("/manage/video/save")
     @RequiresPermissions("video:save")
-    public Response saveVideo(@RequestBody VideoVO videoVO){
+    public Response<Void> insertVideo(@RequestBody VideoVO videoVO){
         ValidatorUtils.validateEntity(videoVO, InsertGroup.class);
-        videoService.saveVideo(videoVO);
-
+        videoService.insertVideo(videoVO);
         return Response.success();
     }
 
@@ -88,10 +85,12 @@ public class VideoController {
      * 更新视频
      *
      * @param videoVO videoVO
+     * @return 更新结果
      */
     @PutMapping("/manage/video/update")
     @RequiresPermissions("video:update")
-    public Response updateVideo(@RequestBody VideoVO videoVO){
+    public Response<Void> updateVideo(@RequestBody VideoVO videoVO){
+        ValidatorUtils.validateEntity(videoVO, UpdateGroup.class);
         videoService.updateVideo(videoVO);
         return Response.success();
     }
@@ -100,38 +99,33 @@ public class VideoController {
      * 更新视频状态
      *
      * @param videoVO videoVO
+     * @return 更新结果
      */
     @PutMapping("/manage/video/update/status")
     @RequiresPermissions("video:update")
-    public Response updateVideoStatus(@RequestBody VideoVO videoVO){
+    public Response<Void> updateVideoStatus(@RequestBody VideoVO videoVO){
         videoService.updateVideoStatus(videoVO);
         return Response.success();
     }
 
     /**
-     * 批量删除
+     * 批量根据videoId删除视频
      *
-     * @param videoIds 视频id列表
+     * @param videoIds videoIds
+     * @return 删除结果
      */
     @DeleteMapping("/manage/video/delete")
     @RequiresPermissions("video:delete")
-    public Response<Void> deleteVideos(@RequestBody List<Long> videoIds) {
-        if (CollectionUtils.isEmpty(videoIds)){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "videoIds不能为空");
-        }
-
-        if (videoIds.size() > 100){
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "videoIds不能超过100个");
-        }
-
-        videoService.deleteVideos(videoIds);
+    public Response<Void> deleteVideosById(@RequestBody List<Long> videoIds) {
+        MyAssert.sizeBetween(videoIds, 1, 100, "videoIds");
+        videoService.deleteVideosById(videoIds);
         return Response.success();
     }
 
     /********************** portal ********************************/
 
     /**
-     * 分页获取视频列表
+     * 分页查询视频列表
      *
      * @param page 页码
      * @param limit 每页数量
@@ -143,49 +137,47 @@ public class VideoController {
      */
     @GetMapping("/video/listvideos")
     @LogView(module = 1)
-    public Response listVideos(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+    public Response<PageData<VideoVO>> selectPortalPage(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
                                @RequestParam("latest") Boolean latest, @RequestParam("categoryId") Long categoryId,
                                @RequestParam("like") Boolean like, @RequestParam("watch") Boolean watch) {
-        PageData queryPageCondition = videoService.listVideos(page, limit, latest, categoryId, like, watch);
-        return Response.success(queryPageCondition);
+        return Response.success(videoService.selectPortalPage(page, limit, latest, categoryId, like, watch));
     }
 
     /**
-     * 获取VideoVO
+     * 根据videoId查询视频
      *
-     * @param id id
-     * @return VideoVO
+     * @param videoId videoId
+     * @return 视频
      */
     @GetMapping("/video/{id}")
     @LogView(module = 1)
-    public Response getVideo(@PathVariable Long id){
-        return Response.success(videoService.getVideoVO(id));
+    public Response<VideoVO> selectPortalVideoVOById(@PathVariable Long videoId){
+        return Response.success(videoService.selectPortalVideoVOById(videoId));
     }
 
     /**
-     * 获取热观榜
+     * 查询热观视频列表
      *
      * @return 热观视频列表
      */
     @GetMapping("/videos/listhotwatchvideos")
     @LogView(module = 1)
-    public Response listHotWatchVideos(){
-        return Response.success(videoService.listHotWatchVideos());
+    public Response<List<VideoVO>> selectHotReadVideoVOs(){
+        return Response.success(videoService.selectHotReadVideoVOs());
     }
 
     /**
      * 视频点赞
      *
-     * @param id id
+     * @param videoId videoId
      * @return 点赞结果
      */
     @PutMapping("/video/{id}")
     @LogView(module = 1)
-    public Response updateVideo(@PathVariable Long id) throws Exception{
-        if (id == null) {
-            throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "id不能为空");
-        }
-        return Response.success(videoService.updateVideo(id));
+    public Response<Video> addVideoLikeNum(@PathVariable Long videoId) throws Exception{
+        MyAssert.notNull(videoId, "videoId不能为空");
+        videoService.addVideoLikeNum(videoId);
+        return Response.success();
     }
 
 }

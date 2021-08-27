@@ -284,7 +284,7 @@ public class ArticleServiceImpl implements ArticleService {
             tagLink.setLinkId(articleVO.getArticleId());
             tagLink.setTagId(item.getTagId());
             tagLink.setModule(ModuleTypeConstants.ARTICLE);
-            tagLinkMapperService.save(tagLink);
+            tagLinkMapperService.insertTagLink(tagLink);
         });
 
         // 当文章是发布状态时，需要新增到es中
@@ -326,7 +326,7 @@ public class ArticleServiceImpl implements ArticleService {
             tagLink.setLinkId(articleVO.getArticleId());
             tagLink.setTagId(item.getTagId());
             tagLink.setModule(ModuleTypeConstants.ARTICLE);
-            tagLinkMapperService.save(tagLink);
+            tagLinkMapperService.insertTagLink(tagLink);
         });
 
         // 更新

@@ -126,7 +126,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         if(ModuleTypeConstants.VIDEO.equals(recommendVO.getModule())){
-            VideoVO videoVO = videoService.getVideoVO(recommendVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
+            VideoVO videoVO = videoService.selectVideoVOByIdAndPublish(recommendVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
             if (Objects.nonNull(videoVO)){
                 if (recommendAdaptorBuilder.getWatchNum()){
                     recommendVO.setWatchNum(videoVO.getWatchNum());
@@ -244,7 +244,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            List<Video> videoList = videoMapperService.listVideosByPublishAndTitle(title);
+            List<Video> videoList = videoMapperService.selectVideosByPublishAndTitle(title, Video.PUBLISH_TRUE);
             if (CollectionUtils.isNotEmpty(videoList)){
                 videoList.forEach(videoListItem -> {
                     RecommendVO recommendVO = new RecommendVO();
@@ -307,7 +307,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            if(Objects.isNull(videoMapperService.getVideo(linkId, Video.PUBLISH_TRUE))) {
+            if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PUBLISH_TRUE))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
         }
