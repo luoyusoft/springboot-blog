@@ -29,9 +29,6 @@ public class Category extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -8525248598661244699L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "类别id主键")
     @TableId(type = IdType.INPUT)
     private Long categoryId;

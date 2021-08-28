@@ -12,6 +12,8 @@ import com.jinhx.blog.entity.file.FileChunk;
 import com.jinhx.blog.entity.file.vo.FileVO;
 import com.jinhx.blog.service.article.ArticleMapperService;
 import com.jinhx.blog.service.file.*;
+import com.jinhx.blog.factory.FileStorageService;
+import com.jinhx.blog.factory.FileStorageServiceFactory;
 import com.jinhx.blog.service.operation.FriendLinkMapperService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -126,9 +128,9 @@ public class FileServiceImpl implements FileService {
             fileResource.setBucketName(bucketName);
             fileResource.setStorageType(storageType);
             fileResource.setUrl(url);
-            fileResource.setIsChunk(File.IS_CHUNK_FALSE);
+            fileResource.setIsChunk(File.IsChunkEnum.NO.getCode());
             fileResource.setChunkCount(0);
-            fileResource.setUploadStatus(File.UPLOAD_STATUS_1);
+            fileResource.setUploadStatus(File.UploadStatusEnum.SUCCESS.getCode());
             fileResource.setSuffix(suffix);
             fileResource.setFileMd5(DigestUtils.md5Hex(file.getInputStream()));
             fileResource.setFileSize(fileStorageService.getFileSize(file.getSize()));
@@ -190,12 +192,12 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<FileVO> getUploadChunkFileVOsByMinio(FileVO fileVO) {
         String bucketName = null;
-        File fileResource = fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileVO.getFileMd5(), fileVO.getModule(), File.IS_CHUNK_TRUE);
+        File fileResource = fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileVO.getFileMd5(), fileVO.getModule(), File.IsChunkEnum.YES.getCode());
 
         // 校验该文件是否上传过
         if(Objects.nonNull(fileResource)){
             // 秒传
-            if(fileResource.getUploadStatus().equals(File.UPLOAD_STATUS_1)){
+            if(fileResource.getUploadStatus().equals(File.UploadStatusEnum.SUCCESS.getCode())){
                 return Collections.emptyList();
             }
             // 续传
@@ -235,7 +237,7 @@ public class FileServiceImpl implements FileService {
             String url = fileStorageService.createUploadChunkUrl(bucketName, fileVO.getFileMd5(), i, 604800);
             file.setUploadUrl(url);
             file.setChunkNumber(i);
-            file.setUploadStatus(FileChunk.UPLOAD_STATUS_0);
+            file.setUploadStatus(FileChunk.UploadStatusEnum.NO.getCode());
             file.setFileMd5(fileVO.getFileMd5());
             file.setBucketName(bucketName);
             fileVOList.add(file);
@@ -243,7 +245,7 @@ public class FileServiceImpl implements FileService {
             FileChunk fileChunk = new FileChunk();
             fileChunk.setFileMd5(fileVO.getFileMd5());
             fileChunk.setUploadUrl(url);
-            fileChunk.setUploadStatus(FileChunk.UPLOAD_STATUS_0);
+            fileChunk.setUploadStatus(FileChunk.UploadStatusEnum.NO.getCode());
             fileChunk.setChunkNumber(file.getChunkNumber());
 
             // 新增分片
@@ -256,12 +258,12 @@ public class FileServiceImpl implements FileService {
         newFile.setFileMd5(fileVO.getFileMd5());
         newFile.setBucketName(bucketName);
         newFile.setFileSize(fileStorageService.getFileSize(Long.valueOf(fileVO.getFileSize())));
-        newFile.setIsChunk(File.IS_CHUNK_TRUE);
+        newFile.setIsChunk(File.IsChunkEnum.YES.getCode());
         newFile.setStorageType(File.STORAGE_TYPE_MINIO);
         newFile.setModule(fileVO.getModule());
         newFile.setSuffix(suffix);
         newFile.setChunkCount(fileVO.getChunkCount());
-        newFile.setUploadStatus(File.UPLOAD_STATUS_0);
+        newFile.setUploadStatus(File.UploadStatusEnum.PART.getCode());
         fileMapperService.insertFile(newFile);
 
         return fileVOList;
@@ -274,13 +276,13 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public void updateChunkUploadSuccess(FileVO fileVO) {
-        if (Objects.isNull(fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileVO.getFileMd5(), fileVO.getModule(), File.IS_CHUNK_TRUE))){
+        if (Objects.isNull(fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileVO.getFileMd5(), fileVO.getModule(), File.IsChunkEnum.YES.getCode()))){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件未上传过");
         }
 
         FileChunk fileChunk = new FileChunk();
         fileChunk.setFileMd5(fileVO.getFileMd5());
-        fileChunk.setUploadStatus(FileChunk.UPLOAD_STATUS_1);
+        fileChunk.setUploadStatus(FileChunk.UploadStatusEnum.YES.getCode());
         fileChunk.setChunkNumber(fileVO.getChunkNumber());
         fileChunkMapperService.updateFileChunkByFileMd5AndChunkNumber(fileChunk);
     }
@@ -293,11 +295,11 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public String composeFileByMinio(FileVO fileVO) {
-        if (Objects.isNull(fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileVO.getFileMd5(), fileVO.getModule(), File.IS_CHUNK_TRUE))){
+        if (Objects.isNull(fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileVO.getFileMd5(), fileVO.getModule(), File.IsChunkEnum.YES.getCode()))){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件未上传过");
         }
 
-        if(fileChunkMapperService.selectFileChunkCountByFileMd5AndUploadStatus(fileVO.getFileMd5(), FileChunk.UPLOAD_STATUS_0) > 1){
+        if(fileChunkMapperService.selectFileChunkCountByFileMd5AndUploadStatus(fileVO.getFileMd5(), FileChunk.UploadStatusEnum.NO.getCode()) > 1){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "该文件还有部分分片未上传");
         }
 
@@ -331,7 +333,7 @@ public class FileServiceImpl implements FileService {
         file.setFileMd5(fileVO.getFileMd5());
         file.setModule(fileVO.getModule());
         file.setUrl(url);
-        file.setUploadStatus(File.UPLOAD_STATUS_1);
+        file.setUploadStatus(File.UploadStatusEnum.SUCCESS.getCode());
 
         fileMapperService.updateFileByFileMd5AndModuleAndIsChunk(fileVO);
 
@@ -363,7 +365,7 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public String getFileUrl(String fileMd5, Integer module) {
-        File file = fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileMd5, module, File.IS_CHUNK_TRUE);
+        File file = fileMapperService.selectFileByFileMd5AndModuleAndIsChunk(fileMd5, module, File.IsChunkEnum.YES.getCode());
         if (Objects.isNull(file)){
             return null;
         }

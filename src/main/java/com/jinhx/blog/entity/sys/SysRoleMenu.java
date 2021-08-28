@@ -27,9 +27,6 @@ public class SysRoleMenu extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 8947211881660774714L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "系统角色菜单id主键")
     @TableId(type = IdType.INPUT)
     private Long sysRoleMenuId;

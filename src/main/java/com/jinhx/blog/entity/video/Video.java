@@ -11,8 +11,10 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -31,14 +33,6 @@ public class Video extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -840045152275397777L;
 
-    /**
-     * 发布状态
-     */
-    public static final Boolean PUBLISH_TRUE = true;
-
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "视频id主键")
     @TableId(type = IdType.INPUT)
     private Long videoId;
@@ -96,5 +90,17 @@ public class Video extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "点赞量")
     private Long likeNum;
+
+    @AllArgsConstructor
+    @Getter
+    public enum PublishEnum {
+
+        YES(true, "发布"),
+        NO(false, "不发布");
+
+        private Boolean code;
+        private String msg;
+
+    }
 
 }

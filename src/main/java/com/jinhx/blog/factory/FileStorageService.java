@@ -1,4 +1,4 @@
-package com.jinhx.blog.service.file;
+package com.jinhx.blog.factory;
 
 import cn.hutool.core.util.IdUtil;
 import com.jinhx.blog.common.util.DateUtils;

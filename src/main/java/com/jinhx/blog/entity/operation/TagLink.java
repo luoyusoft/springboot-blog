@@ -27,9 +27,6 @@ public class TagLink extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1347335185884378936L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "标签链接id主键")
     @TableId(type = IdType.INPUT)
     private Long tagLinkId;

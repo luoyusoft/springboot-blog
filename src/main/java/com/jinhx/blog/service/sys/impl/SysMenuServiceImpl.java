@@ -126,7 +126,7 @@ public class SysMenuServiceImpl implements SysMenuService {
      */
     @Override
     public List<SysMenu> selectNotButtonSysMenus() {
-        return sysMenuMapperService.selectSysMenusByType(SysMenu.TYPE_BUTTON);
+        return sysMenuMapperService.selectSysMenusByType(SysMenu.TypeEnum.BUTTON.getCode());
     }
 
     /**

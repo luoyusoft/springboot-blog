@@ -29,9 +29,6 @@ public class SysParam extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -662497005424960310L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "系统参数id主键")
     @TableId(type = IdType.INPUT)
     private Long sysParamId;

@@ -85,7 +85,7 @@ public class RecommendServiceImpl implements RecommendService {
         if(ModuleTypeConstants.ARTICLE.equals(recommendVO.getModule())){
             ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
             articleVOsQueryDTO.setLogStr("con=info");
-            articleVOsQueryDTO.setPublish(Article.PUBLISH_TRUE);
+            articleVOsQueryDTO.setPublish(Article.PublishEnum.YES.getCode());
             articleVOsQueryDTO.setArticleIds(Lists.newArrayList(recommendVO.getLinkId()));
             articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
                     .categoryListStr(true)
@@ -126,7 +126,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         if(ModuleTypeConstants.VIDEO.equals(recommendVO.getModule())){
-            VideoVO videoVO = videoService.selectVideoVOByIdAndPublish(recommendVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
+            VideoVO videoVO = videoService.selectVideoVOByIdAndPublish(recommendVO.getLinkId(), Video.PublishEnum.YES.getCode(), new VideoAdaptorBuilder.Builder<Video>().setAll().build());
             if (Objects.nonNull(videoVO)){
                 if (recommendAdaptorBuilder.getWatchNum()){
                     recommendVO.setWatchNum(videoVO.getWatchNum());
@@ -231,7 +231,7 @@ public class RecommendServiceImpl implements RecommendService {
         List<RecommendVO> recommendVOList = new ArrayList<>();
 
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            List<Article> articles = articleMapperService.selectArticlesByTitleAndPublish(title, Article.PUBLISH_TRUE);
+            List<Article> articles = articleMapperService.selectArticlesByTitleAndPublish(title, Article.PublishEnum.YES.getCode());
             if (CollectionUtils.isNotEmpty(articles)){
                 articles.forEach(articlesItem -> {
                     RecommendVO recommendVO = new RecommendVO();
@@ -244,7 +244,7 @@ public class RecommendServiceImpl implements RecommendService {
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            List<Video> videoList = videoMapperService.selectVideosByPublishAndTitle(title, Video.PUBLISH_TRUE);
+            List<Video> videoList = videoMapperService.selectVideosByPublishAndTitle(title, Video.PublishEnum.YES.getCode());
             if (CollectionUtils.isNotEmpty(videoList)){
                 videoList.forEach(videoListItem -> {
                     RecommendVO recommendVO = new RecommendVO();
@@ -309,14 +309,14 @@ public class RecommendServiceImpl implements RecommendService {
      */
     private void verifyExistByLinkIdAndModule(Long linkId, Integer module) {
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PUBLISH_TRUE))) {
+            if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PublishEnum.YES.getCode()))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
             return;
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PUBLISH_TRUE))) {
+            if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PublishEnum.YES.getCode()))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "推荐内容不存在");
             }
             return;

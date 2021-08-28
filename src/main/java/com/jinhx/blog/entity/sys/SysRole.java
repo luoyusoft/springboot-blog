@@ -28,9 +28,6 @@ public class SysRole extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -6539094636430203141L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "系统角色id主键")
     @TableId(type = IdType.INPUT)
     private Long sysRoleId;

@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -25,24 +27,6 @@ public class Article extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -1891100871116824211L;
 
-    /**
-     * 发布状态
-     */
-    public static final Boolean PUBLISH_TRUE = true;
-
-    /**
-     * 公开状态
-     */
-    public static final Boolean OPEN_TRUE = true;
-
-    /**
-     * 置顶状态
-     */
-    public static final Boolean TOP_TRUE = true;
-
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "文章id主键")
     @TableId(type = IdType.INPUT)
     private Long articleId;
@@ -79,5 +63,42 @@ public class Article extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "格式化后的内容")
     private String contentFormat;
+
+    @AllArgsConstructor
+    @Getter
+    public enum OpenEnum {
+
+        YES(true, "公开"),
+        NO(false, "不公开");
+
+        private Boolean code;
+        private String msg;
+
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public enum PublishEnum {
+
+        YES(true, "发布"),
+        NO(false, "不发布");
+
+        private Boolean code;
+        private String msg;
+
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public enum CoverTypeEnum {
+
+        NO(0, "无图片"),
+        ROUTINE(1, "普通"),
+        BIG(2, "大图片");
+
+        private Integer code;
+        private String msg;
+
+    }
 
 }

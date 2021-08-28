@@ -79,7 +79,7 @@ public class TopServiceImpl implements TopService {
         if(ModuleTypeConstants.ARTICLE.equals(topVO.getModule())){
             ArticleVOsQueryDTO articleVOsQueryDTO = new ArticleVOsQueryDTO();
             articleVOsQueryDTO.setLogStr("con=info");
-            articleVOsQueryDTO.setPublish(Article.PUBLISH_TRUE);
+            articleVOsQueryDTO.setPublish(Article.PublishEnum.YES.getCode());
             articleVOsQueryDTO.setArticleIds(Lists.newArrayList(topVO.getLinkId()));
             articleVOsQueryDTO.setArticleBuilder(ArticleBuilder.builder()
                     .categoryListStr(true)
@@ -120,7 +120,7 @@ public class TopServiceImpl implements TopService {
         }
 
         if(ModuleTypeConstants.VIDEO.equals(topVO.getModule())){
-            VideoVO videoVO = videoService.selectVideoVOByIdAndPublish(topVO.getLinkId(), Video.PUBLISH_TRUE, new VideoAdaptorBuilder.Builder<Video>().setAll().build());
+            VideoVO videoVO = videoService.selectVideoVOByIdAndPublish(topVO.getLinkId(), Video.PublishEnum.YES.getCode(), new VideoAdaptorBuilder.Builder<Video>().setAll().build());
             if (Objects.nonNull(videoVO)){
                 if (topAdaptorBuilder.getWatchNum()){
                     topVO.setWatchNum(videoVO.getWatchNum());
@@ -215,7 +215,7 @@ public class TopServiceImpl implements TopService {
         List<TopVO> TopVOList = Lists.newArrayList();
 
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            List<Article> articles = articleMapperService.selectArticlesByTitleAndPublish(title, Article.PUBLISH_TRUE);
+            List<Article> articles = articleMapperService.selectArticlesByTitleAndPublish(title, Article.PublishEnum.YES.getCode());
             if (CollectionUtils.isNotEmpty(articles)){
                 articles.forEach(articlesItem -> {
                     TopVO TopVO = new TopVO();
@@ -228,7 +228,7 @@ public class TopServiceImpl implements TopService {
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            List<Video> videoList = videoMapperService.selectVideosByPublishAndTitle(title, Video.PUBLISH_TRUE);
+            List<Video> videoList = videoMapperService.selectVideosByPublishAndTitle(title, Video.PublishEnum.YES.getCode());
             if (videoList != null && videoList.size() > 0){
                 videoList.forEach(videoListItem -> {
                     TopVO TopVO = new TopVO();
@@ -293,14 +293,14 @@ public class TopServiceImpl implements TopService {
      */
     private void verifyExistByLinkIdAndModule(Long linkId, Integer module) {
         if (ModuleTypeConstants.ARTICLE.equals(module)){
-            if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PUBLISH_TRUE))) {
+            if(Objects.isNull(articleMapperService.selectArticleByIdAndPublish(linkId, Article.PublishEnum.YES.getCode()))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
             return;
         }
 
         if (ModuleTypeConstants.VIDEO.equals(module)){
-            if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PUBLISH_TRUE))) {
+            if(Objects.isNull(videoMapperService.selectVideoByIdAndPublish(linkId, Video.PublishEnum.YES.getCode()))) {
                 throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "置顶内容不存在");
             }
             return;

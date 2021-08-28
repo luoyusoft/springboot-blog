@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -25,13 +27,6 @@ public class FileChunk extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -9032683187422485782L;
 
-    public static final Integer UPLOAD_STATUS_0 = 0;
-
-    public static final Integer UPLOAD_STATUS_1 = 1;
-
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "文件分片id主键")
     @TableId(type = IdType.INPUT)
     private Long fileChunkId;
@@ -47,5 +42,17 @@ public class FileChunk extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "分片序号")
     private Integer chunkNumber;
+
+    @AllArgsConstructor
+    @Getter
+    public enum UploadStatusEnum {
+
+        NO(0, "未上传"),
+        YES(1, "已上传");
+
+        private Integer code;
+        private String msg;
+
+    }
 
 }

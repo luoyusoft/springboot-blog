@@ -1,4 +1,4 @@
-package com.jinhx.blog.service.file;
+package com.jinhx.blog.factory;
 
 import com.jinhx.blog.common.enums.ResponseEnums;
 import com.jinhx.blog.common.exception.MyException;

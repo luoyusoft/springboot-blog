@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -35,17 +37,6 @@ public class File extends BaseEntity implements Serializable {
 
     public static final String STORAGE_TYPE_MINIO = "minio";
 
-    public static final Integer UPLOAD_STATUS_0 = 0;
-
-    public static final Integer UPLOAD_STATUS_1 = 1;
-
-    public static final Boolean IS_CHUNK_FALSE = false;
-
-    public static final Boolean IS_CHUNK_TRUE = true;
-
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "文件id主键")
     @TableId(type = IdType.INPUT)
     private Long fileId;
@@ -82,5 +73,29 @@ public class File extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "上传状态（0：部分成功，1：成功）")
     private Integer uploadStatus;
+
+    @AllArgsConstructor
+    @Getter
+    public enum UploadStatusEnum {
+
+        PART(0, "部分成功"),
+        SUCCESS(1, "成功");
+
+        private Integer code;
+        private String msg;
+
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public enum IsChunkEnum {
+
+        YES(true, "是"),
+        NO(false, "否");
+
+        private Boolean code;
+        private String msg;
+
+    }
 
 }

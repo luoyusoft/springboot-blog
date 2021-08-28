@@ -29,9 +29,6 @@ public class Tag extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1465693932599154429L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "标签id主键")
     @TableId(type = IdType.INPUT)
     private Long tagId;

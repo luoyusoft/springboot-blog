@@ -2,8 +2,10 @@ package com.jinhx.blog.entity.article.vo;
 
 import com.jinhx.blog.entity.article.Article;
 import com.jinhx.blog.entity.operation.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.List;
 
@@ -50,6 +52,18 @@ public class ArticleVO extends Article {
     public void listDataDesensitization(){
         this.setContent(null);
         this.setContentFormat(null);
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public enum TopEnum {
+
+        YSE(true, "置顶"),
+        NO(false, "不置顶");
+
+        private Boolean code;
+        private String msg;
+
     }
 
 }

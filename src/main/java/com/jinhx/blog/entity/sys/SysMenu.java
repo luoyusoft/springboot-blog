@@ -9,8 +9,10 @@ import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -46,14 +48,6 @@ public class SysMenu extends BaseEntity implements Serializable {
      */
     public static final String ONE_NAME = "一级菜单";
 
-    /**
-     * 按钮类型
-     */
-    public static final Integer TYPE_BUTTON = 2;
-
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "系统菜单id主键")
     @TableId(type = IdType.INPUT)
     private Long sysMenuId;
@@ -97,5 +91,18 @@ public class SysMenu extends BaseEntity implements Serializable {
 
     @TableField(exist=false)
     private List<?> list;
+
+    @AllArgsConstructor
+    @Getter
+    public enum TypeEnum {
+
+        CATALOGUE(0, "目录"),
+        MENU(1, "菜单"),
+        BUTTON(2, "按钮");
+
+        private Integer code;
+        private String msg;
+
+    }
 
 }

@@ -56,7 +56,7 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initArticleList(){
-        List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PUBLISH_TRUE);
+        List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PublishEnum.YES.getCode());
 
         XxlJobLogger.log("初始化gitalk文章数据，查到个数：{}", articles.size());
         log.info("初始化gitalk文章数据，查到个数：{}", articles.size());
@@ -79,7 +79,7 @@ public class GitalkServiceImpl implements GitalkService {
      */
     @Override
     public boolean initVideoList(){
-        List<Video> videos = videoMapperService.selectVideosByPublish(Video.PUBLISH_TRUE);
+        List<Video> videos = videoMapperService.selectVideosByPublish(Video.PublishEnum.YES.getCode());
         XxlJobLogger.log("初始化gitalk视频数据，查到个数：{}", videos.size());
         log.info("初始化gitalk视频数据，查到个数：{}", videos.size());
         if (CollectionUtils.isNotEmpty(videos)){

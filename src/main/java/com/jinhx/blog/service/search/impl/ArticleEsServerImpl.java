@@ -70,7 +70,7 @@ public class ArticleEsServerImpl implements ArticleEsServer {
     public boolean initArticleList() throws Exception {
         if(elasticSearchUtils.deleteIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
             if(elasticSearchUtils.createIndex(ElasticSearchConstants.BLOG_SEARCH_ARTICLE_INDEX)){
-                List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PUBLISH_TRUE);
+                List<Article> articles = articleMapperService.selectArticlesByPublish(Article.PublishEnum.YES.getCode());
                 XxlJobLogger.log("初始化es文章数据，查到个数：{}", articles.size());
                 log.info("初始化es文章数据，查到个数：{}", articles.size());
                 if(CollectionUtils.isNotEmpty(articles)){

@@ -27,9 +27,6 @@ public class FriendLink extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -5450078578713186942L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "友链id主键")
     @TableId(type = IdType.INPUT)
     private Long friendLinkId;

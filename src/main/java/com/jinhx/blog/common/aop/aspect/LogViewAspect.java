@@ -6,7 +6,7 @@ import com.jinhx.blog.common.filter.params.ParamsHttpServletRequestWrapper;
 import com.jinhx.blog.common.threadpool.ThreadPoolEnum;
 import com.jinhx.blog.common.util.*;
 import com.jinhx.blog.entity.sys.IPInfo;
-import com.jinhx.blog.mapper.log.LogViewMapper;
+import com.jinhx.blog.service.log.LogViewMapperService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -56,7 +56,7 @@ public class LogViewAspect {
     private IPApi ipApi;
 
     @Resource
-    private LogViewMapper logViewMapper;
+    private LogViewMapperService logViewMapperService;
 
     @Pointcut("@annotation(com.jinhx.blog.common.aop.annotation.LogView)")
     public void logViewPointCut() {
@@ -143,7 +143,7 @@ public class LogViewAspect {
         viewLogEntity.setTime(time);
         viewLogEntity.setCreaterId(com.jinhx.blog.entity.log.LogView.CREATER_UPDATER_SYS_ID);
         viewLogEntity.setUpdaterId(com.jinhx.blog.entity.log.LogView.CREATER_UPDATER_SYS_ID);
-        logViewMapper.insert(viewLogEntity);
+        logViewMapperService.insertLogView(viewLogEntity);
     }
 
 }

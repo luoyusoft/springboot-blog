@@ -226,7 +226,7 @@ public class VideoServiceImpl implements VideoService {
         initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_ADD_ROUTINGKEY,
-                JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
+                JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PublishEnum.YES.getCode())));
 
         cleanVideosCache(Lists.newArrayList());
     }
@@ -283,7 +283,7 @@ public class VideoServiceImpl implements VideoService {
         initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_VIDEO);
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
         rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_UPDATE_ROUTINGKEY,
-                JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
+                JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PublishEnum.YES.getCode())));
 
         cleanVideosCache(Lists.newArrayList(videoVO.getVideoId()));
     }
@@ -307,7 +307,7 @@ public class VideoServiceImpl implements VideoService {
 
             if (videoVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_ADD_ROUTINGKEY,
-                        JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PUBLISH_TRUE)));
+                        JsonUtils.objectToJson(videoMapperService.selectVideoByIdAndPublish(videoVO.getVideoId(), Video.PublishEnum.YES.getCode())));
             }else {
                 List<Long> videoIds = Lists.newArrayList(videoVO.getVideoId());
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_VIDEO_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_VIDEO_DELETE_ROUTINGKEY, JsonUtils.objectToJson(videoIds));
@@ -433,7 +433,7 @@ public class VideoServiceImpl implements VideoService {
     @Cacheable(value = RedisKeyConstants.VIDEO, key = "#videoId")
     @Override
     public VideoVO selectPortalVideoVOById(Long videoId) {
-        Video video = videoMapperService.selectVideoByIdAndPublish(videoId, Video.PUBLISH_TRUE);
+        Video video = videoMapperService.selectVideoByIdAndPublish(videoId, Video.PublishEnum.YES.getCode());
         if (Objects.isNull(video)){
             throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "视频不存在");
         }

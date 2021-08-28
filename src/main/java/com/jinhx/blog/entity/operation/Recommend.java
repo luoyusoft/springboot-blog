@@ -30,9 +30,6 @@ public class Recommend extends BaseEntity implements Serializable {
 
     public static final Integer ORDER_NUM_TOP = 1;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "推荐id主键")
     @TableId(type = IdType.INPUT)
     @NotNull(message="推荐id主键不能为空", groups = {UpdateGroup.class})

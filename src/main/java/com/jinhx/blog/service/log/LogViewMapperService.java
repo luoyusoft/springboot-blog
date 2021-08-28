@@ -137,4 +137,28 @@ public class LogViewMapperService extends ServiceImpl<LogViewMapper, LogView> {
         return maxLogView.getLogViewId();
     }
 
+    /**
+     * 新增日志
+     *
+     * @param logView logView
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertLogView(LogView logView) {
+        insertLogViews(Lists.newArrayList(logView));
+    }
+
+    /**
+     * 批量新增日志
+     *
+     * @param logViews logViews
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void insertLogViews(List<LogView> logViews) {
+        if (CollectionUtils.isNotEmpty(logViews)){
+            if (logViews.stream().mapToInt(item -> baseMapper.insert(item)).sum() != logViews.size()){
+                throw new MyException(ResponseEnums.INSERT_FAIL);
+            }
+        }
+    }
+
 }

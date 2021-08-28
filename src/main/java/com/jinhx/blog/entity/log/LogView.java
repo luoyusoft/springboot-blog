@@ -29,9 +29,6 @@ public class LogView extends BaseEntity implements Serializable {
 
     public static final String CREATER_UPDATER_SYS_NAME = "sys";
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "浏览日志id主键")
     @TableId(type = IdType.INPUT)
     private Long logViewId;

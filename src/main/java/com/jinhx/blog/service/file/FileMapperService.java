@@ -104,7 +104,7 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
         if (baseMapper.update(file, new LambdaUpdateWrapper<File>()
                 .eq(File::getFileMd5, file.getFileMd5())
                 .eq(File::getModule, file.getModule())
-                .eq(File::getIsChunk, File.IS_CHUNK_TRUE)) != 1) {
+                .eq(File::getIsChunk, File.IsChunkEnum.YES.getCode())) != 1) {
             throw new MyException(ResponseEnums.UPDATE_FAILR);
         }
     }
@@ -120,7 +120,7 @@ public class FileMapperService extends ServiceImpl<FileMapper, File> {
         File file = baseMapper.selectOne(new LambdaQueryWrapper<File>()
                 .eq(StringUtils.isNotBlank(fileMd5), File::getFileMd5, fileMd5)
                 .eq(Objects.nonNull(module), File::getModule, module)
-                .eq(File::getIsChunk, File.IS_CHUNK_TRUE));
+                .eq(File::getIsChunk, File.IsChunkEnum.YES.getCode()));
         if (Objects.isNull(file)){
             return null;
         }

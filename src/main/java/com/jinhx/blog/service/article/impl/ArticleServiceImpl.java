@@ -295,7 +295,7 @@ public class ArticleServiceImpl implements ArticleService {
             initGitalkRequest.setType(GitalkConstants.GITALK_TYPE_ARTICLE);
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_GITALK_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_GITALK_INIT_ROUTINGKEY, JsonUtils.objectToJson(initGitalkRequest));
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
-                    JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PUBLISH_TRUE)));
+                    JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PublishEnum.YES.getCode())));
         }
 
         cleanArticlesCache(Lists.newArrayList());
@@ -357,13 +357,13 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (article.getPublish() && articleVO.getPublish()){
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
-                    JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PUBLISH_TRUE)));
+                    JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PublishEnum.YES.getCode())));
         }else if (article.getPublish() && !articleVO.getPublish()){
             List<Long> articleIds = Lists.newArrayList(articleVO.getArticleId());
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(articleIds));
         }else if (!article.getPublish() && articleVO.getPublish()){
             rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
-                    JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PUBLISH_TRUE)));
+                    JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PublishEnum.YES.getCode())));
         }
 
         cleanArticlesCache(Lists.newArrayList(articleVO.getArticleId()));
@@ -421,20 +421,20 @@ public class ArticleServiceImpl implements ArticleService {
 
             if (article.getPublish() && articleVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
-                        JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PUBLISH_TRUE)));
+                        JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PublishEnum.YES.getCode())));
             }else if (article.getPublish() && !articleVO.getPublish()){
                 List<Long> articleIds = Lists.newArrayList(articleVO.getArticleId());
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_DELETE_ROUTINGKEY, JsonUtils.objectToJson(articleIds));
             }else if (!article.getPublish() && articleVO.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_ADD_ROUTINGKEY,
-                        JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PUBLISH_TRUE)));
+                        JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PublishEnum.YES.getCode())));
             }
         }else if (Objects.nonNull(articleVO.getOpen())){
             // 更新公开状态
             articleMapperService.updateArticleById(articleVO);
             if (article.getPublish()){
                 rabbitmqUtils.sendByRoutingKey(RabbitMQConstants.BLOG_ARTICLE_TOPIC_EXCHANGE, RabbitMQConstants.TOPIC_ES_ARTICLE_UPDATE_ROUTINGKEY,
-                        JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PUBLISH_TRUE)));
+                        JsonUtils.objectToJson(articleMapperService.selectArticleByIdAndPublish(articleVO.getArticleId(), Article.PublishEnum.YES.getCode())));
             }
         }
 
@@ -574,7 +574,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (CollectionUtils.isNotEmpty(tops)){
             tops.forEach(topsItem -> {
                 if (topsItem.getOrderNum() > (page - 1) * limit && topsItem.getOrderNum() < page * limit){
-                    Article article = articleMapperService.selectArticleByIdAndPublish(topsItem.getLinkId(), Article.PUBLISH_TRUE);
+                    Article article = articleMapperService.selectArticleByIdAndPublish(topsItem.getLinkId(), Article.PublishEnum.YES.getCode());
 
                     if (Objects.isNull(article)){
                         return;
@@ -584,7 +584,7 @@ public class ArticleServiceImpl implements ArticleService {
                             .setTagList()
                             .setAuthor()
                             .build(article));
-                    articleVO.setTop(Article.TOP_TRUE);
+                    articleVO.setTop(ArticleVO.TopEnum.YSE.getCode());
                     articleVOs[(topsItem.getOrderNum() - (page - 1) * limit) -1] = articleVO;
                 }
             });

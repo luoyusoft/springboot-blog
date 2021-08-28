@@ -36,7 +36,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      */
     public HomeVideoInfoVO selectHommeVideoInfoVO() {
         Integer publishCount = baseMapper.selectCount(new LambdaQueryWrapper<Video>()
-                .eq(Video::getPublish, Video.PUBLISH_TRUE));
+                .eq(Video::getPublish, Video.PublishEnum.YES.getCode()));
         Integer allCount = baseMapper.selectCount(new LambdaQueryWrapper<>());
 
         HomeVideoInfoVO homeVideoInfoVO = new HomeVideoInfoVO();
@@ -222,7 +222,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      */
     public IPage<Video> selectPortalPage(Integer page, Integer limit, Boolean latest, Long categoryId, Boolean like, Boolean watch) {
         return baseMapper.selectPage(new QueryPage<Video>(page, limit).getPage(), new LambdaQueryWrapper<Video>()
-                .eq(Video::getPublish, Video.PUBLISH_TRUE)
+                .eq(Video::getPublish, Video.PublishEnum.YES.getCode())
                 .like(categoryId != null, Video::getCategoryId, categoryId)
                 .orderByDesc(latest, Video::getCreateTime)
                 .orderByDesc(like, Video::getLikeNum)
@@ -236,7 +236,7 @@ public class VideoMapperService extends ServiceImpl<VideoMapper, Video> {
      */
     public List<Video> selectHotReadVideoVOs() {
         return baseMapper.selectList(new LambdaQueryWrapper<Video>()
-                .eq(Video::getPublish, Video.PUBLISH_TRUE)
+                .eq(Video::getPublish, Video.PublishEnum.YES.getCode())
                 // 只能调用一次,多次调用以最后一次为准 有sql注入的风险,请谨慎使用
                 .last("limit 5")
                 .orderByDesc(Video::getWatchNum));

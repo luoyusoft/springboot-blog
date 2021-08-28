@@ -7,8 +7,10 @@ import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -27,9 +29,6 @@ public class BillType extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 3365395418752261475L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "账单类型id主键")
     @TableId(type = IdType.INPUT)
     private Long billTypeId;
@@ -44,5 +43,17 @@ public class BillType extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String remarks;
+
+    @AllArgsConstructor
+    @Getter
+    public enum IncomeExpenditureTypeEnum {
+
+        ExpenditureT(0, "支出"),
+        Income(1, "收入");
+
+        private Integer code;
+        private String msg;
+
+    }
 
 }

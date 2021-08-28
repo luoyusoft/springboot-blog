@@ -36,9 +36,6 @@ public class MessageWall extends BaseEntity implements Serializable {
 
     public static final String NAME_PREFIX = "游客-";
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "留言墙id主键")
     @TableId(type = IdType.INPUT)
     private Long messageWallId;

@@ -36,7 +36,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      */
     public HomeArticleInfoVO selectHomeArticleInfoVO() {
         Integer publishCount = baseMapper.selectCount(new LambdaQueryWrapper<Article>()
-                .eq(Article::getPublish, Article.PUBLISH_TRUE));
+                .eq(Article::getPublish, Article.PublishEnum.YES.getCode()));
         Integer allCount = baseMapper.selectCount(new LambdaQueryWrapper<>());
 
         HomeArticleInfoVO homeArticleInfoVO = new HomeArticleInfoVO();
@@ -226,7 +226,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      */
     public IPage<Article> selectPortalPage(Integer page, Integer limit, Long categoryId, Boolean latest, Boolean like, Boolean read) {
         return baseMapper.selectPage(new QueryPage<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
-                .eq(Article::getPublish, Article.PUBLISH_TRUE)
+                .eq(Article::getPublish, Article.PublishEnum.YES.getCode())
                 .like(Objects.nonNull(categoryId), Article::getCategoryId, categoryId)
                 .orderByDesc(latest, Article::getCreateTime)
                 .orderByDesc(like, Article::getLikeNum)
@@ -246,7 +246,7 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      */
     public IPage<Article> selectPortalHomePage(Integer page, Integer limit, List<Long> articleIds) {
         return baseMapper.selectPage(new QueryPage<Article>(page, limit).getPage(), new LambdaQueryWrapper<Article>()
-                .eq(Article::getPublish, Article.PUBLISH_TRUE)
+                .eq(Article::getPublish, Article.PublishEnum.YES.getCode())
                 .notIn(CollectionUtils.isNotEmpty(articleIds), Article::getArticleId, articleIds)
                 .orderByDesc(Article::getCreateTime)
                 .select(Article::getArticleId, Article::getTitle, Article::getDescription, Article::getReadNum, Article::getLikeNum,
@@ -289,8 +289,8 @@ public class ArticleMapperService extends ServiceImpl<ArticleMapper, Article> {
      */
     public List<Article> selectHotReadArticles() {
         return baseMapper.selectList(new LambdaQueryWrapper<Article>()
-                .eq(Article::getPublish, Article.PUBLISH_TRUE)
-                .eq(Article::getOpen, Article.OPEN_TRUE)
+                .eq(Article::getPublish, Article.PublishEnum.YES.getCode())
+                .eq(Article::getOpen, Article.OpenEnum.YES.getCode())
                 // 只能调用一次,多次调用以最后一次为准 有sql注入的风险,请谨慎使用
                 .last("limit 5")
                 .orderByDesc(Article::getReadNum)

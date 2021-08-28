@@ -12,8 +12,10 @@ import com.jinhx.blog.common.validator.group.InsertGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -36,9 +38,6 @@ public class Bill extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1370579136074196212L;
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "账单id主键")
     @TableId(type = IdType.INPUT)
     private Long billId;
@@ -64,5 +63,17 @@ public class Bill extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String remarks;
+
+    @AllArgsConstructor
+    @Getter
+    public enum IncomeExpenditureTypeEnum {
+
+        ExpenditureT(0, "支出"),
+        Income(1, "收入");
+
+        private Integer code;
+        private String msg;
+
+    }
 
 }

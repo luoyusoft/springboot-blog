@@ -8,8 +8,10 @@ import com.jinhx.blog.common.validator.group.UpdateGroup;
 import com.jinhx.blog.entity.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -40,9 +42,6 @@ public class SysUser extends BaseEntity implements Serializable {
         SysUser.sysUserDefaultProfile = sysUserDefaultProfile;
     }
 
-    /**
-     * 主键
-     */
     @ApiModelProperty(value = "系统用户id主键")
     @TableId(type = IdType.INPUT)
     private Long sysUserId;
@@ -74,5 +73,17 @@ public class SysUser extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "头像")
     private String profile;
+
+    @AllArgsConstructor
+    @Getter
+    public enum StatusEnum {
+
+        DISABLE(0, "禁用"),
+        NORMAL(1, "正常");
+
+        private Integer code;
+        private String msg;
+
+    }
 
 }
