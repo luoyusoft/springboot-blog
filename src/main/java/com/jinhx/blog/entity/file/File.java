@@ -33,9 +33,9 @@ public class File extends BaseEntity implements Serializable {
 
     public static final String BUCKET_NAME_OTHER = "other";
 
-    public static final String STORAGE_TYPE_QINIUYUN = "qiniuyun";
+    public static final Integer STORAGE_TYPE_QINIUYUN = 0;
 
-    public static final String STORAGE_TYPE_MINIO = "minio";
+    public static final Integer STORAGE_TYPE_MINIO = 1;
 
     @ApiModelProperty(value = "文件id主键")
     @TableId(type = IdType.INPUT)
@@ -47,8 +47,8 @@ public class File extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "url地址")
     private String url;
 
-    @ApiModelProperty(value = "存储类型（qiniuyun，minio）")
-    private String storageType;
+    @ApiModelProperty(value = "存储类型（0：qiniu，1：minio）")
+    private Integer storageType;
 
     @ApiModelProperty(value = "桶名")
     private String bucketName;

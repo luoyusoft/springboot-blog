@@ -10,11 +10,12 @@ import com.jinhx.blog.entity.base.PageData;
 import com.jinhx.blog.entity.file.File;
 import com.jinhx.blog.entity.file.FileChunk;
 import com.jinhx.blog.entity.file.vo.FileVO;
-import com.jinhx.blog.service.article.ArticleMapperService;
-import com.jinhx.blog.service.file.*;
 import com.jinhx.blog.factory.FileStorageService;
 import com.jinhx.blog.factory.FileStorageServiceFactory;
-import com.jinhx.blog.service.operation.FriendLinkMapperService;
+import com.jinhx.blog.service.article.ArticleMapperService;
+import com.jinhx.blog.service.file.FileChunkMapperService;
+import com.jinhx.blog.service.file.FileMapperService;
+import com.jinhx.blog.service.file.FileService;
 import com.jinhx.blog.service.video.VideoMapperService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -53,9 +54,6 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private VideoMapperService videoMapperService;
-
-    @Autowired
-    private FriendLinkMapperService friendLinkMapperService;
 
     @Autowired
     private FileStorageServiceFactory fileStorageServiceFactory;
@@ -107,7 +105,6 @@ public class FileServiceImpl implements FileService {
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
             String patchName = fileStorageService.getPath("", suffix);
-            String storageType = File.STORAGE_TYPE_MINIO;
             String bucketName;
             if (suffix.equals(".mp4")){
                 bucketName = File.BUCKET_NAME_VIDEO;
@@ -126,7 +123,7 @@ public class FileServiceImpl implements FileService {
             url = url.replace(minioProperties.getMinioBaseUrl(), minioProperties.getMinioInitUrl()).substring(0, url.indexOf("?") + 1);
             fileResource.setFileName(fileName);
             fileResource.setBucketName(bucketName);
-            fileResource.setStorageType(storageType);
+            fileResource.setStorageType(File.STORAGE_TYPE_MINIO);
             fileResource.setUrl(url);
             fileResource.setIsChunk(File.IsChunkEnum.NO.getCode());
             fileResource.setChunkCount(0);

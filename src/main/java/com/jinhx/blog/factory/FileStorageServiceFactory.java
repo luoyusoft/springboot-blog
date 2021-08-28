@@ -6,6 +6,7 @@ import com.jinhx.blog.entity.file.File;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * FileStorageServiceFactory
@@ -22,15 +23,16 @@ public class FileStorageServiceFactory {
     @Resource
     private FileStorageService qiniuFileStorageService;
 
-    public FileStorageService getFileStorageService(String type){
-        switch (type){
-            case File.STORAGE_TYPE_MINIO:
-                return minioFileStorageService;
-            case File.STORAGE_TYPE_QINIUYUN:
-                return qiniuFileStorageService;
-            default:
-                throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "不存在的文件存储类型");
+    public FileStorageService getFileStorageService(Integer type){
+        if (Objects.equals(type, File.STORAGE_TYPE_MINIO)){
+            return minioFileStorageService;
         }
+
+        if (Objects.equals(type, File.STORAGE_TYPE_QINIUYUN)){
+            return qiniuFileStorageService;
+        }
+
+        throw new MyException(ResponseEnums.PARAM_ERROR.getCode(), "不存在的文件存储类型");
     }
 
 

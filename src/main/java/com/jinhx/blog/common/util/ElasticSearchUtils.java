@@ -240,8 +240,8 @@ public class ElasticSearchUtils {
 
         //根据查询相关度进行排序
         searchSourceBuilder.sort(new ScoreSortBuilder());
-        //再根据时间进行排序
-        searchSourceBuilder.sort("id");
+        //再根据创建时间进行排序
+        searchSourceBuilder.sort("createTime");
         //避免分页之后相关性乱了
         searchSourceBuilder.trackScores(true);
 
