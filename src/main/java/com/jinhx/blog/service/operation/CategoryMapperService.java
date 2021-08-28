@@ -33,8 +33,8 @@ public class CategoryMapperService extends ServiceImpl<CategoryMapper, Category>
      */
     public List<Category> selectCategoryVOsByParentNameAndModule(String name, Integer module) {
         return baseMapper.selectList(new LambdaQueryWrapper<Category>()
-                .eq(StringUtils.isNotBlank(name), Category::getModule, module)
-                .like(Objects.nonNull(module), Category::getName, name));
+                .eq(StringUtils.isNotBlank(name), Category::getName, name)
+                .like(Objects.nonNull(module), Category::getModule, module));
     }
 
     /**
